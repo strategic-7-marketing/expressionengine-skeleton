@@ -1,6 +1,7 @@
 # ignore assets
 (assets)/
-(db)/
+(db)/*
+!(db)/ee-skeleton.sql
 
 # ignore node dependency directories
 node_modules/
