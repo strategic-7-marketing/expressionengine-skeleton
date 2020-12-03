@@ -1,0 +1,18 @@
+# ignore assets
+(assets)/
+(db)/
+
+# ignore node dependency directories
+node_modules/
+
+# ignore env specific files
+.htaccess
+
+# ignore for ee
+system/expressionengine/cache/*
+!system/expressionengine/cache/index.html
+system/user/cache/*
+
+# ignore log files
+*.log
+*.DS_Store
