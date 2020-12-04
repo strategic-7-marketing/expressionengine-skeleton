@@ -1,27 +1,40 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-$config['is_system_on'] = 'y';
-$config['multiple_sites_enabled'] = 'n';
-$config['show_ee_news'] = 'n';
-// ExpressionEngine Config Items
-// Find more configs and overrides at
-// https://docs.expressionengine.com/latest/general/system_configuration_overrides.html
+/*
+|--------------------------------------------------------------------------
+| ExpressionEngine Config Items
+|--------------------------------------------------------------------------
+|
+| The following items are for use with ExpressionEngine.  The rest of
+| the config items are for use with CodeIgniter, some of which are not
+| observed by ExpressionEngine, e.g. 'permitted_uri_chars'
+|
+*/
 
 $config['app_version'] = '5.4.0';
-$config['encryption_key'] = 'fc7b3759f69cfb958abcfa0d11a297c4c9716e3e';
-$config['session_crypt_key'] = '02fc051991c05f50967ea4be77d9426e9a718588';
-$config['database'] = array(
-	'expressionengine' => array(
-		'hostname' => 'localhost',
-		'database' => 'ee-skeleton',
-		'username' => 'ee-skeleton',
-		'password' => 'ee-skeleton',
-		'dbprefix' => 'exp_',
-		'char_set' => 'utf8mb4',
-		'dbcollat' => 'utf8mb4_unicode_ci',
-		'port'     => ''
-	),
-);
-$config['share_analytics'] = 'y';
+$config['cp_url'] = 'http://example.com/admin.php';
+$config['doc_url'] = 'https://ellislab.com/expressionengine/user-guide/';
+$config['site_label'] = '';
+// END EE config items
 
-// EOF
+
+
+// ---------------------------------------------------------------
+// Numerous CodeIgniter config settings go here. We've removed
+// them for breviety in our repository code example
+// 
+// DO NOT DELETE THE CONFIG SETTINGS THAT WOULD TYPICALLY APPEAR
+// HERE. THEY ARE CodeIgniter SETTINGS REQUIRED TO RUN EE PROPERLY
+// 
+// The config values start with "base_url" and go to "proxy_ips"
+// ---------------------------------------------------------------
+
+
+
+/**
+ * Require the Focus Lab, LLC Master Config file
+ */
+require 'config/config.master.php';
+
+/* End of file config.php */
+/* Location: ./system/expressionengine/config/config.php */
