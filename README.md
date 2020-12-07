@@ -8,3 +8,5 @@ Anew project would be started from this template repository and modified as need
 Upon cloning config/config.env.php will need modified with the agreed upon URLs including the local dev URL.
 config/config.master.php may also need modified depending on need.
 config/config.local.php is included as a template for local development but should not be tracked or comitted.
+
+Includes NPM package for Foundation and preconfiguration for using Foundation Front-end.
