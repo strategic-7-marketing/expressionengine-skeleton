@@ -1,4 +1,4 @@
-# expressionengine-skeleton
+# expressionengine-skeleton-foundation
 An ExpressionEngine Skeleton Website And Template Repository
 
 This is meant to be a starting point for a new ExpressionEngine website build project.
