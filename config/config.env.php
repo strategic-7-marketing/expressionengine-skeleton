@@ -16,7 +16,7 @@ if ( ! defined('ENV'))
 {
 	$production  = 'domain.com';
 	$staging     = 'staging.domain.com';
-	$local       = 'dev.ee-skeleton';
+	$local       = 'dev.ee-skeleton.com';
 
 	switch (strtolower($_SERVER['HTTP_HOST'])) {
 		case $production:
