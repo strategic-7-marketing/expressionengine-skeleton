@@ -15,4 +15,4 @@ This Repo also includes branches if you wish to start with a front-end framework
 Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for using Bootstrap Front-end.
 Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
 
- **Don't Forget To License The Add-Ons For Production**
+**Don't Forget To License The Add-Ons For Production**
