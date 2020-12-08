@@ -11,4 +11,8 @@ config/config.local.php is included as a template for local development but shou
 
 Included Structure And WYGWAM Add-Ons and added default additional menu items for Structure and Template Manager in the EE backend.
 
+This Repo also includes branches if you wish to start with a front-end framework.
+Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for using Bootstrap Front-end.
+Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
+
  **Don't Forget To License The Add-Ons For Production**
