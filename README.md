@@ -16,3 +16,7 @@ Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for 
 Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
 
 **Don't Forget To License The Add-Ons For Production**
+
+Admin login credentials:
+User: admin
+Pass: ee-skel
