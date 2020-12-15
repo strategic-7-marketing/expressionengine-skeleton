@@ -1,4 +1,14 @@
-# expressionengine-skeleton
+# ExpressionEngine Skeleton
+
+**Default DB Credentials:**\
+DB Name: ee-skeleton\
+User: ee-skeleto\
+Pass: ee-skeleton
+
+**Default Admin Login Credentials:**\
+User: admin\
+Pass: ee-skel
+
 An ExpressionEngine Skeleton Website And Template Repository
 
 This is meant to be a starting point for a new ExpressionEngine website build project.
@@ -16,12 +26,3 @@ Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for 
 Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
 
 **Don't Forget To License The Add-Ons For Production**
-
-**Default DB Credentials:**\
-DB Name: ee-skeleton\
-User: ee-skeleto\
-Pass: ee-skeleton
-
-**Default Admin Login Credentials:**\
-User: admin\
-Pass: ee-skel
