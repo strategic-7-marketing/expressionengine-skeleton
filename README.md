@@ -17,6 +17,11 @@ Foundation branch includes an NPM package for Foundation and preconfiguration fo
 
 **Don't Forget To License The Add-Ons For Production**
 
-Admin login credentials:
+Default DB Credentials:
+DB Name: ee-skeleton
+User: ee-skeleton
+Pass: ee-skeleton
+
+Default Admin Login Credentials:
 User: admin
 Pass: ee-skel
