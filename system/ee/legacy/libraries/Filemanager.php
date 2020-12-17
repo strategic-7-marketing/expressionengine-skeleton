@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2019, EllisLab Corp. (https://ellislab.com)
+ * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -291,6 +291,22 @@ class Filemanager {
 			{
 				return FALSE;
 			}
+		}
+
+		if ($mime == 'image/webp' && !defined('IMAGETYPE_WEBP')) {
+			return false;
+		}
+
+		$imageMimes = [
+			'image/gif', // .gif
+			'image/jpeg', // .jpg, .jpe, .jpeg
+			'image/pjpeg', // .jpg, .jpe, .jpeg
+			'image/png', // .png
+			'image/x-png', // .png
+			'image/webp' // .webp
+		];
+		if (!in_array($mime, $imageMimes)) {
+			return false;
 		}
 
 		return TRUE;
@@ -645,28 +661,15 @@ class Filemanager {
 	 */
 	private function _check_permissions($dir_id)
 	{
-		$group_id = ee()->session->userdata('group_id');
-
-		// Non admins need to have their permissions checked
-		if ($group_id != 1)
+		if (ee('Permission')->isSuperAdmin())
 		{
-			// non admins need to first be checked for restrictions
-			// we'll add these into a where_not_in() check below
-			ee()->db->select('upload_id');
-			ee()->db->where(array(
-				'member_group' => $group_id,
-				'upload_id'    => $dir_id
-			));
-
-			// If any record shows up, then they do not have access
-			if (ee()->db->count_all_results('upload_no_access') > 0)
-			{
-
-				return FALSE;
-			}
+			return TRUE;
 		}
 
-		return TRUE;
+		$member = ee()->session->getMember();
+		$assigned_upload_destinations = $member ? $member->getAssignedUploadDestinations()->indexBy('id') : [];
+
+		return isset($assigned_upload_destinations[$dir_id]);
 	}
 
 
@@ -1150,7 +1153,7 @@ class Filemanager {
 	 *
 	 * Deprecated in 4.1.0
 	 *
-	 * @see EllisLab\ExpressionEngine\Service\Memory\Memory::setMemoryForImageManipulation()
+	 * @see ExpressionEngine\Service\Memory\Memory::setMemoryForImageManipulation()
 	 */
 	function set_image_memory($filename)
 	{
@@ -1222,8 +1225,8 @@ class Filemanager {
 		{
 			$dimensions[] = array(
 				'short_name'	=> 'thumbs',
-				'width'			=> 73,
-				'height'		=> 60,
+				'width'			=> 380, //73,
+				'height'		=> 367, //60
 				'quality'       => 90,
 				'watermark_id'	=> 0,
 				'resize_type'	=> 'crop'
@@ -1697,7 +1700,7 @@ class Filemanager {
 		ee()->load->model('file_upload_preferences_model');
 
 		$directories = ee()->file_upload_preferences_model->get_file_upload_preferences(
-			ee()->session->userdata('group_id'),
+			NULL,
 			NULL,
 			$ignore_site_id
 		);
@@ -1957,7 +1960,7 @@ class Filemanager {
 				// Permissions can only get more strict!
 				if (isset($settings['field_content_type']) && $settings['field_content_type'] == 'image')
 				{
-					$allowed_types = 'gif|jpg|jpeg|png|jpe';
+					$allowed_types = 'gif|jpg|jpeg|png|jpe|svg|webp';
 				}
 			}
 
@@ -2354,7 +2357,7 @@ class Filemanager {
 		// Rename the file
 		$config = array(
 			'upload_path'	=> $upload_directory['server_path'],
-			'allowed_types'	=> (ee()->session->userdata('group_id') == 1) ? 'all' : $upload_directory['allowed_types'],
+			'allowed_types'	=> (ee('Permission')->isSuperAdmin()) ? 'all' : $upload_directory['allowed_types'],
 			'max_size'		=> round((int) $upload_directory['max_size']*1024, 3),
 			'max_width'		=> $upload_directory['max_width'],
 			'max_height'	=> $upload_directory['max_height']
@@ -2553,7 +2556,7 @@ class Filemanager {
 		ee()->load->model('file_upload_preferences_model');
 
 		$upload_dirs = ee()->file_upload_preferences_model->get_file_upload_preferences(
-										ee()->session->userdata('group_id'),
+										NULL,
 										$file_dir_id);
 
 		$dirs = new stdclass();

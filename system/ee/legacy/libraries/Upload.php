@@ -5,7 +5,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2019, EllisLab Corp. (https://ellislab.com)
+ * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -44,7 +44,7 @@ class EE_Upload
     protected $use_temp_dir         = false;
     protected $raw_upload = false;
     protected $_file_name_override  = '';
-    protected $blacklisted_extensions = array();
+    protected $blocked_extensions = array();
 
     /**
      * Constructor
@@ -65,7 +65,7 @@ class EE_Upload
         ee()->load->library('mime_type');
         log_message('debug', "Upload Class Initialized");
 
-        $this->blacklisted_extensions = array(
+        $this->blocked_extensions = array(
             'php',
             'php3',
             'php4',
@@ -175,7 +175,7 @@ class EE_Upload
         }
 
         // Disallowed File Names
-        $disallowed_names = ee()->config->item('upload_file_name_blacklist');
+        $disallowed_names = ee()->config->item('upload_blocked_file_names') ?: ee()->config->item('upload_file_name_blacklist');
 
         if ($disallowed_names !== false) {
             if (! is_array($disallowed_names)) {
@@ -499,7 +499,7 @@ class EE_Upload
     {
         $ext = strtolower(ltrim($this->file_ext, '.'));
 
-        if (in_array($ext, $this->blacklisted_extensions)) {
+        if (in_array($ext, $this->blocked_extensions)) {
             return false;
         }
 
