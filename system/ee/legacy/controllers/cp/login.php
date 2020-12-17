@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2019, EllisLab Corp. (https://ellislab.com)
+ * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -106,7 +106,7 @@ class Login extends CP_Controller {
 		}
 
 		// Normal login button state
-		$this->view->btn_class = 'btn';
+		$this->view->btn_class = 'button button--primary button--large button--wide';
 		$this->view->btn_label = lang('login');
 		$this->view->btn_disabled = '';
 
@@ -263,6 +263,8 @@ class Login extends CP_Controller {
 		{
 			$return_path = ee('CP/URL')->make('/')->compile();
 		}
+
+		ee('CP/JumpMenu')->primeCache();
 
 		$this->functions->redirect($return_path);
 	}
@@ -568,7 +570,7 @@ class Login extends CP_Controller {
 				->cannotClose()
 				->now();
 
-			return $this->forgotten_password_form();
+			return $this->index();
 		}
 
 		$member_id = $query->row('member_id');
@@ -635,7 +637,7 @@ class Login extends CP_Controller {
 				->now();
 		}
 
-		$this->forgotten_password_form();
+		$this->index();
 	}
 
 	/**

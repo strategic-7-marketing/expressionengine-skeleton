@@ -5,7 +5,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2019, EllisLab Corp. (https://ellislab.com)
+ * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -159,7 +159,7 @@ if( ! function_exists( 'ee_mb_substr ') )
 				return mb_substr($str, $start, $length);
 			}
 		}
-
+	
 		$encoding = ee_get_encoding($encoding);
 
 		if('CP850' === $encoding || 'ASCII' === $encoding || ! extension_loaded('iconv'))

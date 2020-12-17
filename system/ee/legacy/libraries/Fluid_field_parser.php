@@ -5,12 +5,12 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2019, EllisLab Corp. (https://ellislab.com)
+ * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
-use EllisLab\Addons\FluidField\Model\FluidField;
-use EllisLab\ExpressionEngine\Service\Model\Collection;
+use ExpressionEngine\Addons\FluidField\Model\FluidField;
+use ExpressionEngine\Service\Model\Collection;
 
 /**
  * Fluid Field Parser

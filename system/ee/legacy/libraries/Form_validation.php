@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2019, EllisLab Corp. (https://ellislab.com)
+ * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -121,7 +121,7 @@ class EE_Form_validation {
 		}
 		else
 		{
-			ee()->output->send_ajax_response('success');
+			ee()->output->send_ajax_response(['success']);
 		}
 	}
 
@@ -575,13 +575,26 @@ class EE_Form_validation {
 	 * @param	string 	$password 	Password string
 	 * @return	bool
 	 */
-	public function auth_password($password)
+	public function auth_password($password, $use_auth_timeout)
 	{
+		$auth_timeout = ($use_auth_timeout === 'useAuthTimeout');
+
+		if ($auth_timeout && ee('Session')->isWithinAuthTimeout())
+		{
+			ee('Session')->resetAuthTimeout();
+			return TRUE;
+		}
+
 		ee()->load->library('auth');
 		$validate = ee()->auth->authenticate_id(
 			ee()->session->userdata('member_id'),
 			$password
 		);
+
+		if ($validate !== FALSE && $auth_timeout)
+		{
+			ee('Session')->resetAuthTimeout();
+		}
 
 		return ($validate !== FALSE);
 	}

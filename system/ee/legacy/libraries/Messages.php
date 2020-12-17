@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2019, EllisLab Corp. (https://ellislab.com)
+ * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -94,9 +94,9 @@ class EE_Messages {
 		$this->allow_pm = self::can_send_pm() ? 'y' : 'n';
 
 		$this->attach_allowed = (ee()->config->item('prv_msg_allow_attachments') == 'y'
-			&& ee()->session->userdata('can_attach_in_private_messages') == 'y') ? 'y' : 'n';
+			&& ee('Permission')->can('attach_in_private_messages')) ? 'y' : 'n';
 
-		$this->storage_limit	= (ee()->session->userdata['group_id'] == '1') ? 0 : ee()->session->userdata['prv_msg_storage_limit'];
+		$this->storage_limit	= (ee('Permission')->isSuperAdmin()) ? 0 : ee()->session->userdata['prv_msg_storage_limit'];
 		$this->send_limit		= ee()->session->userdata['prv_msg_send_limit'];
 
 		if ( ! defined('AMP')) define('AMP', '&amp;');
@@ -158,8 +158,8 @@ class EE_Messages {
 	static public function can_send_pm()
 	{
 		if (ee()->config->item('prv_msg_enabled') != 'y' OR
-				(ee()->session->userdata('can_send_private_messages') != 'y' &&
-				ee()->session->userdata('group_id') != '1') OR
+				( ! ee('Permission')->can('send_private_messages') &&
+					! ee('Permission')->isSuperAdmin()) OR
 			ee()->session->userdata('accept_messages') != 'y')
 		{
 			return FALSE;
@@ -1578,11 +1578,16 @@ DOH;
 
 		$this->single_parts['include']['member_group_options'] = '';
 
-		$query = ee()->db->query("SELECT group_id, group_title FROM exp_member_groups WHERE site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."' AND include_in_memberlist = 'y' ORDER BY group_title");
+		$role_settings = ee('Model')->get('RoleSetting')
+			->with('Role')
+			->filter('include_in_memberlist', 'y')
+			->filter('site_id', ee()->config->item('site_id'))
+			->order('Role.name')
+			->all();
 
-		foreach ($query->result_array() as $row)
+		foreach ($role_settings as $role_setting)
 		{
-			 $this->single_parts['include']['member_group_options'] .= '<option value="'.$row['group_id'].'">'.$row['group_title'].'</option>';
+			 $this->single_parts['include']['member_group_options'] .= '<option value="'.$role_setting->Role->getId().'">'.$role_setting->Role->name.'</option>';
 		}
 
 		$this->return_data = $this->_process_template($this->retrieve_template('search_members'));
@@ -1633,31 +1638,28 @@ DOH;
 
 		foreach ($_POST as $key => $val)
 		{
-			if ($key == 'which_field')
-			{
-				continue;
-			}
-			elseif ($key == 'group_id')
+			if ($key == 'group_id')
 			{
 				if ($val != 'any')
 				{
-					$search_query[] = " exp_member_groups.group_id ='".ee()->db->escape_str($_POST['group_id'])."'";
+					$role = ee('Model')->get('Role', $_POST['group_id'])
+						->with('RoleSettings')
+						->filter('RoleSettings.include_in_memberlist', 'y')
+						->filter('RoleSettings.site_id', ee()->config->item('site_id'))
+						->first();
+
+					if ($role)
+					{
+						$search_query[] = " member_id IN (" . implode($role->Members->pluck('member_id'), ',') . ")";
+					}
 				}
 			}
-			elseif ($key == 'screen_name')
+			elseif ($key == 'screen_name' || $key == 'email')
 			{
 				if (!empty($val))
 				{
-					$search_query[] = "screen_name LIKE '%".ee()->db->escape_like_str($val)."%'";
+					$search_query[] = $key." LIKE '%".ee()->db->escape_like_str($val)."%'";
 				}
-			}
-			elseif ($key == 'email' && !empty($val))
-			{
-					$search_query[] = "email LIKE '%".ee()->db->escape_like_str($val)."%'";
-			}
-			elseif ($key == 'site_id' && !empty($val))
-			{
-				$search_query[] = "site_id LIKE '%".ee()->db->escape_like_str($val)."%'";
 			}
 			else
 			{
@@ -1665,6 +1667,7 @@ DOH;
 				continue;
 			}
 		}
+
 		if (count($search_query) < 1)
 		{
 			ee()->functions->redirect($redirect_url);
@@ -1672,10 +1675,8 @@ DOH;
 
 		$Q = implode(" AND ", $search_query);
 
-		$sql = "SELECT DISTINCT exp_members.screen_name FROM exp_members, exp_member_groups
-				WHERE exp_members.group_id = exp_member_groups.group_id
-				AND exp_member_groups.site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."' AND include_in_memberlist = 'y'
-				AND ".$Q;
+		$sql = "SELECT DISTINCT exp_members.screen_name FROM exp_members
+				WHERE ".$Q;
 
 		$query = ee()->db->query($sql);
 
@@ -1732,11 +1733,16 @@ DOH;
 
 		$this->single_parts['include']['member_group_options'] = '';
 
-		$query = ee()->db->query("SELECT group_id, group_title FROM exp_member_groups WHERE site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."' AND include_in_memberlist = 'y' ORDER BY group_title");
+		$role_settings = ee('Model')->get('RoleSetting')
+			->with('Role')
+			->filter('include_in_memberlist', 'y')
+			->filter('site_id', ee()->config->item('site_id'))
+			->order('Role.name')
+			->all();
 
-		foreach ($query->result_array() as $row)
+		foreach ($role_settings as $role_setting)
 		{
-			 $this->single_parts['include']['member_group_options'] .= '<option value="'.$row['group_id'].'">'.$row['group_title'].'</option>';
+			 $this->single_parts['include']['member_group_options'] .= '<option value="'.$role_setting->Role->getId().'">'.$role_setting->Role->name.'</option>';
 		}
 
 		$this->return_data = $this->_process_template($this->retrieve_template('search_members'));
@@ -1793,7 +1799,7 @@ DOH;
 
 		foreach ($_POST as $key => $val)
 		{
-			if ($key == 'which')
+			if ($key == 'which' || $key == 'site_id')
 			{
 				continue;
 			}
@@ -1801,15 +1807,23 @@ DOH;
 			{
 				if ($val != 'any')
 				{
-					$search_query[] = " group_id ='".ee()->db->escape_str($_POST['group_id'])."'";
+					$role = ee('Model')->get('Role', $_POST['group_id'])
+						->with('RoleSettings')
+						->filter('RoleSettings.include_in_memberlist', 'y')
+						->filter('RoleSettings.site_id', ee()->config->item('site_id'))
+						->first();
+
+					if ($role)
+					{
+						$search_query[] = " member_id IN (" . implode($role->Members->pluck('member_id'), ',') . ")";
+					}
 				}
 			}
-			//site_id, screen_name, email, group_id
-			elseif (in_array($key, array('site_id', 'screen_name', 'email', 'group_id')) && !empty($val))
+			//screen_name, email, group_id
+			elseif (in_array($key, array('screen_name', 'email', 'group_id')) && !empty($val))
 			{
 					$search_query[] = $key." LIKE '%".ee()->db->escape_like_str($val)."%'";
 			}
-			
 		}
 
 		if (count($search_query) < 1)
@@ -1819,10 +1833,8 @@ DOH;
 
 		$Q = implode(" AND ", $search_query);
 
-		$sql = "SELECT DISTINCT exp_members.member_id, exp_members.screen_name FROM exp_members, exp_member_groups
-				WHERE exp_members.group_id = exp_member_groups.group_id
-				AND exp_member_groups.site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."' AND include_in_memberlist = 'y'
-				AND ".$Q;
+		$sql = "SELECT DISTINCT exp_members.member_id, exp_members.screen_name FROM exp_members
+				WHERE ".$Q;
 
 		$query = ee()->db->query($sql);
 
@@ -2281,27 +2293,18 @@ DOH;
 		/**  Check Member Group Permissions
 		/** ---------------------------------*/
 
-		$sql = "SELECT exp_member_groups.group_id, exp_member_groups.can_send_private_messages, exp_member_groups.prv_msg_storage_limit, exp_members.accept_messages
-				FROM exp_members, exp_member_groups
-				WHERE exp_members.group_id = exp_member_groups.group_id
-				AND exp_member_groups.site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."'
-				AND exp_members.member_id = '".ee()->db->escape_str($id)."'";
+		$member = ee('Model')->get('Member', $id)->first();
 
-		$query = ee()->db->query($sql);
-
-		if ($query->num_rows() > 0)
+		if ( ! $member)
 		{
-			// Super Admins have ALL the fun
-			if ($query->row('group_id') == 1 && $query->row('accept_messages') == 'y')
-			{
-				return TRUE;
-			}
-			elseif ($query->row('can_send_private_messages')  != 'y' OR $query->row('accept_messages')  != 'y')
-			{
-				return FALSE;
-			}
+			return FALSE;
 		}
-		else
+
+		if ($member->isSuperAdmin() && $member->accept_messages)
+		{
+			return TRUE;
+		}
+		elseif ( ! $member->can('send_private_messages') && ! $member->accept_messages)
 		{
 			return FALSE;
 		}
@@ -2310,7 +2313,12 @@ DOH;
 		/**  Check Message Count
 		/** -------------------------------*/
 
-		$user_storage_limit = $query->row('prv_msg_storage_limit') ;
+		$role_settings = ee('Model')->get('RoleSetting')
+			->filter('role_id', $member->role_id)
+			->filter('site_id', ee()->config->item('site_id'))
+			->first();
+
+		$user_storage_limit = $role_settings->prv_msg_storage_limit;
 
 		if ($user_storage_limit == 0)
 		{
@@ -3130,7 +3138,7 @@ DOH;
 
 		$this->conditionals['bulletins']		= 'n';
 		$this->conditionals['no_bulletins']		 = 'y';
-		$this->conditionals['can_post_bulletin'] = (ee()->session->userdata['can_send_bulletins'] == 'y') ? 'y' : 'n';
+		$this->conditionals['can_post_bulletin'] = (ee('Permission')->can('send_bulletins')) ? 'y' : 'n';
 
 		$this->single_parts['include']['message'] = $message;
 
@@ -3146,7 +3154,7 @@ DOH;
 
 		$sql =  "FROM exp_member_bulletin_board b, exp_members m
 				 WHERE b.sender_id = m.member_id
-				 AND b.bulletin_group = ".ee()->db->escape_str(ee()->session->userdata['group_id'])."
+				 AND b.bulletin_group = ".ee()->db->escape_str(ee()->session->userdata('role_id'))."
 				 AND bulletin_date < ".ee()->localize->now."
 				 AND
 				 (
@@ -3229,7 +3237,7 @@ DOH;
 
 		if ($query->row('bulletin_date')  != ee()->session->userdata['last_bulletin_date'])
 		{
-			ee()->db->query(ee()->db->update_string('exp_members', array('last_bulletin_date' => $query->row('bulletin_date') ), "group_id = '".ee()->db->escape_str(ee()->session->userdata['group_id'])."'"));
+			ee()->db->query(ee()->db->update_string('exp_members', array('last_bulletin_date' => $query->row('bulletin_date') ), "role_id = '".ee()->db->escape_str(ee()->session->userdata('role_id'))."'"));
 		}
 
 		foreach($query->result_array() as $row)
@@ -3237,7 +3245,7 @@ DOH;
 			++$i;
 			$data = $row;
 
-			$this->conditionals['can_delete_bulletin']		= (ee()->session->userdata['group_id'] == 1 OR $row['sender_id'] == ee()->session->userdata['member_id']) ? 'y' : 'n';
+			$this->conditionals['can_delete_bulletin']		= (ee('Permission')->isSuperAdmin() OR $row['sender_id'] == ee()->session->userdata['member_id']) ? 'y' : 'n';
 
 			if ($this->allegiance == 'cp')
 			{
@@ -3291,7 +3299,7 @@ DOH;
 		{
 			return $this->bulletin_board();
 		}
-		elseif(ee()->session->userdata['group_id'] != 1 && $query->row('sender_id')  != ee()->session->userdata['member_id'])
+		elseif(! ee('Permission')->isSuperAdmin() && $query->row('sender_id')  != ee()->session->userdata['member_id'])
 		{
 			return $this->bulletin_board();
 		}
@@ -3313,7 +3321,7 @@ DOH;
 		/**  Nasty Little Hobbits! No Sending!
 		/** -----------------------------------*/
 
-		if (ee()->session->userdata['can_send_bulletins'] != 'y')
+		if ( ! ee('Permission')->can('send_bulletins'))
 		{
 			return FALSE;
 		}
@@ -3343,29 +3351,33 @@ DOH;
 
 		$english = array('Members', 'Super Admins');
 
-		$sql = "SELECT group_id, group_title FROM exp_member_groups WHERE site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."' AND include_in_memberlist = 'y' AND group_id NOT IN ('2', '3', '4') ";
+		$excluded = [2, 3, 4];
 
-		if (ee()->session->userdata('group_id') != 1)
+		if ( ! ee('Permission')->isSuperAdmin())
 		{
-			$sql .= "AND group_id != '1' ";
+			$excluded[] = 1;
 		}
 
-		$sql .= " ORDER BY group_title";
-
-		$query = ee()->db->query($sql);
+		$role_settings = ee('Model')->get('RoleSetting')
+			->with('Role')
+			->filter('include_in_memberlist', 'y')
+			->filter('site_id', ee()->config->item('site_id'))
+			->filter('role_id', 'NOT IN', $excluded)
+			->order('Role.name')
+			->all();
 
 		$menu = "<option value='0'>".ee()->lang->line('mbr_all_member_groups')."</option>\n";
 
-		foreach ($query->result_array() as $row)
+		foreach ($role_settings as $role_setting)
 		{
-			$group_title = $row['group_title'];
+			$group_title = $role_setting->Role->name;
 
 			if (in_array($group_title, $english))
 			{
 				$group_title = ee()->lang->line(strtolower(str_replace(" ", "_", $group_title)));
 			}
 
-			$menu .= "<option value='".$row['group_id']."'>".$group_title."</option>\n";
+			$menu .= "<option value='".$role_setting->Role->getId()."'>".$group_title."</option>\n";
 		}
 
 		$this->single_parts['group_id_options'] = $menu;
@@ -3390,7 +3402,7 @@ DOH;
 		/**  Nasty Little Hobbits! No Sending!
 		/** -----------------------------------*/
 
-		if (ee()->session->userdata['can_send_bulletins'] != 'y')
+		if ( ! ee('Permission')->can('send_bulletins'))
 		{
 			return FALSE;
 		}
@@ -3409,24 +3421,28 @@ DOH;
 		/**  Valid Member Groups for User
 		/** ----------------------------------------*/
 
-		$sql = "SELECT group_id FROM exp_member_groups WHERE site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."' AND include_in_memberlist = 'y' AND group_id NOT IN ('2', '3', '4') ";
+		$excluded = [2, 3, 4];
 
-		if (ee()->session->userdata('group_id') != 1)
+		if ( ! ee('Permission')->isSuperAdmin())
 		{
-			$sql .= "AND group_id != '1' ";
+			$excluded[] = 1;
 		}
 
-		$sql .= " ORDER BY group_title";
-
-		$query = ee()->db->query($sql);
+		$role_settings = ee('Model')->get('RoleSetting')
+			->with('Role')
+			->filter('include_in_memberlist', 'y')
+			->filter('site_id', ee()->config->item('site_id'))
+			->filter('role_id', 'NOT IN', $excluded)
+			->order('Role.name')
+			->all();
 
 		$group = array();
 
-		foreach ($query->result_array() as $row)
+		foreach ($role_settings as $role_setting)
 		{
-			if ($_POST['group_id'] == '0' OR $_POST['group_id'] == $row['group_id'])
+			if ($_POST['group_id'] == '0' OR $_POST['group_id'] == $role_setting->Role->getId())
 			{
-				$groups[] = $row['group_id'];
+				$groups[] = $role_setting->Role->getId();
 			}
 		}
 
@@ -3467,7 +3483,7 @@ DOH;
 
 			if (ee()->localize->now >= $begins)
 			{
-				ee()->db->query(ee()->db->update_string('exp_members', array('last_bulletin_date' => ee()->localize->now), "group_id = '".ee()->db->escape_str($group_id)."'"));
+				ee()->db->query(ee()->db->update_string('exp_members', array('last_bulletin_date' => ee()->localize->now), "role_id = '".ee()->db->escape_str($group_id)."'"));
 			}
 		}
 
