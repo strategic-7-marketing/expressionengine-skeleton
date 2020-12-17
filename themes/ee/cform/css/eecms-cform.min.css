@@ -40,3 +40,4 @@
 .modal-wrap .req-title {    display: block;    font-size: 14px;    font-weight: 400;    line-height: 1;    margin-top: 10px;}
 @media screen and (min-width: 750px) {	.modal-wrap .setting-txt h3, .setting-txt label {		padding-right: 5px;	}}
 .modal-wrap .setting-txt h3, .setting-txt label {    font-size: 14px;    font-weight: 700;    margin-bottom: 5px;}
+

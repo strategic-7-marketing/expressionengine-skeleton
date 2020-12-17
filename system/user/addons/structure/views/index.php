@@ -79,7 +79,7 @@
             {
                 $markup = str_repeat("\t", $indentDepth).'<ul class="page-list';
 
-                if ($member_settings['nav_state'] && in_array($page['parent_id'], $member_settings['nav_state'])) {
+                if ( ! empty($member_settings['nav_state']) &&  in_array($page['parent_id'], $member_settings['nav_state'])) {
                     $markup .= ' state-collapsed';
                 }
 

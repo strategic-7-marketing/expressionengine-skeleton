@@ -1,4 +1,14 @@
-# expressionengine-skeleton
+# ExpressionEngine Skeleton
+
+**Default DB Credentials:**\
+DB Name: ee-skeleton\
+User: ee-skeleto\
+Pass: ee-skeleton
+
+**Default Admin Login Credentials:**\
+User: admin\
+Pass: ee-skel
+
 An ExpressionEngine Skeleton Website And Template Repository
 
 This is meant to be a starting point for a new ExpressionEngine website build project.
