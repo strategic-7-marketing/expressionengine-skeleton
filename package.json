@@ -13,6 +13,6 @@
   "author": "Marcum Strategic Marketing (Steven Demanett)",
   "license": "ISC",
   "dependencies": {
-    "bootstrap": "^4.5.3"
+    "bootstrap": "^4.6.0"
   }
 }
