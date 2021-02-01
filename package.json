@@ -4,7 +4,6 @@
   "description": "Preconfigured ExpressionEngine Skeleton With Foundation Front-end",
   "main": "index.js",
   "dependencies": {
-    "bootstrap": "^4.5.3",
     "foundation-sites": "^6.6.3"
   },
   "devDependencies": {},
