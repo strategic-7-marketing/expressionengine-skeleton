@@ -139,7 +139,8 @@
         "../node_modules/foundation-sites/scss/prototype/_border-box.scss",
         "../node_modules/foundation-sites/scss/prototype/_border-none.scss",
         "../node_modules/foundation-sites/scss/prototype/_sizing.scss",
-        "../node_modules/foundation-sites/scss/prototype/_spacing.scss"
+        "../node_modules/foundation-sites/scss/prototype/_spacing.scss",
+        "_custom.scss"
     ],
     "names": [],
     "file": "styles.min.css"
