@@ -7,7 +7,6 @@
 node_modules/
 
 # ignore env specific files
-.htaccess
 config/config.local.php
 
 # ignore for ee
