@@ -14,9 +14,9 @@
 $env_config['database'] = array (
 	'expressionengine' => array (
 		'hostname' => 'localhost',
-		'database' => '',
-		'username' => '',
-		'password' => '',
+		'database' => 'ee-skeleton',
+		'username' => 'ee-skeleton',
+		'password' => 'ee-skeleton',
 		'dbdriver' => 'mysqli',
 		'dbprefix' => 'exp_',
 		'char_set' => 'utf8mb4',
