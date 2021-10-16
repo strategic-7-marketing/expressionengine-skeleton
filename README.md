@@ -19,6 +19,39 @@ Upon cloning config/config.env.php will need modified with the agreed upon URLs 
 config/config.master.php may also need modified depending on need.
 config/config.local.php is included as a template for local development but should not be tracked or comitted.
 
+Included in an .htaccess_LIVE file that if used should be configured for the production domain. "APEXDOMAIN" in .htaccess_LIVE should be replaced with the actual apex or naked domain name. This file is intended to be used with GitHub Actions to streamline deployment to the production server. For example using the following Deploy Via FTP action which will deploy the site when the main branch is comitted to the configured FTP server secrets (FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD) furthermore it will delete any .htaccess file on the server and rename .htaccess_LIVE to .htaccess to take its place.
+
+```
+name: Deploy Via FTP
+on:
+  push:
+    branches:
+      - main
+jobs:
+  FTP-Deploy-Action:
+    name: FTP-Deploy-Action
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.1.0
+      with:
+        fetch-depth: 2
+    - name: FTP-Deploy-Action
+      uses: SamKirkland/FTP-Deploy-Action@3.1.1
+      with:
+        ftp-server: ${{ secrets.FTP_SERVER }}
+        ftp-username: ${{ secrets.FTP_USERNAME }}
+        ftp-password: ${{ secrets.FTP_PASSWORD }}
+    - name: Rename htaccess Go Live
+      shell: python
+      run: |
+        import ftplib
+        ftp = ftplib.FTP('${{ secrets.FTP_SERVER }}')
+        ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
+        ftp.delete('.htaccess')
+        ftp.rename('.htaccess_LIVE', '.htaccess')
+        ftp.quit()
+```
+
 Included Structure And WYGWAM Add-Ons and added default additional menu items for Structure and Template Manager in the EE backend.
 
 This Repo also includes branches if you wish to start with a front-end framework.
