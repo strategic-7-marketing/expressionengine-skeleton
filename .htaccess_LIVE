@@ -1,14 +1,21 @@
-RewriteEngine on
-# Removes index.php
-RewriteCond $1 !\.(gif|jpe?g|png)$ [NC]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php/$1 [L]
-# If 404s, "No Input File" or every URL returns the same thing
-# make it /index.php?/$1 above (add the question mark)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
 
-# Redirects HTTP and WWW to HTTPS Apex Domain
-RewriteCond %{HTTPS} off [OR]
-RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC,OR]
-RewriteCond %{HTTP_HOST} ^(?:www\.)?(.*)$ [NC]
-RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+    # Redirects HTTP and WWW to HTTPS Apex Domain
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+    RewriteRule ^(.*)$ https://APEXDOMAIN/$1 [R=301,L]
+
+    # Removes index.php from ExpressionEngine URLs
+    RewriteCond %{THE_REQUEST} ^GET.*index\.php [NC]
+    RewriteCond %{REQUEST_URI} !/system/.* [NC]
+    RewriteRule (.*?)index\.php/*(.*) /$1$2 [R=301,NE,L]
+
+    # Directs all EE web requests through the site index file
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ /index.php/$1 [L]
+    # If 404s, "No Input File" or every URL returns the same thing
+    # make it /index.php?/$1 above (add the question mark)
+</IfModule>
