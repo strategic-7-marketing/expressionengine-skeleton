@@ -18,6 +18,7 @@ A new project would be started from this template repository and modified as nee
 Upon cloning config/config.env.php will need modified with the agreed upon URLs including the local dev URL.
 config/config.master.php may also need modified depending on need.
 config/config.local.php is included as a template for local development but should not be tracked or comitted.
+config/config.local.php is commented out in .gitignore please uncomment when creating a new repo from this template.
 
 Included in an .htaccess_LIVE file that if used should be configured for the production domain. "APEXDOMAIN" in .htaccess_LIVE should be replaced with the actual apex or naked domain name. This file is intended to be used with GitHub Actions to streamline deployment to the production server. For example using the following Deploy Via FTP action which will deploy the site when the main branch is comitted to the configured FTP server secrets (FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD) furthermore it will delete any .htaccess file on the server and rename .htaccess_LIVE to .htaccess to take its place.
 
