@@ -48,7 +48,6 @@ jobs:
         import ftplib
         ftp = ftplib.FTP('${{ secrets.FTP_SERVER }}')
         ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
-        ftp.delete('.htaccess')
         ftp.rename('.htaccess_LIVE', '.htaccess')
         ftp.quit()
 ```
