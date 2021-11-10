@@ -11,13 +11,15 @@
 |
 */
 
-$config['app_version'] = '6.0.1';
+$config['app_version'] = '6.1.5';
 $config['cp_url'] = 'http://example.com/admin.php';
 $config['doc_url'] = 'https://ellislab.com/expressionengine/user-guide/';
 $config['site_label'] = '';$config['allow_php'] = 'n';
 $config['legacy_member_templates'] = 'y';
+$config['site_license_key'] = '';
 
 // END EE config items
+
 
 
 

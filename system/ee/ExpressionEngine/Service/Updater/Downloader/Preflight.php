@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -170,6 +170,10 @@ class Preflight
             'theme_paths' => $this->getThemePaths()
         ];
 
+        foreach ($config['theme_paths'] as $theme_path) {
+            $this->validateThemePath($theme_path);
+        }
+
         $this->filesystem->write(
             $this->path() . 'configs.json',
             json_encode($config),
@@ -192,6 +196,22 @@ class Preflight
         }
 
         return $this->theme_paths;
+    }
+
+    /**
+     * Checks whether themes path are existent and are valid ones
+     *
+     * @return	void
+     */
+    private function validateThemePath($theme_path)
+    {
+        if (!$this->filesystem->exists(rtrim(rtrim($theme_path, '/'), DIRECTORY_SEPARATOR) . '/ee/cp')) {
+            throw new UpdaterException(sprintf(
+                lang('theme_folder_path_invalid'),
+                $theme_path,
+                DOC_URL . 'control-panel/settings/urls.html#themes-path'
+            ), 1);
+        }
     }
 }
 

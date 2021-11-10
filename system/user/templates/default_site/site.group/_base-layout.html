@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>{site_name}{if layout:seo_title != ''} | {layout:seo_title}{/if}</title>
+
+    <meta name="description" content="{layout:seo_description}">
+    <link rel="canonical" href="{site_url}{current_path}"/>
+
+    <!-- Favicon Code -->
+    <!-- https://realfavicongenerator.net -->
+    <!-- End Favicon Code -->
+
+    <link rel="stylesheet" href="{site_url}css/styles.min.css?v=0.0.1" type="text/css">
+    {layout:css}
+
+    <!-- Google Tag Manager -->
+
+    <!-- End Google Tag Manager -->
+</head>
+
+<body>
+    {layout:contents}
+    {layout:js}
+</body>
+
+</html>
