@@ -120,6 +120,20 @@ class Structure_mcp extends Mcp
         $permissions['delete'] = $this->sql->user_access('perm_delete', $settings);
         $permissions['reorder'] = $this->sql->user_access('perm_reorder', $settings);
 
+        $rules = array();
+
+        // Only EE6 and up have the `allow_preview` field on channels.
+        if (version_compare(APP_VER, '6.1.0', '>=')) {
+            // put fields to go faster.
+            $builder = ee('Model')->get('Channel')->filter('site_id', '==', $this->site_id)->order('channel_id', 'ASC')->fields('allow_preview', 'channel_id')->all();
+            $channel_rules = $builder->pluck('allow_preview');
+            $channel_id = $builder->pluck('channel_id');
+
+            for ($i = 0; $i < count($channel_id); $i++) {
+                $rules[$channel_id[$i]] = $channel_rules[$i];
+            }
+        }
+
         // Enable/disable dragging and reordering
         // if ((isset($permissions['reorder']) && $permissions['reorder']) || $permissions['admin'])
         ee()->cp->load_package_js('jquery.ui.nestedsortable');
@@ -148,7 +162,8 @@ class Structure_mcp extends Mcp
         $data['theme_url']             = ee()->config->item('theme_folder_url') . 'third_party/structure';
         $data['extra_reorder_options'] = $this->extra_reorder_options;
         $data['homepage']              = array_search('/', $site_pages['uris']);
-        $data['selected_tab'] = 0;
+        $data['selected_tab']          = 0;
+        $data['channel_rules']         = $rules;
 
         // Gut check to make sure they ran the update method!
         if (!ee()->db->field_exists('updated', 'structure')) {
@@ -175,15 +190,21 @@ class Structure_mcp extends Mcp
         // -------------------------------------------
 
         $page_choices = array();
-
+        $page_selectors = array();
         if (is_array($data['valid_channels'])) {
             $page_choices = array_intersect_key($data['valid_channels'], $data['assigned_channels']);
+        }
+        //specific case that occurs if a single channel is not selected for in page selector still need to provide it with a valid add child page link.
+        if (is_array($data['valid_channels'])) {
+            $page_selectors = $data['valid_channels'];
         }
 
         $data['page_choices'] = $page_choices;
 
         if ($page_choices && count($page_choices) == 1) {
-            $data['add_page_url'] = $this->flux->cpURL('publish', 'create', array('channel_id'=>key($page_choices)));
+            $data['add_page_url'] = $this->flux->cpURL('publish', 'create', array('channel_id' => key($page_choices)));
+        } elseif ($page_selectors && count($page_choices) == 1) {
+            $data['add_page_url'] = $this->flux->cpURL('publish', 'create', array('channel_id' => key($page_choices)));
         } elseif ($data['page_count'] == 0) {
             $data['add_page_url'] = $this->flux->moduleURL('channel_settings');
         } else {
@@ -343,8 +364,13 @@ class Structure_mcp extends Mcp
             @$titles[$key] .= $slug;
         }
 
+        // Build an entry id string to limit the scope of results to
+        // prevent memory errors on sites with lots of entries.
+        $entry_ids = array_keys($data);
+        $entry_ids_string = implode(',', $entry_ids);
+
         // Build an array with all current channel_ids
-        $results = ee()->db->query("SELECT entry_id,channel_id FROM exp_channel_titles WHERE site_id = $this->site_id");
+        $results = ee()->db->query("SELECT entry_id,channel_id FROM exp_channel_titles WHERE site_id = $this->site_id AND entry_id IN ($entry_ids_string)");
 
         $channel_data = array();
         if ($results->num_rows() > 0) {
@@ -641,17 +667,23 @@ class Structure_mcp extends Mcp
 
         // EE 4.2 Live Preview requires a Preview URL entered in each channel or the Live Preview breaks
         // so if this is a Structure managed channel, make sure something is in the Preview URL field.
-        if (ee()->db->field_exists('preview_url', 'channels')) {
-            if (!empty($updated_channels)) {
-                ee()->db->where("(preview_url='' OR preview_url IS NULL)");
-                ee()->db->where_in('channel_id', $updated_channels);
-                ee()->db->update('channels', array('preview_url'=>'Managed by Structure - Changes here will not have any effect'));
-            }
+        foreach ($form_data as $channel_id => $data) {
+            if (ee()->db->field_exists('preview_url', 'channels') && $data['type'] != 'asset') {
+                if (!empty($updated_channels)) {
+                    ee()->db->where("(preview_url='' OR preview_url IS NULL)");
+                    ee()->db->where_in('channel_id', $channel_id);
+                    ee()->db->update('channels', array('preview_url' => 'Managed by Structure - Changes here will not have any effect'));
+                }
 
-            if (!empty($unmanaged_channels)) {
-                ee()->db->where('preview_url', 'Managed by Structure - Changes here will not have any effect');
-                ee()->db->where_in('channel_id', $unmanaged_channels);
-                ee()->db->update('channels', array('preview_url'=>''));
+                if (!empty($unmanaged_channels)) {
+                    ee()->db->where('preview_url', 'Managed by Structure - Changes here will not have any effect');
+                    ee()->db->where_in('channel_id', $channel_id);
+                    ee()->db->update('channels', array('preview_url' => ''));
+                }
+            } elseif (ee()->db->field_exists('preview_url', 'channels') && $data['type'] == 'asset') {
+                $builder = ee('Model')->get('Channel')->filter('channel_id', '==', $channel_id)->first();
+                $builder->preview_url = NULL;
+                $builder->save();
             }
         }
 

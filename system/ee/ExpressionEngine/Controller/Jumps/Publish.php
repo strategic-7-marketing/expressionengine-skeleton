@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -126,7 +126,7 @@ class Publish extends Jumps
 
         if ($can_create) {
             foreach ($channels as $i => $channel) {
-                if ($channel->max_entries != 0 && $channel->max_entries <= $channel->total_entries) {
+                if ($channel->maxEntriesLimitReached()) {
                     unset($channels[$i]);
                 }
             }

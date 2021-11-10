@@ -109,6 +109,11 @@ class Structure_Nestedset_Adapter_Ee
                 WHERE $where
                 LIMIT 1";
         */
+
+        // MySQL 5.7.5 workaround. TODO: Come back to this and rewrite these queries.
+        ee()->db->query("SET SESSION sql_mode = ''");
+
+
         $sql = "SELECT node.*,
                     (COUNT(parent.lft) - 2) AS depth,
                     if((node.rgt - node.lft) = 1,1,0) AS isLeaf,

@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -62,7 +62,12 @@ class Template extends ProfilerSection
     public function setData($log)
     {
         $last = end($log);
-        $this->template_memory = $last['memory'];
+
+        if ($last !== false) {
+            $this->template_memory = $last['memory'];
+        } else {
+            $this->template_memory = 0;
+        }
 
         foreach ($log as &$entry) {
             // convert human friendly megabytes into bytes for maths

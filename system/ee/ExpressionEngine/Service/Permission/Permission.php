@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -64,10 +64,10 @@ class Permission
         $groups = $query->all();
 
         if ($groups) {
-            return $groups->pluck('role_id');
+            return array_unique(array_merge([1], $groups->pluck('role_id')));
         }
 
-        return [];
+        return [1];
     }
 
     public function rolesThatCan($permission, $site_id = null)
@@ -93,6 +93,29 @@ class Permission
     {
         foreach ($roles as $role) {
             if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Can they use Pro?
+     *
+     * @return boolean
+     */
+    public function canUsePro()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+        
+        //currently. anyone with CP access 
+        //if the future, inject into Permissions service
+        if ($this->has('can_access_cp')) {
+            $assigned_modules = ee()->session->getMember()->getAssignedModules()->pluck('module_name');
+            if (in_array('Pro', $assigned_modules)) {
                 return true;
             }
         }
@@ -176,10 +199,17 @@ class Permission
             return true;
         }
 
+        // Check to see that something was passed, even if it's an empty array (mostly a gut-check for add-on devs).
+        if (empty(func_get_args())) {
+            throw new \BadMethodCallException('Invalid parameter count, 1 or more arguments required.');
+        }
+
         $which = $this->prepareArguments(func_get_args());
 
+        // Check to see if an empty array of values was passed. We want to check to see if the user has
+        // any of the requested permissions, but if it's empty, they obviously do not have permission.
         if (! count($which)) {
-            throw new \BadMethodCallException('Invalid parameter count, 1 or more arguments required.');
+            return false;
         }
 
         foreach ($which as $w) {
@@ -214,6 +244,10 @@ class Permission
      */
     protected function check($which)
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         //legacy permission support
         if (in_array($which, ['can_create_entries', 'can_edit_other_entries', 'can_edit_self_entries', 'can_delete_self_entries', 'can_delete_all_entries', 'can_assign_post_authors'])) {
             $member = ee()->session->getMember();

@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -527,6 +527,10 @@ class EE_Config
             'captcha_rand',
             'captcha_require_members',
             'require_captcha',
+            'use_recaptcha',
+            'recaptcha_site_key',
+            'recaptcha_site_secret',
+            'recaptcha_score_threshold',
             'enable_sql_caching',
             'force_query_string',
             'show_profiler',
@@ -798,6 +802,7 @@ class EE_Config
                         ->all();
                 }
 
+                $anything_to_add = $new_values;
                 foreach ($configs as $config) {
                     $key = $config->key;
 
@@ -808,28 +813,18 @@ class EE_Config
                     $config->value = $new_values[$key];
                     $config->save();
 
-                    if ($key == 'is_system_on') {
-                        $isSystemOn = $new_values[$key];
-                    }
-
-                    unset($new_values[$key]);
+                    unset($anything_to_add[$key]);
                 }
                 // Add any new configs to the DB
-                if (! empty($new_values)) {
-                    $all = $this->divineAll();
+                if (! empty($anything_to_add)) {
                     $install = $this->divination('install');
-                    foreach ($new_values as $key => $value) {
-                        if (in_array($key, $all)) {
-                            ee('Model')->make('Config', [
-                                'site_id' => (in_array($key, $install)) ? 0 : $site_id,
-                                'key' => $key,
-                                'value' => $value
-                            ])->save();
-                            if ($key == 'is_system_on') {
-                                $isSystemOn = $new_values[$key];
-                            }
-                            unset($new_values[$key]);
-                        }
+                    foreach ($anything_to_add as $key => $value) {
+                        ee('Model')->make('Config', [
+                            'site_id' => (in_array($key, $install)) ? 0 : $site_id,
+                            'key' => $key,
+                            'value' => $value
+                        ])->save();
+                        unset($anything_to_add[$key]);
                     }
                 }
             } else {
@@ -842,11 +837,6 @@ class EE_Config
             foreach ($ci_config as $key => $val) {
                 $new_values[$key] = $val;
             }
-        }
-
-        // Shim writing is system on to config file
-        if (isset($isSystemOn)) {
-            $new_values['is_system_on'] = $isSystemOn;
         }
 
         // Update config file with remaining values
@@ -1086,6 +1076,7 @@ class EE_Config
 
         // Cycle through the newconfig array and swap out the data
         $to_be_added = array();
+        $divineAll = $this->divineAll();
         if (is_array($new_values)) {
             foreach ($new_values as $key => $val) {
                 if (is_array($val)) {
@@ -1103,7 +1094,8 @@ class EE_Config
                 }
 
                 // Are we adding a brand new item to the config file?
-                if (! isset($config[$key])) {
+                // we only add custom items that are not in divination array
+                if (! isset($config[$key]) && !in_array($key, $divineAll)) {
                     $to_be_added[$key] = $val;
                 } else {
                     $base_regex = '#(\$config\[(\042|\047)' . $key . '\\2\]\s*=\s*)';
@@ -1302,6 +1294,7 @@ class EE_Config
                 'multiple_sites_enabled' => array('r', array('y' => 'yes', 'n' => 'no')),
                 'is_system_on' => array('r', array('y' => 'yes', 'n' => 'no')),
                 'is_site_on' => array('r', array('y' => 'yes', 'n' => 'no')),
+                'site_license_key' => array('i', '', 'strip_tags|trim|valid_xss_check'),
                 'site_name' => array('i', '', 'required|strip_tags|trim|valid_xss_check'),
                 'site_index' => array('i', '', 'strip_tags|trim|valid_xss_check'),
                 'site_url' => array('i', '', 'required|strip_tags|trim|valid_xss_check'),
@@ -1414,10 +1407,14 @@ class EE_Config
             ),
 
             'captcha_cfg' => array(
+                'use_recaptcha' => array('r', array('y' => 'yes', 'n' => 'no')),
                 'captcha_path' => array('i', '', 'strip_tags|trim|valid_xss_check'),
                 'captcha_url' => array('i', '', 'strip_tags|trim|valid_xss_check'),
                 'captcha_font' => array('r', array('y' => 'yes', 'n' => 'no')),
                 'captcha_rand' => array('r', array('y' => 'yes', 'n' => 'no')),
+                'recaptcha_site_key' => array('i', ''),
+                'recaptcha_site_secret' => array('i', ''),
+                'recaptcha_score_threshold' => array('i', ''),
                 'captcha_require_members' => array('r', array('y' => 'yes', 'n' => 'no'))
             ),
 

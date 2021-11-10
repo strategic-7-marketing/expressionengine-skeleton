@@ -86,6 +86,8 @@ $lang = array(
 
     'captcha_required' => 'You must submit the word that appears in the image',
 
+    'recaptcha_required' => 'reCAPTCHA check did not pass',
+
     'checksum_changed_accept' => 'Accept Changes',
 
     'checksum_changed_warning' => 'One or more core files have been altered:',
@@ -98,6 +100,12 @@ The following files are affected:
 If you made these changes, please accept the modifications on the control panel homepage. If you did not alter these files it may indicate a hacking attempt. Check the files for any suspicious contents (JavaScript or iFrames) and see: ' . DOC_URL . 'troubleshooting/error_messages/expressionengine_has_detected_the_modification_of_a_core_file.html',
 
     'checksum_email_subject' => 'A core file was modified on your site.',
+
+    'warning_system_status_title' => 'Please check system online status',
+
+    'warning_system_status_message' => 'Your current system status is set to <b>%s</b>. If you need to change that, please visit <a href="%s">System Settings</a> or press the button below.',
+
+    'warning_system_status_button' => 'Set System %s',
 
     'csrf_token_expired' => 'This form has expired. Please refresh and try again.',
 
@@ -163,6 +171,8 @@ If you made these changes, please accept the modifications on the control panel 
     'pending' => 'Pending',
 
     'super_admins' => 'Super Admins',
+
+    'anonymous' => 'Anonymous',
 
     /* Template.php */
     'error_fix_module_processing' => 'Please check that the \'%x\' module is installed and that \'%y\' is an available method of the module',
@@ -431,6 +441,46 @@ If you made these changes, please accept the modifications on the control panel 
     'UP13' => '(UTC +13:00) Samoa Time Zone, Phoenix Islands Time, Tonga',
 
     'UP14' => '(UTC +14:00) Line Islands',
+
+    /* Cookies */
+
+    'cookie_csrf_token' => 'CSRF Token',
+    'cookie_csrf_token_desc' => 'A security cookie used to identify the user and prevent Cross Site Request Forgery attacks.',
+
+    'cookie_flash' => 'Flash data',
+    'cookie_flash_desc' => 'Control panel user feedback messages, encrypted for security.',
+
+    'cookie_remember' => 'Remember Me',
+    'cookie_remember_desc' => 'Determines whether a user is automatically logged in upon visiting the site.',
+
+    'cookie_sessionid' => 'Session ID',
+    'cookie_sessionid_desc' => 'Session id, used to associate a logged in user with their data.',
+
+    'cookie_visitor_consents' => 'Visitor Consents',
+    'cookie_visitor_consents_desc' => 'Saves responses to Consent requests for non-logged in visitors',
+
+    'cookie_last_activity' => 'Last Activity',
+    'cookie_last_activity_desc' => 'Records the time of the last page load. Used in in calculating active sessions.',
+
+    'cookie_last_visit' => 'Last Visit',
+    'cookie_last_visit_desc' => 'Date of the user’s last visit, based on the last_activity cookie. Can be shown as a statistic for members and used by forum and comments to show unread topics for both members and guests.',
+
+    'cookie_anon' => 'Anonymize',
+    'cookie_anon_desc' => 'Determines whether the user’s username is displayed in the list of currently logged in members.',
+
+    'cookie_tracker' => 'Tracker',
+    'cookie_tracker_desc' => 'Contains the last 5 pages viewed, encrypted for security. Typically used for form or error message returns.',
+
+    'cookie_viewtype' => 'Filemanager View Type',
+    'cookie_viewtype_desc' => 'Determines View Type to be used in Filemanager (table or thumbs view)',
+
+    'cookie_cp_last_site_id' => 'CP Last Site ID',
+    'cookie_cp_last_site_id_desc' => 'MSM cookie indicating the last site accessed in the control panel.',
+
+    'cookie_collapsed_nav' => 'Collapsed Navigation',
+    'cookie_collapsed_nav_desc' => 'Determines whether navigation sidebar is control panel should be collapsed.',
+
+    
 
 );
 

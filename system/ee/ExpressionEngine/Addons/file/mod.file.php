@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -99,7 +99,7 @@ class File
             $file_id = ee()->TMPL->fetch_param('file_id');
         }
 
-        // Chec	k for category parameters
+        // Check for category parameters
         foreach ($category_params as $param => $variable) {
             if ($this->enable['categories']
                 && ($temp = ee()->TMPL->fetch_param($param))) {
@@ -227,7 +227,7 @@ class File
         }
 
         $sql = ee()->db->select('c.cat_name, c.cat_url_title, c.cat_id, c.cat_image, c.cat_description,
-									c.parent_id, p.cat_id, p.file_id, c.group_id, cg.field_html_formatting, fd.*')
+                                    c.parent_id, p.cat_id, p.file_id, c.group_id, cg.field_html_formatting, fd.*')
             ->from('exp_categories AS c, exp_file_categories AS p')
             ->join('category_field_data AS fd', 'fd.cat_id = c.cat_id', 'LEFT')
             ->join('category_groups AS cg', 'cg.group_id = c.group_id', 'LEFT')
@@ -472,8 +472,8 @@ class File
     /**
      * Gets File Metadata- may move to db
      *
-     * @param	string	$file_path	The full path to the file to check
-     * @return	array
+     * @param   string  $file_path  The full path to the file to check
+     * @return  array
      */
     public function get_file_sizes($file_path)
     {
@@ -504,8 +504,22 @@ class File
     {
         ee()->load->library('mime_type');
 
-        $addon = ee('Addon')->get(ee()->input->get('addon'));
-        $path = $addon->getPath() . '/' . ee()->input->get('file');
+        if (IS_PRO && ee()->input->get('prolet')) {
+            $prolet = ee('Model')->get('pro:Prolet', (int) ee()->input->get('prolet'))->first();
+            if (!empty($prolet)) {
+                $path = $prolet->icon;
+            }
+        } else {
+            $addon = ee('Addon')->get(ee()->input->get('addon'));
+            $filename = ee()->input->get('file');
+            if (!in_array($filename, ['icon.svg', 'icon.png'])) {
+                $filename = 'icon.svg';
+            }
+            $path = $addon->getPath() . '/' . $filename;
+        }
+        if (empty($path)) {
+            $path = 'icon.svg';
+        }
 
         ee()->output->out_type = 'cp_asset';
         ee()->output->enable_profiler(false);

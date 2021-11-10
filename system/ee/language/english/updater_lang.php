@@ -53,6 +53,13 @@ $lang = array(
     'turnSystemOn_step' =>
     'Turning system on',
 
+    'theme_folder_path_invalid' =>
+    'The following theme folder path is not valid:
+
+%s
+
+Please set it to correct value as described in <a href="%s" target="_blank">the documentation</a>.',
+
     'files_not_writable' =>
     'The following paths are not writable:
 
@@ -127,6 +134,10 @@ Please make sure you have the latest version of each file in place and then try 
 
     'update_rolledback_desc' =>
     'Contact support if you continue having trouble updating, or you can <a href=\'%s\' rel=\'external\'>manually update</a>.',
+
+    'update_version_warning' => 'Please check system online status',
+
+    'update_version_warning_desc' => 'Your current system status is set to <b>%s</b>. If you need to change that, please visit System Settings.',
 
     '' => ''
 );

@@ -277,7 +277,8 @@ window.Wygwam;
     Wygwam.loadEEFileBrowser = function(params, directory, content_type, dirURL) {
         // Set up the temporary increase of z-indexes.
         var modalZIndex = $('.modal-file').css('z-index'),
-            overlayZindex = $('.overlay').css('z-index');
+            overlayZindex = $('.overlay').css('z-index'),
+            appOverlayZindex = $('.app-overlay').css('z-index');
 
         $('.modal-file').css('z-index', 10012);
         $('.overlay, .app-overlay').css('z-index', 10011);
@@ -286,10 +287,14 @@ window.Wygwam;
             $('body').css({ position:'fixed', width:'initial' });
         }
 
+        $('.cke_dialog_open').css({'overflow': 'scroll'})
+
         // Set up restoration of original z-indexes.
         var restoreZIndexes = function (){
+            $('.cke_dialog_open').css({'overflow': 'hidden'})
             $('.modal-file').css({'z-index': modalZIndex});
             $('.overlay').css({'z-index': overlayZindex});
+            $('.app-overlay').css({'z-index': appOverlayZindex});
             $('body').css({ position:'initial', width:'initial' });
         };
 

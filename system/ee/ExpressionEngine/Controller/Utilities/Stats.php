@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -249,14 +249,9 @@ class Stats extends Utilities
             }
 
             // now update the channels table
-            $channel_entries_count = ee()->db->query('SELECT count(entry_id) AS count, channel_id
-					FROM exp_channel_titles
-					GROUP BY channel_id');
-
-            if ($channel_entries_count->num_rows() > 0) {
-                foreach ($channel_entries_count->result() as $row) {
-                    ee()->db->update('channels', array('total_entries' => $row->count), array('channel_id' => $row->channel_id));
-                }
+            $channels = ee('Model')->get('Channel')->all();
+            foreach ($channels as $i => $channel) {
+                $channel->updateEntryStats();
             }
 
             unset($data);
