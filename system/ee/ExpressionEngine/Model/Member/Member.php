@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -300,6 +300,7 @@ class Member extends ContentModel
     protected $cp_homepage;
     protected $cp_homepage_channel;
     protected $cp_homepage_custom;
+    protected $dismissed_pro_banner;
 
     /**
      * Getter for legacy group_id property
@@ -417,7 +418,7 @@ class Member extends ContentModel
     public function onAfterSave()
     {
         parent::onAfterSave();
-        ee()->cache->file->delete('jumpmenu/' . $this->member_id);
+        ee()->cache->file->delete('jumpmenu/' . md5($this->member_id));
     }
 
     /**
@@ -591,7 +592,7 @@ class Member extends ContentModel
      * use the default of 'homepage'. We prioritize on the Member's preferences
      * then the groups preferences, falling back to the default.
      *
-     * @param	int	Optional site ID to get member homepage for, defaults to current site
+     * @param   int Optional site ID to get member homepage for, defaults to current site
      * @return ExpressionEngine\Library\CP\URL The URL
      */
     public function getCPHomepageURL($site_id = null)
@@ -654,8 +655,8 @@ class Member extends ContentModel
     /**
      * A link back to the owning member group object.
      *
-     * @return	Structure	A link back to the Structure object that defines
-     *						this Content's structure.
+     * @return  Structure   A link back to the Structure object that defines
+     *                      this Content's structure.
      */
     public function getStructure()
     {
@@ -835,11 +836,11 @@ class Member extends ContentModel
     /**
      * Hash and update Password
      *
-     * 	Validation of $this->password takes the plaintext password. But it then
-     * 	needs to be prepped as a salted hash before it's saved to the database
-     * 	so we never store a plaintext password. It is imperative that this is done
-     * 	BEFORE a call to save() the model, so it's not even ever in the database
-     * 	temporarily or in a MySQL query log, potentially transmitted over HTTP even.
+     *  Validation of $this->password takes the plaintext password. But it then
+     *  needs to be prepped as a salted hash before it's saved to the database
+     *  so we never store a plaintext password. It is imperative that this is done
+     *  BEFORE a call to save() the model, so it's not even ever in the database
+     *  temporarily or in a MySQL query log, potentially transmitted over HTTP even.
      *
      * @param  string $plaintext Plaintext password
      * @return void
@@ -1049,11 +1050,17 @@ class Member extends ContentModel
         return false;
     }
 
-    public function getAllRoles()
+    /**
+     * Get all roles assigned to member, including Primary Role, extra roles and roles assigned via Role Groups
+     * @param  bool $cache Whether to cache roles during this request
+     *
+     * @return Collection
+     */
+    public function getAllRoles($cache = true)
     {
         $cache_key = "Member/{$this->member_id}/Roles";
 
-        $roles = $this->getFromCache($cache_key);
+        $roles = ($cache == true) ? $this->getFromCache($cache_key) : false;
 
         if ($roles === false) {
             $roles = $this->Roles->indexBy('name');
@@ -1069,12 +1076,19 @@ class Member extends ContentModel
 
             $roles = new Collection($roles);
 
-            $this->saveToCache($cache_key, $roles);
+            if ($cache == true) {
+                $this->saveToCache($cache_key, $roles);
+            }
         }
 
         return $roles;
     }
 
+    /**
+     * Get all modules that the member is allowed to access
+     *
+     * @return Collection
+     */
     public function getAssignedModules()
     {
         if ($this->isSuperAdmin()) {
@@ -1091,6 +1105,11 @@ class Member extends ContentModel
         return new Collection($modules);
     }
 
+    /**
+     * Get all channels that the member is allowed to use
+     *
+     * @return Collection
+     */
     public function getAssignedChannels()
     {
         if ($this->isSuperAdmin()) {
@@ -1107,6 +1126,11 @@ class Member extends ContentModel
         return new Collection($channels);
     }
 
+    /**
+     * Get all upload destination that the member is allowed to use
+     *
+     * @return Collection
+     */
     public function getAssignedUploadDestinations()
     {
         if ($this->isSuperAdmin()) {
@@ -1123,6 +1147,11 @@ class Member extends ContentModel
         return new Collection($uploads);
     }
 
+    /**
+     * Get all entry statuses that the member is allowed to use
+     *
+     * @return Collection
+     */
     public function getAssignedStatuses()
     {
         if ($this->isSuperAdmin()) {
@@ -1139,6 +1168,11 @@ class Member extends ContentModel
         return new Collection($statuses);
     }
 
+    /**
+     * Get all template groups that the member is allowed to manipulate
+     *
+     * @return Collection
+     */
     public function getAssignedTemplateGroups()
     {
         if ($this->isSuperAdmin()) {
@@ -1155,6 +1189,11 @@ class Member extends ContentModel
         return new Collection($template_groups);
     }
 
+    /**
+     * Get all templates that the member is allowed to access
+     *
+     * @return Collection
+     */
     public function getAssignedTemplates()
     {
         if ($this->isSuperAdmin()) {
@@ -1171,6 +1210,11 @@ class Member extends ContentModel
         return new Collection($templates);
     }
 
+    /**
+     * Get permissions assigned to member
+     *
+     * @return Array [permission => permission_id]
+     */
     public function getPermissions()
     {
         $cache_key = "Member/{$this->member_id}/Permissions";
@@ -1192,28 +1236,56 @@ class Member extends ContentModel
 
     public function can($permission)
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         $permissions = $this->getPermissions();
 
         return array_key_exists('can_' . $permission, $permissions);
     }
 
+    /**
+     * Checks whether member has certain permission
+     *
+     * @return Bool `true` if permission has been granted
+     */
     public function has($permission)
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         $permissions = $this->getPermissions();
 
         return array_key_exists($permission, $permissions);
     }
 
+    /**
+     * Checks whether member is SuperAdmin
+     *
+     * @return Bool `true` if member is SuperAdmin
+     */
     public function isSuperAdmin()
     {
         return in_array(1, $this->getAllRoles()->pluck('role_id'));
     }
 
+    /**
+     * Checks whether member has been banned
+     *
+     * @return Bool `true` if member is banned
+     */
     public function isBanned()
     {
         return $this->role_id == 2 || in_array(2, $this->getAllRoles()->pluck('role_id'));
     }
 
+    /**
+     * Checks whether member is pending
+     *
+     * @return Bool `true` if member is pending
+     */
     public function isPending()
     {
         return $this->role_id == 4 || in_array(4, $this->getAllRoles()->pluck('role_id'));

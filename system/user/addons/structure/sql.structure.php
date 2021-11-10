@@ -1992,7 +1992,11 @@ class Sql_structure
                     ->pluck('role_id');
             }
 
-            $roles = ee('Model')->get('Role')
+            if (empty($can_create_entries) || empty($can_edit_other_entries) || empty($can_edit_self_entries)) {
+                return false;
+            }
+
+            $allowedRoles = ee('Model')->get('Role')
                 ->filter('role_id', 'IN', $can_create_entries)
                 ->filter('role_id', 'IN', $can_edit_other_entries)
                 ->filter('role_id', 'IN', $can_edit_self_entries)
@@ -2001,11 +2005,18 @@ class Sql_structure
                 ->all()
                 ->toArray();
 
+            $moduleRoles = ee('Model')->get('Module')->filter('module_name', 'Structure')->first()->AssignedRoles->pluck('role_id');
 
-            if(!empty($roles)) {
-                foreach ($roles as $i=>$role) {
-                    $roles[$i]['id'] = $role['role_id'];
-                    $roles[$i]['title'] = $role['name'];
+            $roles = [];
+            $i = 0;
+            if(!empty($allowedRoles)) {
+                foreach ($allowedRoles as $role) {
+                    if (in_array($role['role_id'], $moduleRoles)) {
+                        $roles[$i] = $role;
+                        $roles[$i]['id'] = $role['role_id'];
+                        $roles[$i]['title'] = $role['name'];
+                        $i++;
+                    }
                 }
             }
 

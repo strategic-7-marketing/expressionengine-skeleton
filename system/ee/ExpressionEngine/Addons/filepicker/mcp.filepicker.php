@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -224,11 +224,6 @@ class Filepicker_mcp
             $vars['data_url_base'] = $this->base_url;
         } else {
             $table = $this->picker->buildTableFromFileCollection($files, $perpage, ee()->input->get_post('selected'));
-
-            // Display Upload button if we can
-            if (isset($vars['upload']) && is_numeric($vars['dir'])) {
-                $table->addActionButton($vars['upload'], lang('upload_new_file'));
-            }
 
             // show a slightly different message if we have no upload directories
             if ($nodirs) {

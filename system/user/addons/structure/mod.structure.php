@@ -1347,9 +1347,9 @@ class Structure extends Channel
                             'channel_id' => $listing_channel,
                             'parent_id' => $node_parent_id,
                             'entry_id' => $c_entry['entry_id'],
-                            'template_id' => $listing_entries[$c_entry['entry_id']]['template_id'] ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template,
+                            'template_id' => !empty($listing_entries[$c_entry['entry_id']]['template_id']) ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template,
                             'parent_uri' => $node_parent_uri,
-                            'uri' => $listing_entries[$c_entry['entry_id']]['uri'] ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']
+                            'uri' => !empty($listing_entries[$c_entry['entry_id']]['uri']) ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']
                         );
 
                         // Hook to allow other add-ons to modify the listing data.
@@ -1364,8 +1364,8 @@ class Structure extends Channel
 
                         $listing_data[] = $temp_listing;
 
-                        $site_pages['uris'][$c_entry['entry_id']] = $this->create_full_uri($temp_listing['parent_uri'], $listing_entries[$c_entry['entry_id']]['uri'] ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']);
-                        $site_pages['templates'][$c_entry['entry_id']] = $listing_entries[$c_entry['entry_id']]['template_id'] ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template;
+                        $site_pages['uris'][$c_entry['entry_id']] = $this->create_full_uri($temp_listing['parent_uri'], !empty($listing_entries[$c_entry['entry_id']]['uri']) ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']);
+                        $site_pages['templates'][$c_entry['entry_id']] = !empty($listing_entries[$c_entry['entry_id']]['template_id']) ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template;
                     }
 
                     // Stay connected - only if it's EE2 or less.
@@ -1484,9 +1484,9 @@ class Structure extends Channel
                             'channel_id' => $listing_channel,
                             'parent_id' => $node_parent_id,
                             'entry_id' => $c_entry['entry_id'],
-                            'template_id' => $listing_entries[$c_entry['entry_id']]['template_id'] ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template,
+                            'template_id' => !empty($listing_entries[$c_entry['entry_id']]['template_id']) ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template,
                             'parent_uri' => $node_parent_uri,
-                            'uri' => $listing_entries[$c_entry['entry_id']]['uri'] ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']
+                            'uri' => !empty($listing_entries[$c_entry['entry_id']]['uri']) ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']
                         );
 
                         // Hook to allow other add-ons to modify the listing data.
@@ -1501,8 +1501,8 @@ class Structure extends Channel
 
                         $listing_data[] = $temp_listing;
 
-                        $site_pages['uris'][$c_entry['entry_id']] = $this->create_full_uri($temp_listing['parent_uri'], $listing_entries[$c_entry['entry_id']]['uri'] ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']);
-                        $site_pages['templates'][$c_entry['entry_id']] = $listing_entries[$c_entry['entry_id']]['template_id'] ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template;
+                        $site_pages['uris'][$c_entry['entry_id']] = $this->create_full_uri($temp_listing['parent_uri'], !empty($listing_entries[$c_entry['entry_id']]['uri']) ? $listing_entries[$c_entry['entry_id']]['uri'] : $c_entry['url_title']);
+                        $site_pages['templates'][$c_entry['entry_id']] = !empty($listing_entries[$c_entry['entry_id']]['template_id']) ? $listing_entries[$c_entry['entry_id']]['template_id'] : $default_template;
                     }
 
                     // Stay connected - only if it's EE2 or less.
@@ -1985,7 +1985,6 @@ class Structure extends Channel
 
         foreach ($ids as $eid) {
             $node = $this->nset->getNode($eid);
-            $listing_cid = $node['listing_cid'];
 
             // Check to see if we have a Structure node or just an entry
             // if a node then get it's tree and affect the children
@@ -1994,6 +1993,7 @@ class Structure extends Channel
             if ($node) {
                 // find out if there are children by retrieving the tree
                 // if has children then modify those and their children if they exist
+                $listing_cid = $node['listing_cid'];
                 $tree = "";
                 $tree = $this->nset->getTree($eid);
 

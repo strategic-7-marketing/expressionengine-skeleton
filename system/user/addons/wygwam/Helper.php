@@ -321,7 +321,7 @@ class Helper
             'toolbarCanCollapse'            => 'n',
             'dialog_backgroundCoverOpacity' => 0,
             'entities_processNumerical'     => 'y',
-            'forcePasteAsPlainText'         => 'y'
+            'forcePasteAsPlainText'         => 'n'
         ), static::defaultConfigSettings());
     }
 

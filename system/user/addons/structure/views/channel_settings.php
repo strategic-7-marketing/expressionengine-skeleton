@@ -38,7 +38,7 @@
         <thead>
             <tr class="odd">
                 <th><?=lang('channel')?></th>
-                <th><?=lang('type')?> <a class="structure-help-link" href="http://buildwithstructure.com/documentation/page_types_whats_the_difference_between_a_page_listing_and_asset#types">What are types?</a></th>
+                <th><?=lang('type')?> <a class="structure-help-link" href="http://buildwithstructure.com/documentation/page_types_whats_the_difference_between_a_page_listing_and_asset#types" target="_blank">What are types?</a></th>
                 <th><?=lang('settings_options')?></th>
             </tr>
         </thead>

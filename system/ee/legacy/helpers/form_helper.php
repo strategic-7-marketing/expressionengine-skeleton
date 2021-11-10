@@ -9,7 +9,7 @@ if (! defined('BASEPATH')) {
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -213,11 +213,15 @@ function form_preference($name, $details)
  * @param	string	$work_text	Text to display when form is submitting
  * @param   string  $name       The value of a name="" attribute
  * @param   string  $invalid    Force an invalid/disabled state on the button
+ * @param   string  $destructive Add danger class to button
  * @return	string	Button HTML
  */
-function cp_form_submit($value, $work_text, $name = null, $invalid = false)
+function cp_form_submit($value, $work_text, $name = null, $invalid = false, $destructive = false)
 {
     $class = 'button button--primary';
+    if ($destructive) {
+        $class .= ' button--danger';
+    }
     $disable = '';
     $btn_text = lang($value);
     $validation_errors = validation_errors();
@@ -232,8 +236,12 @@ function cp_form_submit($value, $work_text, $name = null, $invalid = false)
     if ($name) {
         $name = ' name="' . $name . '"';
     }
+    $shortcut = '';
+    if (stripos($value, lang('save')) !== false) {
+        $shortcut = ' data-shortcut="s"';
+    }
 
-    return '<input class="' . $class . '" type="submit"' . $name . ' value="' . $btn_text . '" data-submit-text="' . lang($value) . '" data-work-text="' . lang($work_text) . '"' . $disable . '>';
+    return '<button class="' . $class . '" type="submit"' . $name . $shortcut . ' value="' . $btn_text . '" data-submit-text="' . lang($value) . '" data-work-text="' . lang($work_text) . '"' . $disable . '>' . $btn_text . '</button>';
 }
 
 /**

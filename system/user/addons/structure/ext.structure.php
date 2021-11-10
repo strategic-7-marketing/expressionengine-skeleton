@@ -62,7 +62,6 @@ class Structure_ext extends Ext
             'cp_custom_menu'                    => 'cp_custom_menu',
             'publish_live_preview_route'        => 'publish_live_preview_route',
             'entry_save_and_close_redirect'     => 'entry_save_and_close_redirect',
-            'rte_autocomplete_pages'         => 'rte_autocomplete_pages'
         );
 
         foreach ($hooks as $hook => $method) {
@@ -169,8 +168,8 @@ class Structure_ext extends Ext
             $updated = true;
         }
 
-        if (version_compare($current, '4.7.0', "<")) {
-            $this->registerExtension("rte_autocomplete_pages");
+        if (version_compare($current, '4.8.0', "<")) {
+            $this->unregisterExtension("rte_autocomplete_pages");
             $updated = true;
         }
 
@@ -182,42 +181,6 @@ class Structure_ext extends Ext
     /**************************************************\
      ******************* ALL HOOKS: *******************
     \**************************************************/
-
-    public function rte_autocomplete_pages($pages, $search, $site_id)
-    {
-        $this->extensions->end_script = true;
-
-        $entries = ee('Model')->get('ChannelEntry')->fields('entry_id, title, channel_id');
-        if (!empty($search)) {
-            $entries->filter('title', 'LIKE', '%' . $search . '%');
-        }
-        if (!empty($site_id)) {
-            $entries->filter('site_id', $site_id);
-        }
-        $entries->limit(10);
-        $channels = ee('Model')->get('Channel')->fields('channel_id', 'channel_title');
-        if (!empty($site_id)) {
-            $channels->filter('site_id', $site_id);
-        }
-        $channel_names = $channels->all()->getDictionary('channel_id', 'channel_title');
-        $titles = $entries->all()->getDictionary('entry_id', 'title');
-        $channel_ids = $entries->all()->getDictionary('entry_id', 'channel_id');
-
-        $structure_q = ee()->db->select('entry_id, structure_url_title')
-            ->from('structure')
-            ->where_in('entry_id', array_keys($titles))
-            ->get();
-        foreach ($structure_q->result_array() as $row) {
-            $pages[] = (object) [
-                'id' => '@' . $row['entry_id'],
-                'text' => $titles[$row['entry_id']],
-                'extra' => $channel_names[$channel_ids[$row['entry_id']]],
-                'href' => '{page' . $row['entry_id'] . '}'
-            ];
-        }
-
-        return $pages;
-    }
 
     public function publish_live_preview_route($data, $uri, $template_id)
     {
@@ -418,7 +381,7 @@ class Structure_ext extends Ext
                 ->where('class', 'Channel')
                 ->where('method', 'live_preview')
                 ->get('actions');
-            if (ee()->input->get('ACT') == $action_id->row('action_id')) {
+            if ($action_id->num_rows() > 0 && ee()->input->get('ACT') == $action_id->row('action_id')) {
                 $isLivePreviewRequest = true;
             }
         }
@@ -473,7 +436,7 @@ class Structure_ext extends Ext
             //  Set all other class variables
             // -------------------------------------------
 
-            $this->entry_id = array_search($this->uri, $this->site_pages['uris']);
+            $this->entry_id = array_search(strtolower($this->uri), array_map('strtolower', $this->site_pages['uris']));
             $this->parent_id = $this->sql->get_parent_id($this->entry_id, null);
             $this->segment_1 = ee()->uri->segment(1) ? '/'.ee()->uri->segment(1) : false;
 
@@ -988,6 +951,19 @@ class Structure_ext extends Ext
         );
 
         if ($channel_type == 'listing') {
+            $site_pages = $this->sql->get_site_pages(true);
+            $uri = 'start';
+            if(isset($site_pages['uris'][$entry_id])){
+                //entry already existed
+                $site_pages_uri = $site_pages['uris'][$entry_id];
+                $uri_pieces = explode('/', $site_pages_uri);
+                $uri_pieces = array_filter($uri_pieces);
+                $uri = end($uri_pieces);
+            }else{
+                //new entry
+                $uri = $obj->entry->url_title;
+            }
+            $entry_data['uri'] = $uri;
             $this->sql->set_listing_data($entry_data);
         } else {
             require_once PATH_THIRD.'structure/mod.structure.php';
@@ -1103,7 +1079,8 @@ class Structure_ext extends Ext
         ee()->config->_global_vars['structure:page:uri']                = $isLivePreviewRequest || $this->entry_id !== false ? $this->uri : false;
         ee()->config->_global_vars['structure:page:url']                = $isLivePreviewRequest || $this->entry_id !== false ? Structure_Helper::remove_double_slashes($this->site_pages['url'] . ee()->config->_global_vars['structure:page:uri']) : false; // {page:url}
         ee()->config->_global_vars['structure:page:channel']            = $this->entry_id !== false ? $this->sql->get_channel_by_entry_id($this->entry_id) : false; // {page:channel}
-        ee()->config->_global_vars['structure:page:channel_short_name'] = $this->entry_id !== false ?  $this->sql->get_channel_name_by_channel_id(ee()->config->_global_vars['structure:page:channel']) : false; // {page:channel_short_name}
+        ee()->config->_global_vars['structure:page:channel_short_name'] = $this->entry_id !== false ? $this->sql->get_channel_name_by_channel_id(ee()->config->_global_vars['structure:page:channel']) : false; // {page:channel_short_name}
+        ee()->config->_global_vars['structure:page:hidden']             = $this->entry_id !== false ? $this->sql->get_hidden_state($this->entry_id) : false;
 
         // parent page global vars
         ee()->config->_global_vars['structure:parent:entry_id']           = $this->parent_id !== false ? $this->parent_id : false; // {page:entry_id}

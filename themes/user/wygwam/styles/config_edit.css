@@ -59,6 +59,7 @@ body.tb-dragging * { cursor: -webkit-grabbing !important; }
 #wygwam-advanced .remove a { display: block; width: 20px; height: 20px; text-indent: -9999em; background: url(../images/remove.png) 0 0; cursor: default; }
 #wygwam-advanced .remove a.enabled { background-position: 0 50%; cursor: pointer; }
 #wygwam-advanced .remove a.enabled:active { background-position: 0 100%; }
+#wygwam-advanced .setting-field label + label { margin-left: 10px; }
 
 /* ptSwitch */
 ul.ptSwitch { display: inline-block; margin: 0; padding: 0; list-style-type: none; line-height: 18px; font-weight: bold; cursor: default; -webkit-user-select: none; -moz-user-select: none; }

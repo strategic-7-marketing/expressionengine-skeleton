@@ -25,5 +25,6 @@
 				<?php endif ?>
 			</div>
 		</section>
+		
 	</body>
 </html>

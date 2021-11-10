@@ -50,37 +50,39 @@ tfoot tr:first-child td {
         <h1><?=lang('structure_validation')?></h1>
         <?=lang('structure_validation_desc')?>
         <br /><br />
-
-        <table class="structure-table validation-stats zebra-striped">
-        <thead>
-        <tr>
-            <th colspan="2" class="total-divider"><strong><?=lang('total_entries')?></strong></th>
-            <th colspan="4"><strong><?=lang('total_missing_from')?></strong></th>
-        </tr>
-        <tr>
-            <th class="structure"><?=lang('structure')?></th>
-            <th class="eerouting"><?=lang('ee_url_routing')?></th>
-            <th class="ee"><?=lang('ee')?></th>
-            <th class="eerouting"><?=lang('ee_url_routing')?></th>
-            <th class="structure total-divider"><?=lang('structure')?></th>
-            <th class="structure"><?=lang('structure_listings')?></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td class="<?=$total_entries_class?>"><?=$total_structure_entries?></td>
-            <td class="<?=$total_entries_class?>"><?=$total_site_pages_entries?></td>
-            <td class="<?=$total_missing_class?>"><?=$ee_orphans?></td>
-            <td class="<?=$total_missing_class?>"><?=$site_pages_orphans?><?=(!empty($site_pages_listing_orphans) ? ' '.lang('entries').'<br />'.$site_pages_listing_orphans.' '.lang('listings') : '')?></td>
-            <td class="<?=$total_missing_class?>"><?=$structure_orphans?></td>
-            <td class="<?=$total_missing_class?>"><?=$structure_listing_orphans?></td>
-        </tr>
-        </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table class="structure-table validation-stats zebra-striped">
+            <thead>
+            <tr>
+                <th colspan="2" class="total-divider"><strong><?=lang('total_entries')?></strong></th>
+                <th colspan="4"><strong><?=lang('total_missing_from')?></strong></th>
+            </tr>
+            <tr>
+                <th class="structure"><?=lang('structure')?></th>
+                <th class="eerouting"><?=lang('ee_url_routing')?></th>
+                <th class="ee"><?=lang('ee')?></th>
+                <th class="eerouting"><?=lang('ee_url_routing')?></th>
+                <th class="structure total-divider"><?=lang('structure')?></th>
+                <th class="structure"><?=lang('structure_listings')?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="<?=$total_entries_class?>"><?=$total_structure_entries?></td>
+                <td class="<?=$total_entries_class?>"><?=$total_site_pages_entries?></td>
+                <td class="<?=$total_missing_class?>"><?=$ee_orphans?></td>
+                <td class="<?=$total_missing_class?>"><?=$site_pages_orphans?><?=(!empty($site_pages_listing_orphans) ? ' '.lang('entries').'<br />'.$site_pages_listing_orphans.' '.lang('listings') : '')?></td>
+                <td class="<?=$total_missing_class?>"><?=$structure_orphans?></td>
+                <td class="<?=$total_missing_class?>"><?=$structure_listing_orphans?></td>
+            </tr>
+            </tbody>
+            </table>
+        </div>
         <br />
 
         <p><strong><?=lang('note_colon').' '.lang('listings_auto_fix')?></strong> <?=lang('please_edit_listings_individually')?></p>
 <?php if(!empty($orphaned_entries) && count($orphaned_entries) > 0) { ?>
+    <div class="table-wrapper">
         <table class="structure-table validation-stats zebra-striped">
         <thead>
         <tr>
@@ -129,6 +131,7 @@ tfoot tr:first-child td {
     <?php } ?>
         </tfoot>
         </table>
+    </div>
 <?php } else { ?>
         <div class="success"><strong><?=lang('no_corrupt_entries')?></strong></div>
 <?php } ?>
@@ -159,6 +162,7 @@ tfoot tr:first-child td {
         <h1><?=lang('url_mismatches')?></h1>
         <p><?=lang('url_mismatches_desc')?></p>
 <?php if(!empty($mismatch_url_entries) && is_array($mismatch_url_entries) && count($mismatch_url_entries) > 0) { ?>
+    <div class="table-wrapper">
         <table class="structure-table validation-stats zebra-striped">
         <thead>
         <tr>
@@ -177,6 +181,7 @@ tfoot tr:first-child td {
     <?php } ?>
         </tbody>
         </table>
+    </div>
 <?php } else { ?>
         <div class="success"><strong><?=lang('no_url_mismatches')?></strong></div>
 <?php } ?>
@@ -189,6 +194,7 @@ tfoot tr:first-child td {
         <h1><?=lang('url_duplicates')?></h1>
         <p><?=lang('url_duplicates_desc')?></p>
 <?php if(!empty($site_pages_uri_duplicates) && is_array($site_pages_uri_duplicates) && count($site_pages_uri_duplicates) > 0) { ?>
+    <div class="table-wrapper">
         <table class="structure-table validation-stats zebra-striped">
         <thead>
         <tr>
@@ -205,6 +211,7 @@ tfoot tr:first-child td {
     <?php } ?>
         </tbody>
         </table>
+    </div>
 <?php } else { ?>
         <div class="success"><strong><?=lang('no_duplicate_urls')?></strong></div>
 <?php } ?>
@@ -218,6 +225,7 @@ tfoot tr:first-child td {
         <p><?=lang('template_id_validation_desc1')?></p>
         <p><?=lang('template_id_validation_desc2')?></p>
 <?php if(!empty($template_id_errors) && is_array($template_id_errors) && count($template_id_errors) > 0) { ?>
+    <div class="table-wrapper">
         <table class="structure-table validation-stats zebra-striped">
         <thead>
         <tr>
@@ -234,6 +242,7 @@ tfoot tr:first-child td {
     <?php } ?>
         </tbody>
         </table>
+    </div>
 <?php } else { ?>
         <div class="success"><strong><?=lang('no_template_id_errors')?></strong></div>
 <?php } ?>
@@ -248,6 +257,7 @@ tfoot tr:first-child td {
         <br /><br />
 
 <?php if(!empty($entries_missing_from_structure) && is_array($entries_missing_from_structure) && count($entries_missing_from_structure) > 0) { ?>
+    <div class="table-wrapper">
         <table class="structure-table validation-stats zebra-striped">
         <thead>
         <tr>
@@ -264,6 +274,7 @@ tfoot tr:first-child td {
     <?php } ?>
         </tbody>
         </table>
+    </div>
 <?php } else { ?>
         <div class="success"><strong><?=lang('no_structure_missing_entries')?></strong></div>
 <?php } ?>

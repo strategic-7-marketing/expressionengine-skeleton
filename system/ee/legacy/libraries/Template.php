@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2020, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -47,6 +47,7 @@ class EE_Template
     public $template_group_id = 0;
     public $template_name = '';			// Name of template being parsed
     public $template_id = 0;
+    public $enable_frontedit = 'y';
 
     public $tag_data = array();		// Data contained in tags
     public $tagparams = array();
@@ -318,6 +319,21 @@ class EE_Template
             'is_ajax_request' => AJAX_REQUEST,
             'is_live_preview_request' => ee('LivePreview')->hasEntryData(),
         ];
+
+        //Pro conditionals
+        $added_globals['frontedit'] = false;
+        if (IS_PRO && ee('pro:Access')->hasValidLicense() && ee('pro:Access')->hasDockPermission()) {
+            if (
+                REQ == 'PAGE' && 
+                ee()->session->userdata('admin_sess') == 1 &&
+                (ee()->config->item('enable_frontedit') == 'y' || ee()->config->item('enable_frontedit') === false) &&
+                (isset(ee()->TMPL) && is_object(ee()->TMPL) && in_array(ee()->TMPL->template_type, ['webpage'])) &&
+                ee()->TMPL->enable_frontedit != 'n' &&
+                ee()->input->cookie('frontedit') != 'off'
+            ) {
+                $added_globals['frontedit'] = true;
+            }
+        }
 
         $added_globals = array_merge($added_globals, $this->getMemberVariables());
 
@@ -1200,6 +1216,9 @@ class EE_Template
                 $data_start = $this->in_point + $tag_length;
 
                 $tag = trim(substr($raw_tag, 1, -1));
+                if (IS_PRO) {
+                    $tag = preg_replace("/\{frontedit_link\s+(.*)[\"\'@]\s?\}/sU", '', $tag);
+                }
                 $args = trim((preg_match("/\s+.*/", $tag, $matches))) ? $matches[0] : '';
                 $tag = trim(str_replace($args, '', $tag));
 
@@ -1342,6 +1361,10 @@ class EE_Template
                 $this->tag_data[$this->loop_count]['no_results'] = $no_results;
                 $this->tag_data[$this->loop_count]['no_results_block'] = $no_results_block;
                 $this->tag_data[$this->loop_count]['search_fields'] = $search_fields;
+                if (IS_PRO && $tag != 'exp:channel:entries') {
+                    $this->tag_data[$this->loop_count]['chunk'] = preg_replace("/\{frontedit_link\s+(.*)[\"\'@]\s?\}/sU", '', $chunk);
+                    $this->tag_data[$this->loop_count]['block'] = preg_replace("/\{frontedit_link\s+(.*)[\"\'@]\s?\}/sU", '', $block);
+                }
             } // END IF
 
             // Increment counter
@@ -1889,7 +1912,14 @@ class EE_Template
         $status = & $this->$status;
 
         // Bail out if this tag/template isn't set to cache
-        if (! isset($args['cache']) or $args['cache'] != 'yes') {
+        if (! isset($args['cache']) or $args['cache'] != 'yes' or ee('LivePreview')->hasEntryData()) {
+            $status = 'NO_CACHE';
+
+            return false;
+        }
+
+        // do not use cache with Pro editing
+        if (IS_PRO && ee('pro:Access')->hasDockPermission()) {
             $status = 'NO_CACHE';
 
             return false;
@@ -2062,7 +2092,8 @@ class EE_Template
 
                 $this->template_type = "404";
                 $this->layout_vars = array(); // Reset Layout vars
-                $this->parse($tmpl_query->row('template_data'));
+                $tmpl = $tmpl_query->row('template_data');
+                $this->parse($tmpl);
                 $out = $this->parse_globals($this->final_template);
                 ee()->output->out_type = "404";
                 ee()->output->set_output($out);
@@ -2350,7 +2381,7 @@ class EE_Template
             }
         }
 
-        if ($template_group == '' && $show_default == false && ee()->config->item('site_404') != '') {
+        if (($template_group == '' || in_array($template_group, ['system_messages', 'pro-dashboard-widgets'])) && $show_default == false && ee()->config->item('site_404') != '') {
             $treq = ee()->config->item('site_404');
 
             $x = explode("/", $treq);
@@ -2423,6 +2454,7 @@ class EE_Template
             $this->log_item("HTTP Authentication in Progress");
 
             $disallowed_roles = ee('Model')->get('Role')
+                ->fields('role_id', 'name')
                 ->all()
                 ->getDictionary('role_id', 'name');
 
@@ -2445,18 +2477,24 @@ class EE_Template
 
         // Is the current user allowed to view this template?
         if ($query->row('enable_http_auth') != 'y' && ! ee('Permission')->isSuperAdmin()) {
-            if (!ee()->session->getMember()) {
-                $templates = [];
-                $role = ee('Model')->get('Role', 3)->first();
-
-                foreach ($role->AssignedTemplates as $template) {
-                    $templates[$template->getId()] = $template->template_id;
+            
+            ee()->db->select('role_id');
+            ee()->db->where('template_id', $query->row('template_id'));
+            $results = ee()->db->get('templates_roles');
+            $templates_roles = [];
+            if ($results->num_rows() > 0) {
+                foreach ($results->result_array() as $row) {
+                    $templates_roles[] = $row['role_id'];
                 }
+            } 
+            
+            if (!ee()->session->getMember()) {
+                $currentMemberRoles = [3];
             } else {
-                $templates = ee()->session->getMember()->getAssignedTemplates()->pluck('template_id');
+                $currentMemberRoles = ee()->session->getMember()->getAllRoles()->pluck('role_id');
             }
 
-            if (! in_array($query->row('template_id'), $templates)) {
+            if (!array_intersect($templates_roles, $currentMemberRoles)) {
                 $this->log_item("No Template Access Privileges");
 
                 if ($this->depth > 0) {
@@ -2475,7 +2513,16 @@ class EE_Template
                         ->get();
 
                     // If the redirect template is not allowed, give them a 404
-                    if (! in_array($query->row('template_id'), $templates)) {
+                    ee()->db->select('role_id');
+                    ee()->db->where('template_id', $query->row('template_id'));
+                    $results = ee()->db->get('templates_roles');
+                    $templates_roles = [];
+                    if ($results->num_rows() > 0) {
+                        foreach ($results->result_array() as $row) {
+                            $templates_roles[] = $row['role_id'];
+                        }
+                    } 
+                    if (!array_intersect($templates_roles, $currentMemberRoles)) {
                         $this->log_item("Access redirect denied, Show 404");
 
                         // The redirect page with no access is the 404 template- throw a manual 404
@@ -2633,6 +2680,7 @@ class EE_Template
         $this->template_group_id = $row['group_id'];
         $this->template_name = $row['template_name'];
         $this->template_id = $row['template_id'];
+        $this->enable_frontedit = $row['enable_frontedit'];
 
         return $this->convert_xml_declaration($this->remove_ee_comments($row['template_data']));
     }
@@ -2865,6 +2913,10 @@ class EE_Template
     {
         if (strpos($str, '{!--') === false) {
             return $str;
+        }
+
+        if (IS_PRO && ee('Permission')->canUsePro()) {
+            $str = preg_replace("/\{\!--\s*(\/\/)*\s*disable\s*frontedit\s*--\}/s", '<!-- ${1}disable frontedit -->', $str);
         }
 
         return preg_replace("/\{!--.*?--\}/s", '', $str);
@@ -3487,7 +3539,7 @@ class EE_Template
         }
 
         // same with modified, sometimes devs run this method themselves instead of a full parse_variables()
-        if ($this->modified_vars === false) {
+        if (empty($this->modified_vars) || $this->modified_vars === false) {
             $this->modified_vars = $this->getModifiedVariables();
         }
 
@@ -3867,7 +3919,7 @@ class EE_Template
     {
         if (is_array($dates) && ! empty($dates)) {
             $tags = implode('|', array_keys($dates));
-            if (preg_match_all("/" . LD . "(" . $tags . ")(.*?)" . RD . "/i", $tagdata, $matches)) {
+            if (preg_match_all("/" . LD . "(" . $tags . ")(.*?)" . RD . "/si", $tagdata, $matches)) {
                 foreach ($matches[2] as $key => $val) {
                     $timestamp = $dates[$matches[1][$key]];
                     $dt = $timestamp;

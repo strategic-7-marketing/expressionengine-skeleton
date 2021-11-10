@@ -1,7 +1,7 @@
 <?php
 
 $this->table->clear();
-$cp_table_template['table_open'] = '<table width="100%" data-skipped="'.lang('skipped').'" class="structure-table nav_history_table" cellspacing="0" cellpadding="0">';
+$cp_table_template['table_open'] = '<div class="nav_history_table-wrap"><table width="100%" data-skipped="'.lang('skipped').'" class="structure-table nav_history_table" cellspacing="0" cellpadding="0">';
 
 $this->table->set_template($cp_table_template);
 $this->table->set_heading(array(
