@@ -725,7 +725,7 @@ class Structure_tab extends Tab
         // Build Listing Channels Select Box
         $listing_channel = ee()->input->get_post('structure__listing_channel') ? ee()->input->get_post('structure__listing_channel') : 0;
         $listing_channels = array();
-        $listing_channels[0] = "==None Selected==";
+        $listing_channels['n'] = "==None Selected==";
 
         if ($count_listings > 0) {
             foreach ($listings as $channel_id => $row) {
