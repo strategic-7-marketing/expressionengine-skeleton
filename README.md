@@ -48,7 +48,11 @@ jobs:
         import ftplib
         ftp = ftplib.FTP('${{ secrets.FTP_SERVER }}')
         ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
-        ftp.rename('.htaccess_LIVE', '.htaccess')
+        if '.htaccess_LIVE' in ftp.nlst():
+          ftp.rename('.htaccess_LIVE', '.htaccess')
+          print ('htaccess renamed')
+        else:
+          print ('.htaccess_LIVE not found nothing renamed')
         ftp.quit()
 ```
 
