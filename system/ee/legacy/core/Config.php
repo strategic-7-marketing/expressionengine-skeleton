@@ -547,7 +547,7 @@ class EE_Config
             'password_lockout_interval',
             'require_ip_for_login',
             'require_ip_for_posting',
-            'require_secure_passwords',
+            'password_security_policy',
             'allow_dictionary_pw',
             'name_of_dictionary_file',
             'xss_clean_uploads',
@@ -689,6 +689,7 @@ class EE_Config
             'enable_online_user_tracking',
             'force_redirect',
             'is_system_on',
+            'cli_enabled',
             'multiple_sites_enabled',
             'newrelic_app_name',
             'use_newrelic',
@@ -1052,12 +1053,18 @@ class EE_Config
             show_error(lang('unwritable_config_file'), 503);
         }
 
-        // Read the config file as PHP
-        require $this->config_path;
-
-        // Read the config data as a string
-        // Really no point in loading file_helper to do this one
-        $config_file = file_get_contents($this->config_path);
+        $fp = fopen($this->config_path, "r");
+        if (flock($fp, LOCK_SH)) {
+            // Read the config file as PHP
+            require $this->config_path;
+            // Read the config data as a string
+            // Really no point in loading file_helper to do this one
+            $config_file = file_get_contents($this->config_path);
+            flock($fp, LOCK_UN);
+        } else {
+            return false;
+        }
+        fclose($fp);
 
         // Trim it
         $config_file = trim($config_file);
@@ -1084,7 +1091,7 @@ class EE_Config
                 } elseif (is_bool($val)) {
                     $val = ($val == true) ? 'TRUE' : 'FALSE';
                 } else {
-                    $val = str_replace("\\\"", "\"", $val);
+                    $val = str_replace("\\\"", "\"", (string) $val);
                     $val = str_replace("\\'", "'", $val);
                     $val = str_replace('\\\\', '\\', $val);
 
@@ -1172,13 +1179,17 @@ class EE_Config
             }
         }
 
-        if (! $fp = fopen($this->config_path, FOPEN_WRITE_CREATE_DESTRUCTIVE)) {
+        // Check for exclusive file lock before truncating file and writing new contents
+        $fp = fopen($this->config_path, "r+");
+        if (flock($fp, LOCK_EX)) {
+            ftruncate($fp, 0);
+            fwrite($fp, $config_file, strlen($config_file));
+            fflush($fp);
+            flock($fp, LOCK_UN);
+        } else {
             return false;
         }
 
-        flock($fp, LOCK_EX);
-        fwrite($fp, $config_file, strlen($config_file));
-        flock($fp, LOCK_UN);
         fclose($fp);
 
         if (! empty($this->_config_path_errors)) {
@@ -1350,7 +1361,7 @@ class EE_Config
                 'xss_clean_uploads' => array('r', array('y' => 'yes', 'n' => 'no')),
                 'password_lockout' => array('r', array('y' => 'yes', 'n' => 'no')),
                 'password_lockout_interval' => array('i', ''),
-                'require_secure_passwords' => array('r', array('y' => 'yes', 'n' => 'no')),
+                'password_security_policy' => array('r', array('none' => 'password_security_none', 'basic' => 'password_security_basic', 'good' => 'password_security_good', 'strong' => 'password_security_strong')),
                 'allow_dictionary_pw' => array('r', array('y' => 'yes', 'n' => 'no')),
                 'name_of_dictionary_file' => array('i', ''),
                 'un_min_len' => array('i', ''),
@@ -1678,7 +1689,7 @@ class EE_Config
             'cookie_path' => array('cookie_path_explain'),
             'deny_duplicate_data' => array('deny_duplicate_data_explanation'),
             'redirect_submitted_links' => array('redirect_submitted_links_explanation'),
-            'require_secure_passwords' => array('secure_passwords_explanation'),
+            'password_security_policy' => array('password_security_policy_desc'),
             'allow_dictionary_pw' => array('real_word_explanation', 'dictionary_note'),
             'censored_words' => array('censored_explanation', 'censored_wildcards'),
             'censor_replacement' => array('censor_replacement_info'),

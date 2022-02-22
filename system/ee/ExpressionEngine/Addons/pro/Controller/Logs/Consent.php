@@ -19,7 +19,7 @@ class Consent extends Logs\Consent
 {
     public function __construct()
     {
-        if (!IS_PRO) {
+        if (!IS_PRO || !ee('pro:Access')->hasValidLicense()) {
             show_error(lang('unauthorized_access'), 403);
         }
         ee()->lang->load('pro', ee()->session->get_language(), false, true, PATH_ADDONS . 'pro/');
