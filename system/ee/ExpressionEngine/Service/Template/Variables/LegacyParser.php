@@ -163,14 +163,15 @@ class LegacyParser
         if ($target) {
             preg_match_all('/' . LD . '(' . preg_quote($target, '/') . '.*?)' . RD . '/s', $tagdata, $matches);
         } else {
-            preg_match_all('/' . LD . '(.+?)' . RD . '/s', $tagdata, $matches);
+            preg_match_all('/' . LD . '([^\n].+?)' . RD . '/s', $tagdata, $matches);
         }
 
         $temp_close = [];
         $temp_misc = [];
 
         foreach ($matches[1] as $key => $val) {
-            if (strncmp($val, 'if ', 3) !== 0 &&
+            if (!is_numeric($val) &&
+                strncmp($val, 'if ', 3) !== 0 &&
                 strncmp($val, 'if:', 3) !== 0 &&
                 substr($val, 0, 3) != '/if') {
                 if (strpos($val, '{') !== false) {

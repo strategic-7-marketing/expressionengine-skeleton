@@ -2,7 +2,7 @@
 <div class="login__content">
     <?=ee('CP/Alert')->getAllInlines()?>
 
-    <?=form_open(ee('CP/URL')->make('login/authenticate', ['hide_closer' => 'y']), array(), array('return_path' => $return_path, 'after' => ee()->input->get_post('after')))?>
+    <?=form_open(ee('CP/URL')->make('login/authenticate', ['hide_closer' => 'y']), [], ['return_path' => $return_path, 'after' => ee('Security/XSS')->clean(ee()->input->get_post('after'))])?>
         <fieldset>
             <div class="field-instruct">
                 <?=lang('username', 'username')?>

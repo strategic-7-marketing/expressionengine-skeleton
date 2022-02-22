@@ -34,6 +34,7 @@ class Cookies extends Settings\Pro
         $cookie_prefix = (! ee()->config->item('cookie_prefix')) ? 'exp_' : ee()->config->item('cookie_prefix') . '_';
 
         $allCookies = ee('Model')->get('CookieSetting')->all();
+        $providers = ee('App')->getProviders();
         
         foreach (['Necessary', 'Functionality', 'Performance', 'Targeting'] as $type) {
             $data = array();
@@ -43,6 +44,7 @@ class Cookies extends Settings\Pro
                     $data[] = [
                         $cookie->cookie_title,
                         $cookie_prefix . $cookie->cookie_name,
+                        isset($providers[$cookie->cookie_provider]) ? $providers[$cookie->cookie_provider]->getName() : lang($cookie->cookie_provider),
                         ($cookie->cookie_enforced_lifetime !== null) ? $cookie->cookie_enforced_lifetime : $cookie->cookie_lifetime,
                         ['toolbar_items' => ['settings' => [
                             'href' => ee('CP/URL')->make('settings/pro/cookies/manage/' . $cookie->cookie_id),
@@ -56,6 +58,7 @@ class Cookies extends Settings\Pro
                 array(
                     'cookie_title',
                     'cookie_name',
+                    'cookie_provider',
                     'cookie_lifetime',
                     'manage' => array(
                         'type' => Table::COL_TOOLBAR
@@ -96,11 +99,12 @@ class Cookies extends Settings\Pro
         }
 
         $providers = ee('App')->getProviders();
-        if (!isset($providers[$cookie->cookie_provider])) {
+        $provider = $cookie->cookie_provider == 'cp' ? 'ee' : $cookie->cookie_provider;
+        if (!isset($providers[$provider])) {
             show_error(lang('unauthorized_access'), 403);
         }
 
-        $cookieSettings = $providers[$cookie->cookie_provider]->get('cookie_settings');
+        $cookieSettings = $providers[$provider]->get('cookie_settings');
         $lifetimeIsChangeable = true;
         if (!empty($cookieSettings) && isset($cookieSettings[$cookie->cookie_name])) {
             if (isset($cookieSettings[$cookie->cookie_name]['lifetime_changeable'])) {

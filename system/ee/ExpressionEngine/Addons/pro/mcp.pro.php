@@ -12,6 +12,7 @@
 class Pro_mcp
 {
     private $sidebar;
+    private $hasValidLicense = false;
     /**
      * Constructor
      *
@@ -22,7 +23,7 @@ class Pro_mcp
         ee()->load->library('file_field');
         ee()->lang->load('settings');
         ee()->lang->load('pro', ee()->session->get_language(), false, true, PATH_ADDONS . 'pro/');
-        ee('pro:Access')->hasValidLicense(true);
+        $this->hasValidLicense = ee('pro:Access')->hasValidLicense(true);
     }
 
     public function index()
@@ -38,6 +39,9 @@ class Pro_mcp
      */
     public function branding()
     {
+        if (! $this->hasValidLicense) {
+            return $this->general();
+        }
         $this->build_sidebar('branding');
         $fields = [
             'login_logo',
@@ -132,11 +136,15 @@ class Pro_mcp
      */
     public function general()
     {
-        $this->build_sidebar('general');
+        if ($this->hasValidLicense) {
+            $this->build_sidebar('general');
+        }
         $fields = [
             'enable_dock',
             'enable_frontedit',
             'automatic_frontedit_links',
+            'enable_entry_cloning',
+            'enable_mfa',
         ];
 
         if (ee('Request')->isPost()) {
@@ -209,7 +217,28 @@ class Pro_mcp
                                 'value' => $settings['automatic_frontedit_links']
                             ]
                         ]
-                    ]
+                    ],
+                    [
+                        'title' => 'enable_entry_cloning',
+                        'desc' => 'enable_entry_cloning_desc',
+                        'fields' => [
+                            'enable_entry_cloning' => [
+                                'type' => 'yes_no',
+                                'value' => $settings['enable_entry_cloning']
+                            ]
+                        ]
+                    ],
+                    [
+                        'title' => 'enable_mfa',
+                        'desc' => 'enable_mfa_desc',
+                        'fields' => [
+                            'enable_mfa' => [
+                                'type' => 'yes_no',
+                                'disabled' => version_compare(PHP_VERSION, 7.1, '<'),
+                                'value' => version_compare(PHP_VERSION, 7.1, '<') ? 'n' : $settings['enable_mfa']
+                            ]
+                        ]
+                    ],
                 ]
             ]
         ];

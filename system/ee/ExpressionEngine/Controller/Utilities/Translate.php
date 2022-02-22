@@ -62,6 +62,7 @@ class Translate extends Utilities
 
     public function index()
     {
+        ee()->lang->load('settings');
         $default_language = ee()->config->item('deft_lang') ?: 'english';
 
         $vars = [];
@@ -144,7 +145,7 @@ class Translate extends Utilities
 
         $data = array();
 
-        $this->load->helper('file');
+        ee()->load->helper('file');
 
         $path = $this->getLanguageDirectory($language);
 
@@ -244,6 +245,7 @@ class Translate extends Utilities
         }
 
         ee()->view->set_message('issue', lang('cannot_access'));
+        return '';
     }
 
     /**

@@ -95,7 +95,7 @@ class FrontEdit
             }
             //get all field names
             $field_regexps = [];
-            $allFields = ee('Model')->get('ChannelField')->fields('field_id', 'field_type', 'field_name')->order('field_name', 'desc')->all();
+            $allFields = ee('Model')->get('ChannelField')->fields('field_id', 'field_type', 'field_name')->filter('enable_frontedit', 'y')->order('field_name', 'desc')->all();
             $fields = [
                 'title' => 'title'
             ];
@@ -167,6 +167,7 @@ class FrontEdit
                 '/\<[\w\-]+?\s[^\>]*?(?P<link>\{[\w:]+\:frontedit\}).*?\>/si' => true,//in the middle of tag
                 //'/\<a\s.*?\>.*?(?P<link>\{[\w:]+\:frontedit\}).*?\<\/a\>/si' => true,//inside A tag
                 '/\{if\s[^\}]*?(?P<link>\{[\w:]+\:frontedit\}).*?\}/s' => true,//EE {if} conditional
+                '/\{encode=[^\}]*?(?P<link>\{[\w:]+\:frontedit\}).*?\}/s' => true,//EE {encode} tag
                 '/\<\!--\s*disable\s*frontedit\s*--\>.*?(?P<link>\{[\w:]+\:frontedit\}).*?\<\!--\s*\/\/\s*disable\s*frontedit\s*--\>/si' => false,
             ];
 
