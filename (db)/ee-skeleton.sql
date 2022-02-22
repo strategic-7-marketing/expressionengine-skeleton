@@ -7,7 +7,7 @@
 #
 # Host: localhost (MySQL 5.7.30)
 # Database: ee-skeleton
-# Generation Time: 2021-11-10 02:52:17 +0000
+# Generation Time: 2022-02-22 22:46:29 +0000
 # ************************************************************
 
 
@@ -69,7 +69,8 @@ VALUES
 	(30,'Member','send_username',0),
 	(31,'Member','update_profile',0),
 	(32,'Member','upload_avatar',0),
-	(33,'Member','recaptcha_check',1);
+	(33,'Member','recaptcha_check',1),
+	(34,'Member','validate',0);
 
 /*!40000 ALTER TABLE `exp_actions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -295,6 +296,7 @@ CREATE TABLE `exp_channel_fields` (
   `field_content_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'any',
   `field_settings` text COLLATE utf8mb4_unicode_ci,
   `legacy_field_data` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `enable_frontedit` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   PRIMARY KEY (`field_id`),
   KEY `field_type` (`field_type`),
   KEY `site_id` (`site_id`)
@@ -435,6 +437,7 @@ CREATE TABLE `exp_channels` (
   `max_entries` int(10) unsigned NOT NULL DEFAULT '0',
   `sticky_enabled` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `allow_preview` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
+  `enable_entry_cloning` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   PRIMARY KEY (`channel_id`),
   KEY `cat_group` (`cat_group`(191)),
   KEY `channel_name` (`channel_name`),
@@ -710,7 +713,9 @@ VALUES
 	(164,0,'is_system_on','y'),
 	(165,0,'multiple_sites_enabled','n'),
 	(166,1,'site_license_key',''),
-	(167,1,'show_ee_news','n');
+	(167,1,'show_ee_news','n'),
+	(168,0,'cli_enabled','y'),
+	(169,1,'password_security_policy','none');
 
 /*!40000 ALTER TABLE `exp_config` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -875,7 +880,7 @@ LOCK TABLES `exp_cookie_settings` WRITE;
 
 INSERT INTO `exp_cookie_settings` (`cookie_id`, `cookie_provider`, `cookie_name`, `cookie_lifetime`, `cookie_enforced_lifetime`, `cookie_title`, `cookie_description`)
 VALUES
-	(1,'ee','csrf_token',NULL,NULL,'CSRF Token','A security cookie used to identify the user and prevent Cross Site Request Forgery attacks.'),
+	(1,'ee','csrf_token',7200,NULL,'CSRF Token','A security cookie used to identify the user and prevent Cross Site Request Forgery attacks.'),
 	(2,'ee','flash',0,NULL,'Flash data','Control panel user feedback messages, encrypted for security.'),
 	(3,'ee','remember',NULL,NULL,'Remember Me','Determines whether a user is automatically logged in upon visiting the site.'),
 	(4,'ee','sessionid',3600,NULL,'Session ID','Session id, used to associate a logged in user with their data.'),
@@ -883,7 +888,7 @@ VALUES
 	(6,'ee','last_activity',NULL,NULL,'Last Activity','Records the time of the last page load. Used in in calculating active sessions.'),
 	(7,'ee','last_visit',NULL,NULL,'Last Visit','Date of the user’s last visit, based on the last_activity cookie. Can be shown as a statistic for members and used by forum and comments to show unread topics for both members and guests.'),
 	(8,'ee','anon',NULL,NULL,'Anonymize','Determines whether the user’s username is displayed in the list of currently logged in members.'),
-	(9,'ee','tracker',NULL,NULL,'Tracker','Contains the last 5 pages viewed, encrypted for security. Typically used for form or error message returns.'),
+	(9,'ee','tracker',0,NULL,'Tracker','Contains the last 5 pages viewed, encrypted for security. Typically used for form or error message returns.'),
 	(10,'ee','viewtype',NULL,NULL,'Filemanager View Type','Determines View Type to be used in Filemanager (table or thumbs view)'),
 	(11,'ee','cp_last_site_id',NULL,NULL,'CP Last Site ID','MSM cookie indicating the last site accessed in the control panel.'),
 	(12,'ee','ee_cp_viewmode',NULL,NULL,'ee_cp_viewmode',NULL),
@@ -960,7 +965,8 @@ VALUES
 	(34,1,1,'admin','::1',1634420541,'Logged in'),
 	(35,1,1,'admin','::1',1636512626,'Logged in'),
 	(36,1,1,'admin','::1',1636512631,'Logged out'),
-	(37,1,1,'admin','::1',1636512646,'Logged in');
+	(37,1,1,'admin','::1',1636512646,'Logged in'),
+	(38,1,1,'admin','::1',1645569821,'Logged in');
 
 /*!40000 ALTER TABLE `exp_cp_log` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1049,6 +1055,7 @@ CREATE TABLE `exp_eeharbor_licenses` (
   `site_id` int(11) unsigned NOT NULL DEFAULT '0',
   `addon` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `license_key` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `ignore_site` int(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`license_key`),
   KEY `site_id_addon` (`site_id`,`addon`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1185,21 +1192,20 @@ LOCK TABLES `exp_extensions` WRITE;
 INSERT INTO `exp_extensions` (`extension_id`, `class`, `method`, `hook`, `settings`, `priority`, `version`, `enabled`)
 VALUES
 	(1,'Comment_ext','addCommentMenu','cp_custom_menu','a:0:{}',10,'2.3.3','y'),
-	(4,'Structure_ext','after_channel_entry_save','after_channel_entry_save','a:0:{}',10,'4.7.0','y'),
-	(5,'Structure_ext','sessions_end','sessions_end','a:0:{}',10,'4.7.0','y'),
-	(6,'Structure_ext','entry_submission_redirect','entry_submission_redirect','a:0:{}',10,'4.7.0','y'),
-	(7,'Structure_ext','cp_member_login','cp_member_login','a:0:{}',10,'4.7.0','y'),
-	(8,'Structure_ext','sessions_start','sessions_start','a:0:{}',10,'4.7.0','y'),
-	(9,'Structure_ext','pagination_create','pagination_create','a:0:{}',10,'4.7.0','y'),
-	(10,'Structure_ext','wygwam_config','wygwam_config','a:0:{}',10,'4.7.0','y'),
-	(11,'Structure_ext','core_template_route','core_template_route','a:0:{}',10,'4.7.0','y'),
-	(12,'Structure_ext','entry_submission_end','entry_submission_end','a:0:{}',10,'4.7.0','y'),
-	(13,'Structure_ext','channel_form_submit_entry_end','channel_form_submit_entry_end','a:0:{}',10,'4.7.0','y'),
-	(14,'Structure_ext','template_post_parse','template_post_parse','a:0:{}',10,'4.7.0','y'),
-	(15,'Structure_ext','cp_custom_menu','cp_custom_menu','a:0:{}',10,'4.7.0','y'),
-	(16,'Structure_ext','publish_live_preview_route','publish_live_preview_route','a:0:{}',10,'4.7.0','y'),
-	(17,'Structure_ext','entry_save_and_close_redirect','entry_save_and_close_redirect','a:0:{}',10,'4.7.0','y'),
-	(18,'Structure_ext','rte_autocomplete_pages','rte_autocomplete_pages','a:0:{}',10,'4.7.0','y');
+	(4,'Structure_ext','after_channel_entry_save','after_channel_entry_save','a:0:{}',10,'5.0.0','y'),
+	(5,'Structure_ext','sessions_end','sessions_end','a:0:{}',10,'5.0.0','y'),
+	(6,'Structure_ext','entry_submission_redirect','entry_submission_redirect','a:0:{}',10,'5.0.0','y'),
+	(7,'Structure_ext','cp_member_login','cp_member_login','a:0:{}',10,'5.0.0','y'),
+	(8,'Structure_ext','sessions_start','sessions_start','a:0:{}',10,'5.0.0','y'),
+	(9,'Structure_ext','pagination_create','pagination_create','a:0:{}',10,'5.0.0','y'),
+	(10,'Structure_ext','wygwam_config','wygwam_config','a:0:{}',10,'5.0.0','y'),
+	(11,'Structure_ext','core_template_route','core_template_route','a:0:{}',10,'5.0.0','y'),
+	(12,'Structure_ext','entry_submission_end','entry_submission_end','a:0:{}',10,'5.0.0','y'),
+	(13,'Structure_ext','channel_form_submit_entry_end','channel_form_submit_entry_end','a:0:{}',10,'5.0.0','y'),
+	(14,'Structure_ext','template_post_parse','template_post_parse','a:0:{}',10,'5.0.0','y'),
+	(15,'Structure_ext','cp_custom_menu','cp_custom_menu','a:0:{}',10,'5.0.0','y'),
+	(16,'Structure_ext','publish_live_preview_route','publish_live_preview_route','a:0:{}',10,'5.0.0','y'),
+	(17,'Structure_ext','entry_save_and_close_redirect','entry_save_and_close_redirect','a:0:{}',10,'5.0.0','y');
 
 /*!40000 ALTER TABLE `exp_extensions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1256,8 +1262,8 @@ VALUES
 	(15,'rte','2.1.0','YTowOnt9','n'),
 	(16,'toggle','1.0.0','YTowOnt9','n'),
 	(17,'url','1.0.0','YTowOnt9','n'),
-	(18,'structure','4.7.0','YToxOntzOjE5OiJzdHJ1Y3R1cmVfbGlzdF90eXBlIjtzOjU6InBhZ2VzIjt9','n'),
-	(19,'wygwam','5.1.0','YTowOnt9','n'),
+	(18,'structure','5.0.0','YToxOntzOjE5OiJzdHJ1Y3R1cmVfbGlzdF90eXBlIjtzOjU6InBhZ2VzIjt9','n'),
+	(19,'wygwam','5.2.0','YTowOnt9','n'),
 	(20,'colorpicker','1.0.0','YTowOnt9','n');
 
 /*!40000 ALTER TABLE `exp_fieldtypes` ENABLE KEYS */;
@@ -1674,12 +1680,13 @@ CREATE TABLE `exp_members` (
   `quick_tabs` text COLLATE utf8mb4_unicode_ci,
   `show_sidebar` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `pmember_id` int(10) NOT NULL DEFAULT '0',
-  `rte_enabled` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
-  `rte_toolset_id` int(10) NOT NULL DEFAULT '0',
   `cp_homepage` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cp_homepage_channel` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cp_homepage_custom` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dismissed_pro_banner` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `enable_mfa` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `backup_mfa_code` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pending_role_id` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`member_id`),
   KEY `group_id` (`role_id`),
   KEY `unique_id` (`unique_id`),
@@ -1689,9 +1696,9 @@ CREATE TABLE `exp_members` (
 LOCK TABLES `exp_members` WRITE;
 /*!40000 ALTER TABLE `exp_members` DISABLE KEYS */;
 
-INSERT INTO `exp_members` (`member_id`, `role_id`, `username`, `screen_name`, `password`, `salt`, `unique_id`, `crypt_key`, `authcode`, `email`, `signature`, `avatar_filename`, `avatar_width`, `avatar_height`, `photo_filename`, `photo_width`, `photo_height`, `sig_img_filename`, `sig_img_width`, `sig_img_height`, `ignore_list`, `private_messages`, `accept_messages`, `last_view_bulletins`, `last_bulletin_date`, `ip_address`, `join_date`, `last_visit`, `last_activity`, `total_entries`, `total_comments`, `total_forum_topics`, `total_forum_posts`, `last_entry_date`, `last_comment_date`, `last_forum_post_date`, `last_email_date`, `in_authorlist`, `accept_admin_email`, `accept_user_email`, `notify_by_default`, `notify_of_pm`, `display_signatures`, `parse_smileys`, `smart_notifications`, `language`, `timezone`, `time_format`, `date_format`, `include_seconds`, `profile_theme`, `forum_theme`, `tracker`, `template_size`, `notepad`, `notepad_size`, `bookmarklets`, `quick_links`, `quick_tabs`, `show_sidebar`, `pmember_id`, `rte_enabled`, `rte_toolset_id`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `dismissed_pro_banner`)
+INSERT INTO `exp_members` (`member_id`, `role_id`, `username`, `screen_name`, `password`, `salt`, `unique_id`, `crypt_key`, `authcode`, `email`, `signature`, `avatar_filename`, `avatar_width`, `avatar_height`, `photo_filename`, `photo_width`, `photo_height`, `sig_img_filename`, `sig_img_width`, `sig_img_height`, `ignore_list`, `private_messages`, `accept_messages`, `last_view_bulletins`, `last_bulletin_date`, `ip_address`, `join_date`, `last_visit`, `last_activity`, `total_entries`, `total_comments`, `total_forum_topics`, `total_forum_posts`, `last_entry_date`, `last_comment_date`, `last_forum_post_date`, `last_email_date`, `in_authorlist`, `accept_admin_email`, `accept_user_email`, `notify_by_default`, `notify_of_pm`, `display_signatures`, `parse_smileys`, `smart_notifications`, `language`, `timezone`, `time_format`, `date_format`, `include_seconds`, `profile_theme`, `forum_theme`, `tracker`, `template_size`, `notepad`, `notepad_size`, `bookmarklets`, `quick_links`, `quick_tabs`, `show_sidebar`, `pmember_id`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `dismissed_pro_banner`, `enable_mfa`, `backup_mfa_code`, `pending_role_id`)
 VALUES
-	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1634420542,1636512627,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,'y',0,NULL,NULL,NULL,'y');
+	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1636513259,1645569822,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,NULL,NULL,NULL,'y','n',NULL,0);
 
 /*!40000 ALTER TABLE `exp_members` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1929,14 +1936,14 @@ VALUES
 	(2,'Comment','2.3.3','y','n'),
 	(3,'Consent','1.0.0','n','n'),
 	(4,'Member','2.2.1','n','n'),
-	(5,'Stats','2.1.0','n','n'),
+	(5,'Stats','2.2.0','n','n'),
 	(6,'Rte','2.1.0','y','n'),
 	(7,'File','1.1.0','n','n'),
 	(8,'Filepicker','1.0','y','n'),
 	(9,'Relationship','1.0.0','n','n'),
 	(10,'Search','2.2.2','n','n'),
-	(11,'Structure','4.7.0','y','y'),
-	(12,'Wygwam','5.1.0','y','n');
+	(11,'Structure','5.0.0','y','y'),
+	(12,'Wygwam','5.2.0','y','n');
 
 /*!40000 ALTER TABLE `exp_modules` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2257,6 +2264,7 @@ CREATE TABLE `exp_role_settings` (
   `can_create_new_templates` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `can_edit_templates` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `can_delete_templates` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `require_mfa` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   PRIMARY KEY (`id`),
   KEY `role_id` (`role_id`,`site_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2264,13 +2272,13 @@ CREATE TABLE `exp_role_settings` (
 LOCK TABLES `exp_role_settings` WRITE;
 /*!40000 ALTER TABLE `exp_role_settings` DISABLE KEYS */;
 
-INSERT INTO `exp_role_settings` (`id`, `role_id`, `site_id`, `menu_set_id`, `is_locked`, `can_edit_other_entries`, `can_assign_post_authors`, `can_delete_self_entries`, `can_delete_all_entries`, `mbr_delete_notify_emails`, `exclude_from_moderation`, `search_flood_control`, `prv_msg_send_limit`, `prv_msg_storage_limit`, `include_in_authorlist`, `include_in_memberlist`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `can_create_entries`, `can_edit_self_entries`, `can_create_new_templates`, `can_edit_templates`, `can_delete_templates`)
+INSERT INTO `exp_role_settings` (`id`, `role_id`, `site_id`, `menu_set_id`, `is_locked`, `can_edit_other_entries`, `can_assign_post_authors`, `can_delete_self_entries`, `can_delete_all_entries`, `mbr_delete_notify_emails`, `exclude_from_moderation`, `search_flood_control`, `prv_msg_send_limit`, `prv_msg_storage_limit`, `include_in_authorlist`, `include_in_memberlist`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `can_create_entries`, `can_edit_self_entries`, `can_create_new_templates`, `can_edit_templates`, `can_delete_templates`, `require_mfa`)
 VALUES
-	(1,1,1,1,'y','y','y','y','y',NULL,'y',0,20,60,'y','y',NULL,0,NULL,'y','y','y','y','y'),
-	(2,2,1,0,'n','n','n','n','n',NULL,'n',60,20,60,'n','n',NULL,0,NULL,'n','n','n','n','n'),
-	(3,3,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n'),
-	(4,4,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n'),
-	(5,5,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n');
+	(1,1,1,1,'y','y','y','y','y',NULL,'y',0,20,60,'y','y',NULL,0,NULL,'y','y','y','y','y','n'),
+	(2,2,1,0,'n','n','n','n','n',NULL,'n',60,20,60,'n','n',NULL,0,NULL,'n','n','n','n','n','n'),
+	(3,3,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n'),
+	(4,4,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n'),
+	(5,5,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n');
 
 /*!40000 ALTER TABLE `exp_role_settings` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2287,19 +2295,20 @@ CREATE TABLE `exp_roles` (
   `short_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci,
   `is_locked` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `total_members` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `exp_roles` WRITE;
 /*!40000 ALTER TABLE `exp_roles` DISABLE KEYS */;
 
-INSERT INTO `exp_roles` (`role_id`, `name`, `short_name`, `description`, `is_locked`)
+INSERT INTO `exp_roles` (`role_id`, `name`, `short_name`, `description`, `is_locked`, `total_members`)
 VALUES
-	(1,'Super Admin','super_admin','','y'),
-	(2,'Banned','banned','','n'),
-	(3,'Guests','guests','','n'),
-	(4,'Pending','pending','','n'),
-	(5,'Members','members','','n');
+	(1,'Super Admin','super_admin','','y',0),
+	(2,'Banned','banned','','n',0),
+	(3,'Guests','guests','','n',0),
+	(4,'Pending','pending','','n',0),
+	(5,'Members','members','','n',0);
 
 /*!40000 ALTER TABLE `exp_roles` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2407,7 +2416,8 @@ LOCK TABLES `exp_security_hashes` WRITE;
 
 INSERT INTO `exp_security_hashes` (`hash_id`, `date`, `session_id`, `hash`)
 VALUES
-	(29,1636512646,'c12fdafdea7ae1dbcd25e81b7f6e638bbb6c0a19','b32ee028d09c2958f0383f042d831cbce36be454');
+	(29,1636512646,'c12fdafdea7ae1dbcd25e81b7f6e638bbb6c0a19','b32ee028d09c2958f0383f042d831cbce36be454'),
+	(30,1645569822,'4c984c911c31f6daa5b637adeafc7877bd4141af','e3d0816a72b47d9751fddc8336e48f72e75d3fbf');
 
 /*!40000 ALTER TABLE `exp_security_hashes` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2430,6 +2440,7 @@ CREATE TABLE `exp_sessions` (
   `auth_timeout` int(10) unsigned NOT NULL DEFAULT '0',
   `last_activity` int(10) unsigned NOT NULL DEFAULT '0',
   `can_debug` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `mfa_flag` enum('skip','show','required') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'skip',
   PRIMARY KEY (`session_id`),
   KEY `member_id` (`member_id`),
   KEY `last_activity_idx` (`last_activity`)
@@ -2438,9 +2449,10 @@ CREATE TABLE `exp_sessions` (
 LOCK TABLES `exp_sessions` WRITE;
 /*!40000 ALTER TABLE `exp_sessions` DISABLE KEYS */;
 
-INSERT INTO `exp_sessions` (`session_id`, `member_id`, `admin_sess`, `ip_address`, `user_agent`, `login_state`, `fingerprint`, `sess_start`, `auth_timeout`, `last_activity`, `can_debug`)
+INSERT INTO `exp_sessions` (`session_id`, `member_id`, `admin_sess`, `ip_address`, `user_agent`, `login_state`, `fingerprint`, `sess_start`, `auth_timeout`, `last_activity`, `can_debug`, `mfa_flag`)
 VALUES
-	('c12fdafdea7ae1dbcd25e81b7f6e638bbb6c0a19',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.23 Safari/537.36',NULL,'cf93e58d4a64849df7cd5bc0d5c254d7',1636512646,0,1636512695,'0');
+	('4c984c911c31f6daa5b637adeafc7877bd4141af',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.84 Safari/537.36',NULL,'e165040a95df8e599403efc82c9bbdd5',1645569821,0,1645569846,'0','skip'),
+	('c12fdafdea7ae1dbcd25e81b7f6e638bbb6c0a19',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.23 Safari/537.36',NULL,'cf93e58d4a64849df7cd5bc0d5c254d7',1636512646,0,1636513517,'0','skip');
 
 /*!40000 ALTER TABLE `exp_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2533,7 +2545,8 @@ VALUES
 	(14,1,'y','private_message_notification','Someone has sent you a Private Message','email','private_messages','\n{recipient_name},\n\n{sender_name} has just sent you a Private Message titled ‘{message_subject}’.\n\nYou can see the Private Message by logging in and viewing your inbox at:\n{site_url}\n\nContent:\n\n{message_content}\n\nTo stop receiving notifications of Private Messages, turn the option off in your Email Settings.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
 	(15,1,'y','pm_inbox_full','Your private message mailbox is full','email','private_messages','{recipient_name},\n\n{sender_name} has just attempted to send you a Private Message,\nbut your inbox is full, exceeding the maximum of {pm_storage_limit}.\n\nPlease log in and remove unwanted messages from your inbox at:\n{site_url}',NULL,1607033726,0),
 	(16,1,'y','post_install_message_template','','system',NULL,'<!doctype html>\n<html>\n	<head>\n		<title>Welcome to ExpressionEngine!</title>\n		<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" lang=\"en-us\" dir=\"ltr\">\n		<meta content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\"  name=\"viewport\">\n		<link href=\"{theme_folder_url}cp/css/common.min.css\" rel=\"stylesheet\">\n			</head>\n	<body class=\"installer-page\">\n		<section class=\"flex-wrap\">\n			<section class=\"wrap\">\n				<div class=\"login__logo\">\n  <svg width=\"281px\" height=\"36px\" viewBox=\"0 0 281 36\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n  <title>ExpressionEngine</title>\n  <defs>\n      <polygon id=\"path-1\" points=\"0.3862 0.1747 18.6557 0.1747 18.6557 21.5 0.3862 21.5\"></polygon>\n      <polygon id=\"path-3\" points=\"0.3926 0.17455 13.9915 0.17455 13.9915 15.43755 0.3926 15.43755\"></polygon>\n      <polygon id=\"path-5\" points=\"0 0.06905 25.8202 0.06905 25.8202 31.6178513 0 31.6178513\"></polygon>\n      <polygon id=\"path-7\" points=\"0.10635 0.204 25.9268587 0.204 25.9268587 31.7517 0.10635 31.7517\"></polygon>\n  </defs>\n  <g id=\"logo\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">\n      <g id=\"expressionengine\">\n          <path d=\"M92.88015,27.0665 L89.28865,20.955 L94.66665,14.6405 L94.77265,13.9 L91.11315,13.9 L87.86765,17.95 C87.76015,18.0845 87.57265,18.353 87.30415,19.2645 C87.33065,18.353 87.14315,18.0845 87.08965,17.9775 L84.80915,13.9 L80.59815,13.9 L84.62115,20.8475 L78.21065,28.3045 L82.42165,28.3045 L86.04315,23.905 C86.23065,23.664 86.52565,23.154 86.66065,22.5915 C86.66065,23.154 86.79465,23.6905 86.92865,23.905 L89.42265,28.3045 L92.70265,28.3045 L92.88015,27.0665 Z\" id=\"Fill-1\"></path>\n          <path d=\"M80.2395,11.9686 L70.9585,11.9686 L70.288,16.6091 L78.7645,16.6091 L77.4495,19.6141 L69.751,19.6141 C69.805,19.8011 69.805,20.0156 69.778,20.1231 L69.027,25.3011 L78.3345,25.3011 L77.9055,28.3046 L65.003,28.3046 L67.7925,8.9651 L80.6685,8.9651 L80.2395,11.9686 Z\" id=\"Fill-3\"></path>\n          <path d=\"M102.3328,16.20735 C101.5283,16.20735 100.5628,16.34085 99.3558,17.11935 L98.1493,25.46185 C98.8998,25.83735 99.9723,25.99835 100.8848,25.99835 C103.0573,25.99835 104.2378,24.60235 104.7478,20.98085 C104.8548,20.28385 104.9083,19.69385 104.9083,19.18485 C104.9083,17.03835 104.0508,16.20735 102.3328,16.20735 M108.3418,20.98085 C107.6718,25.70235 105.5783,28.73385 100.5093,28.73385 C99.5708,28.73385 98.4978,28.54635 97.5313,28.08985 C97.6128,28.38435 97.6933,28.73385 97.6393,29.02935 L96.8073,34.79585 L93.2133,34.79585 L96.2178,13.89985 L98.7928,13.89985 L99.0878,15.08085 C100.3213,14.00685 101.7703,13.47035 103.1113,13.47035 C106.9473,13.47035 108.5023,15.69685 108.5023,19.05035 C108.5023,19.66735 108.4483,20.31135 108.3418,20.98085\" id=\"Fill-5\"></path>\n          <path d=\"M119.33865,16.69 C118.74815,16.609 118.13215,16.555 117.48715,16.555 C116.46815,16.555 115.39515,16.716 114.45615,17.28 L112.87415,28.3045 L109.27965,28.3045 L111.34515,13.8995 L114.29515,13.8995 L114.51115,15.0535 C115.71715,13.8995 116.92465,13.4705 118.21215,13.4705 C118.72265,13.4705 119.25865,13.5515 119.79515,13.659 L119.33865,16.69 Z\" id=\"Fill-7\"></path>\n          <path d=\"M127.43385,16.31455 C125.39585,16.31455 124.40285,17.09155 123.81285,19.61405 L129.71435,19.61405 C129.76785,19.29205 129.79435,18.99655 129.79435,18.72855 C129.79435,17.14555 129.01685,16.31455 127.43385,16.31455 M133.03985,22.13505 L123.35635,22.13505 C123.30235,22.56405 123.27685,22.93955 123.27685,23.28855 C123.27685,25.05905 124.08085,25.89105 126.06585,25.89105 C127.91685,25.89105 128.96335,25.08605 129.74035,23.90505 L132.44985,25.00505 C131.18885,27.41855 128.82885,28.73355 125.66385,28.73355 C121.58635,28.73355 119.73535,26.56055 119.73535,22.93955 C119.73535,22.34955 119.78885,21.73305 119.86985,21.08855 C120.64685,15.80405 122.95485,13.47055 127.86285,13.47055 C132.31635,13.47055 133.33585,16.60905 133.33585,19.29205 C133.33585,20.09655 133.17435,21.16955 133.03985,22.13505\" id=\"Fill-9\"></path>\n          <path d=\"M144.11795,17.70905 C143.60895,16.79705 142.66995,16.28705 141.19395,16.28705 C140.04145,16.28705 138.64595,16.52905 138.64595,17.97755 C138.64595,18.48755 138.88745,18.91655 139.53145,19.02405 L142.64245,19.58655 C144.60095,19.93605 146.20995,21.03455 146.20995,23.12755 C146.20995,27.23155 142.80295,28.73355 139.23545,28.73355 C136.71445,28.73355 134.73045,27.87555 133.76445,25.62255 L136.76845,24.52255 C137.33245,25.54155 138.24395,25.99805 139.61245,25.99805 C140.95345,25.99805 142.61595,25.59505 142.61595,23.93255 C142.61595,23.34255 142.34795,22.91355 141.56945,22.77855 L138.21645,22.16255 C136.66095,21.86655 135.13145,20.68655 135.13145,18.46005 C135.13145,14.65055 138.27045,13.47055 141.59695,13.47055 C144.57445,13.47055 146.20995,14.67805 146.93445,16.39455 L144.11795,17.70905 Z\" id=\"Fill-11\"></path>\n          <path d=\"M157.28835,17.70905 C156.77935,16.79705 155.84135,16.28705 154.36435,16.28705 C153.21235,16.28705 151.81785,16.52905 151.81785,17.97755 C151.81785,18.48755 152.05935,18.91655 152.70335,19.02405 L155.81435,19.58655 C157.77285,19.93605 159.38185,21.03455 159.38185,23.12755 C159.38185,27.23155 155.97385,28.73355 152.40635,28.73355 C149.88635,28.73355 147.90085,27.87555 146.93585,25.62255 L149.93885,24.52255 C150.50285,25.54155 151.41585,25.99805 152.78285,25.99805 C154.12535,25.99805 155.78685,25.59505 155.78685,23.93255 C155.78685,23.34255 155.51985,22.91355 154.74135,22.77855 L151.38835,22.16255 C149.83185,21.86655 148.30235,20.68655 148.30235,18.46005 C148.30235,14.65055 151.44085,13.47055 154.76885,13.47055 C157.74485,13.47055 159.38185,14.67805 160.10535,16.39455 L157.28835,17.70905 Z\" id=\"Fill-13\"></path>\n          <path d=\"M168.0188,11.0294 C167.9908,11.2714 167.9908,11.2714 167.7768,11.2714 L164.2888,11.2714 C164.0743,11.2714 164.0743,11.2714 164.1018,11.0294 L164.5858,7.7039 C164.6108,7.4359 164.6108,7.4084 164.8253,7.4084 L168.3133,7.4084 C168.5278,7.4084 168.5278,7.4359 168.5003,7.7039 L168.0188,11.0294 Z M167.2953,28.5464 L165.4688,28.5464 C163.3783,28.5464 162.3583,27.6334 162.3583,25.7564 C162.3583,25.4619 162.3853,25.1659 162.4378,24.8169 L163.5128,17.3874 C163.5378,17.1729 163.6728,16.8509 163.8873,16.6089 L161.2853,16.6089 L161.6618,13.8999 L167.5898,13.8999 L166.0328,24.8169 C166.0083,24.9514 166.0083,25.0864 166.0083,25.1934 C166.0083,25.5154 166.1398,25.6229 166.5443,25.6229 L167.6968,25.6229 L167.2953,28.5464 Z\" id=\"Fill-15\"></path>\n          <path d=\"M176.8977,16.31455 C174.6972,16.31455 173.6242,17.44105 173.0882,21.08855 C172.9807,21.81305 172.9262,22.45705 172.9262,22.99305 C172.9262,25.16605 173.7837,25.89105 175.5282,25.89105 C177.7007,25.89105 178.8562,24.76305 179.3922,21.08855 C179.4997,20.39105 179.5522,19.77455 179.5522,19.23855 C179.5522,17.03805 178.6662,16.31455 176.8977,16.31455 M182.9852,21.08855 C182.2617,26.07805 180.0887,28.73355 175.1262,28.73355 C170.8872,28.73355 169.3582,26.13155 169.3582,22.85955 C169.3582,22.29555 169.4132,21.67955 169.4927,21.08855 C170.2167,16.01905 172.3647,13.47055 177.3267,13.47055 C181.5377,13.47055 183.1197,15.93905 183.1197,19.26455 C183.1197,19.85455 183.0672,20.44455 182.9852,21.08855\" id=\"Fill-17\"></path>\n          <path d=\"M197.21265,19.23835 L195.89815,28.30435 L192.33015,28.30435 L193.64515,19.23835 C193.70015,18.91635 193.72465,18.59485 193.72465,18.29935 C193.72465,17.06535 193.24365,16.26085 191.90115,16.26085 C190.80115,16.26085 189.51415,16.87685 188.46865,17.52085 L186.91165,28.30435 L183.34415,28.30435 L185.41015,13.89985 L188.36115,13.89985 L188.60315,15.21435 C190.26465,13.89985 191.60665,13.47035 193.10865,13.47035 C196.11265,13.47035 197.32015,15.37535 197.32015,17.92385 C197.32015,18.35285 197.26715,18.78185 197.21265,19.23835\" id=\"Fill-19\"></path>\n          <path d=\"M214.45925,11.9686 L205.17825,11.9686 L204.51025,16.6091 L212.98475,16.6091 L211.67025,19.6141 L203.97075,19.6141 C204.02625,19.8011 204.02625,20.0156 203.99875,20.1231 L203.24775,25.3011 L212.55525,25.3011 L212.12675,28.3046 L199.22325,28.3046 L202.01525,8.9651 L214.89075,8.9651 L214.45925,11.9686 Z\" id=\"Fill-21\"></path>\n          <path d=\"M227.8411,19.23835 L226.5266,28.30435 L222.9586,28.30435 L224.2736,19.23835 C224.3261,18.91635 224.3531,18.59485 224.3531,18.29935 C224.3531,17.06535 223.8696,16.26085 222.5301,16.26085 C221.4296,16.26085 220.1426,16.87685 219.0946,17.52085 L217.5401,28.30435 L213.9726,28.30435 L216.0386,13.89985 L218.9871,13.89985 L219.2291,15.21435 C220.8931,13.89985 222.2331,13.47035 223.7371,13.47035 C226.7411,13.47035 227.9486,15.37535 227.9486,17.92385 C227.9486,18.35285 227.8936,18.78185 227.8411,19.23835\" id=\"Fill-23\"></path>\n          <g id=\"Group-27\" transform=\"translate(227.500000, 13.296000)\">\n              <mask id=\"mask-2\" fill=\"white\">\n                  <use xlink:href=\"#path-1\"></use>\n              </mask>\n              <g id=\"Clip-26\"></g>\n              <path d=\"M9.7742,2.9912 C7.7607,2.9912 6.6082,4.1452 6.6082,6.1297 C6.6082,7.4702 7.4667,8.0342 9.0232,8.0342 C11.0342,8.0342 12.1612,6.9617 12.1612,4.9772 C12.1612,3.6622 11.3832,2.9912 9.7742,2.9912 L9.7742,2.9912 Z M10.1207,15.0622 L5.0787,14.1227 C4.2757,14.9812 3.9262,15.5447 3.9262,16.7522 C3.9262,18.1197 4.8917,18.7372 7.4667,18.7372 C9.1557,18.7372 11.4907,18.4687 11.4907,16.2957 C11.4907,15.6262 11.1412,15.2507 10.1207,15.0622 L10.1207,15.0622 Z M18.3312,3.3132 L16.5872,3.3132 C16.3457,3.3132 15.7542,3.2867 15.3002,3.0722 C15.5672,3.7157 15.6742,4.4392 15.6742,5.0307 C15.6742,9.2142 12.3482,10.8237 8.6187,10.8237 C7.7882,10.8237 6.9852,10.7437 6.2862,10.5827 C6.1792,10.5552 6.0717,10.5292 5.9372,10.5292 C5.5352,10.5292 5.2932,10.7437 5.2932,11.1452 C5.2932,11.4137 5.4282,11.6017 6.0167,11.7092 L11.1962,12.6747 C14.0652,13.2112 15.0577,14.4447 15.0577,16.0277 C15.0577,20.6682 10.7122,21.5002 7.0647,21.5002 C4.1682,21.5002 0.3862,20.7217 0.3862,17.1002 C0.3862,15.2232 1.3767,13.6142 2.9857,12.6482 C2.6637,12.2457 2.5042,11.7902 2.5042,11.3597 C2.5042,10.3947 3.2007,9.6437 4.0062,9.2142 C3.4972,8.5707 3.0682,7.5517 3.0682,6.3717 C3.0682,2.1602 6.3387,0.1747 10.1757,0.1747 C11.5177,0.1747 12.9372,0.4167 13.9852,1.0862 L16.0537,0.6212 L18.6557,0.6212 L18.3312,3.3132 Z\" id=\"Fill-25\" mask=\"url(#mask-2)\"></path>\n          </g>\n          <path d=\"M251.54175,11.0294 C251.51675,11.2714 251.51675,11.2714 251.30225,11.2714 L247.81475,11.2714 C247.59975,11.2714 247.59975,11.2714 247.62725,11.0294 L248.10925,7.7039 C248.13625,7.4359 248.13625,7.4084 248.35075,7.4084 L251.83875,7.4084 C252.05275,7.4084 252.05275,7.4359 252.02575,7.7039 L251.54175,11.0294 Z M250.81825,28.5464 L248.99425,28.5464 C246.90175,28.5464 245.88375,27.6334 245.88375,25.7564 C245.88375,25.4619 245.91075,25.1659 245.96375,24.8169 L247.03575,17.3874 C247.06375,17.1729 247.19825,16.8509 247.41275,16.6089 L244.81075,16.6089 L245.18475,13.8999 L251.11275,13.8999 L249.55825,24.8169 C249.53125,24.9514 249.53125,25.0864 249.53125,25.1934 C249.53125,25.5154 249.66575,25.6229 250.06725,25.6229 L251.21975,25.6229 L250.81825,28.5464 Z\" id=\"Fill-28\"></path>\n          <path d=\"M266.32595,19.23835 L265.01095,28.30435 L261.44345,28.30435 L262.75845,19.23835 C262.81345,18.91635 262.83795,18.59485 262.83795,18.29935 C262.83795,17.06535 262.35695,16.26085 261.01445,16.26085 C259.91445,16.26085 258.62695,16.87685 257.58195,17.52085 L256.02445,28.30435 L252.45745,28.30435 L254.52345,13.89985 L257.47445,13.89985 L257.71645,15.21435 C259.37795,13.89985 260.71995,13.47035 262.22195,13.47035 C265.22595,13.47035 266.43345,15.37535 266.43345,17.92385 C266.43345,18.35285 266.38045,18.78185 266.32595,19.23835\" id=\"Fill-30\"></path>\n          <g id=\"Group-34\" transform=\"translate(267.000000, 13.296000)\">\n              <mask id=\"mask-4\" fill=\"white\">\n                  <use xlink:href=\"#path-3\"></use>\n              </mask>\n              <g id=\"Clip-33\"></g>\n              <path d=\"M8.0916,3.01855 C6.0531,3.01855 5.0606,3.79555 4.4691,6.31805 L10.3716,6.31805 C10.4241,5.99605 10.4516,5.70055 10.4516,5.43255 C10.4516,3.84955 9.6731,3.01855 8.0916,3.01855 M13.6971,8.83905 L4.0126,8.83905 C3.9596,9.26805 3.9326,9.64355 3.9326,9.99255 C3.9326,11.76305 4.7381,12.59505 6.7216,12.59505 C8.5731,12.59505 9.6211,11.79005 10.3961,10.60905 L13.1056,11.70905 C11.8461,14.12255 9.4861,15.43755 6.3201,15.43755 C2.2436,15.43755 0.3926,13.26455 0.3926,9.64355 C0.3926,9.05355 0.4446,8.43705 0.5271,7.79255 C1.3031,2.50805 3.6106,0.17455 8.5201,0.17455 C12.9736,0.17455 13.9916,3.31305 13.9916,5.99605 C13.9916,6.80055 13.8316,7.87355 13.6971,8.83905\" id=\"Fill-32\" mask=\"url(#mask-4)\"></path>\n          </g>\n          <path d=\"M20.60205,17.64605 C21.11355,14.75605 22.01655,12.45255 23.28405,10.79305 C24.18105,9.60555 25.17405,9.00405 26.23755,9.00405 C26.80055,9.00405 27.27705,9.22055 27.65305,9.64955 C28.01805,10.06905 28.20405,10.64605 28.20405,11.36305 C28.20405,13.02405 27.45705,14.53555 25.98455,15.86155 C24.91705,16.81355 23.20305,17.51055 20.89205,17.93305 L20.53855,17.99805 L20.60205,17.64605 Z M30.67305,21.68355 C29.37505,22.92855 28.23905,23.80705 27.31805,24.24655 C26.34905,24.70655 25.34805,24.93855 24.34355,24.93855 C23.11755,24.93855 22.12155,24.54805 21.38655,23.77655 C20.65105,23.00705 20.27805,21.90355 20.27805,20.49455 L20.37305,19.08355 L20.56855,19.05005 C24.00755,18.47005 26.60155,17.80655 28.27555,17.07555 C29.93155,16.35405 31.14005,15.49505 31.86855,14.52405 C32.59155,13.56105 32.95655,12.59155 32.95655,11.65055 C32.95655,10.50805 32.52355,9.59355 31.63105,8.84705 C30.73555,8.10155 29.44355,7.72455 27.79455,7.72455 C25.50305,7.72455 23.33455,8.25905 21.34955,9.31405 C19.36805,10.36805 17.78305,11.82905 16.64005,13.65605 C15.50005,15.48105 14.92155,17.41555 14.92155,19.40105 C14.92155,21.61755 15.60505,23.39505 16.95205,24.68005 C18.30455,25.96905 20.19355,26.62005 22.56705,26.62005 C24.25255,26.62005 25.84755,26.28155 27.30805,25.61355 C28.70455,24.97455 30.14905,23.86705 31.60805,22.37255 C31.33005,22.16805 30.87005,21.82855 30.67305,21.68355 L30.67305,21.68355 Z\" id=\"Fill-35\"></path>\n          <g id=\"Group-39\" transform=\"translate(0.000000, 2.796000)\">\n              <mask id=\"mask-6\" fill=\"white\">\n                  <use xlink:href=\"#path-5\"></use>\n              </mask>\n              <g id=\"Clip-38\"></g>\n              <path d=\"M7.2737,19.35005 C5.3202,11.70605 9.9462,3.71505 17.8897,0.06905 C17.6907,0.14055 17.5042,0.22255 17.3077,0.29605 C17.5087,0.20005 17.6882,0.11955 17.8272,0.07205 L2.9432,3.91255 L6.9112,6.26005 C1.7147,10.66105 -0.9663,16.11555 0.3187,21.14505 C2.3302,29.02005 13.3457,33.12605 25.8202,31.10805 C17.1117,31.75655 9.2257,26.99355 7.2737,19.35005\" id=\"Fill-37\" mask=\"url(#mask-6)\"></path>\n          </g>\n          <g id=\"Group-42\" transform=\"translate(23.500000, 0.296000)\">\n              <mask id=\"mask-8\" fill=\"white\">\n                  <use xlink:href=\"#path-7\"></use>\n              </mask>\n              <g id=\"Clip-41\"></g>\n              <path d=\"M18.65285,12.4697 C20.60635,20.1147 15.98135,28.1052 8.03735,31.7517 C8.23585,31.6797 8.42235,31.5977 8.61885,31.5232 C8.41785,31.6212 8.23835,31.7002 8.09935,31.7482 L22.98335,27.9087 L19.01585,25.5612 C24.21185,21.1597 26.89285,15.7042 25.60835,10.6747 C23.59635,2.8027 12.58085,-1.3053 0.10635,0.7142 C8.81435,0.0637 16.70135,4.8267 18.65285,12.4697\" id=\"Fill-40\" mask=\"url(#mask-8)\"></path>\n          </g>\n      </g>\n    </g>\n  </svg>\n</div>\n				<div class=\"panel warn\">\n  <div class=\"panel-heading\" style=\"text-align: center;\">\n    <h3>ExpressionEngine has been installed!</h3>\n  </div>\n  <div class=\"panel-body\">\n    <div class=\"updater-msg\">\n  		<p style=\"margin-bottom: 20px;\">If you see this message, then everything went well.</p>\n\n  		<div class=\"alert alert--attention\">\n            <div class=\"alert__icon\">\n              <i class=\"fas fa-info-circle fa-fw\"></i>\n            </div>\n            <div class=\"alert__content\">\n    			<p>If you are site owner, please login into your Control Panel and create your first template.</p>\n    		</div>\n  		</div>\n  		<div class=\"alert alert--attention\">\n            <div class=\"alert__icon\">\n              <i class=\"fas fa-info-circle fa-fw\"></i>\n            </div>\n            <div class=\"alert__content\">\n    			<p>If this is your first time using ExpressionEngine CMS, make sure to <a href=\"https://docs.expressionengine.com/latest/getting-started/the-big-picture.html\">check out the documentation</a> to get started.</p>\n    		</div>\n  		</div>\n  	</div>\n  </div>\n  <div class=\"panel-footer\">\n\n  </div>\n</div>\n			</div>\n			<section class=\"bar\">\n				<p style=\"float: left;\"><a href=\"https://expressionengine.com/\" rel=\"external\"><b>ExpressionEngine</b></a></p>\n				<p style=\"float: right;\">&copy;2020 <a href=\"https://packettide.com/\" rel=\"external\">Packet Tide</a>, LLC</p>\n			</section>\n		</section>\n\n	</body>\n</html>',NULL,1608244647,0),
-	(17,1,'y','forgot_username_instructions','Username information','email','members','{name},\n\nYour username is: {username}\n\nIf you didn\\\'t request your username yourself, please contact an administrator right away.\n\n{site_name}\n{site_url}',NULL,1636512662,0);
+	(17,1,'y','forgot_username_instructions','Username information','email','members','{name},\n\nYour username is: {username}\n\nIf you didn\\\'t request your username yourself, please contact an administrator right away.\n\n{site_name}\n{site_url}',NULL,1636512662,0),
+	(18,1,'y','mfa_template','','system',NULL,'<!doctype html>\n        <html dir=\"ltr\">\n            <head>\n                <title>{title}</title>\n                <meta http-equiv=\"content-type\" content=\"text/html; charset={charset}\">\n                <meta content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\"  name=\"viewport\">\n                <meta name=\"referrer\" content=\"no-referrer\">\n                {meta_refresh}\n                <style type=\"text/css\">\n        :root, body {\n            --ee-panel-bg: #fff;\n            --ee-panel-border: #dfe0ef;\n            --ee-text-normal: #0d0d19;\n            --ee-text-secondary: #8f90b0;\n            --ee-main-bg: #f7f7fb;\n            --ee-link: #5D63F1;\n            --ee-link-hover: #171feb;\n            --ee-bg-blank: #fff;\n            --ee-code-border: #dfe0ef;\n        \n            --ee-input-color: #0d0d19;\n            --ee-input-bg: #fff;\n            --ee-input-placeholder: #adaec5;\n            --ee-input-border: #cbcbda;\n            --ee-input-border-accent: #ecedf5;\n            --ee-input-focus-border: #5D63F1;\n            --ee-input-focus-shadow: 0 3px 6px -3px rgba(174,151,255,0.14),0 5px 10px -3px rgba(97,114,242,0.05);\n            --ee-button-primary-color: #fff;\n            --ee-button-primary-bg: #5D63F1;\n            --ee-button-primary-border: #5D63F1;\n        \n            --ee-bg-0: #f7f7fb;\n            --ee-border: #dfe0ef;\n            --ee-error: #FA5252;\n            --ee-error-light: #fee7e7;\n            --ee-warning: #FFB40B;\n            --ee-warning-light: #fff6e1;\n        }\n\n        @font-face{font-family:Roboto;font-style:normal;font-weight:400;src:url({url_themes}webfonts/roboto-v20-latin-regular.eot);src:local(\"Roboto\"),local(\"Roboto-Regular\"),url({url_themes}webfonts/roboto-v20-latin-regular.eot?#iefix) format(\"embedded-opentype\"),url({url_themes}webfonts/roboto-v20-latin-regular.woff2) format(\"woff2\"),url({url_themes}webfonts/roboto-v20-latin-regular.woff) format(\"woff\"),url({url_themes}webfonts/roboto-v20-latin-regular.ttf) format(\"truetype\"),url({url_themes}webfonts/roboto-v20-latin-regular.svg#Roboto) format(\"svg\")}@font-face{font-family:Roboto;font-style:italic;font-weight:400;src:url({url_themes}webfonts/roboto-v20-latin-italic.eot);src:local(\"Roboto Italic\"),local(\"Roboto-Italic\"),url({url_themes}webfonts/roboto-v20-latin-italic.eot?#iefix) format(\"embedded-opentype\"),url({url_themes}webfonts/roboto-v20-latin-italic.woff2) format(\"woff2\"),url({url_themes}webfonts/roboto-v20-latin-italic.woff) format(\"woff\"),url({url_themes}webfonts/roboto-v20-latin-italic.ttf) format(\"truetype\"),url({url_themes}webfonts/roboto-v20-latin-italic.svg#Roboto) format(\"svg\")}@font-face{font-family:Roboto;font-style:normal;font-weight:500;src:url({url_themes}webfonts/roboto-v20-latin-500.eot);src:local(\"Roboto Medium\"),local(\"Roboto-Medium\"),url({url_themes}webfonts/roboto-v20-latin-500.eot?#iefix) format(\"embedded-opentype\"),url({url_themes}webfonts/roboto-v20-latin-500.woff2) format(\"woff2\"),url({url_themes}webfonts/roboto-v20-latin-500.woff) format(\"woff\"),url({url_themes}webfonts/roboto-v20-latin-500.ttf) format(\"truetype\"),url({url_themes}webfonts/roboto-v20-latin-500.svg#Roboto) format(\"svg\")}@font-face{font-family:Roboto;font-style:italic;font-weight:500;src:url({url_themes}webfonts/roboto-v20-latin-500italic.eot);src:local(\"Roboto Medium Italic\"),local(\"Roboto-MediumItalic\"),url({url_themes}webfonts/roboto-v20-latin-500italic.eot?#iefix) format(\"embedded-opentype\"),url({url_themes}webfonts/roboto-v20-latin-500italic.woff2) format(\"woff2\"),url({url_themes}webfonts/roboto-v20-latin-500italic.woff) format(\"woff\"),url({url_themes}webfonts/roboto-v20-latin-500italic.ttf) format(\"truetype\"),url({url_themes}webfonts/roboto-v20-latin-500italic.svg#Roboto) format(\"svg\")}@font-face{font-family:Roboto;font-style:normal;font-weight:700;src:url({url_themes}webfonts/roboto-v20-latin-700.eot);src:local(\"Roboto Bold\"),local(\"Roboto-Bold\"),url({url_themes}webfonts/roboto-v20-latin-700.eot?#iefix) format(\"embedded-opentype\"),url({url_themes}webfonts/roboto-v20-latin-700.woff2) format(\"woff2\"),url({url_themes}webfonts/roboto-v20-latin-700.woff) format(\"woff\"),url({url_themes}webfonts/roboto-v20-latin-700.ttf) format(\"truetype\"),url({url_themes}webfonts/roboto-v20-latin-700.svg#Roboto) format(\"svg\")}@font-face{font-family:Roboto;font-style:italic;font-weight:700;src:url({url_themes}webfonts/roboto-v20-latin-700italic.eot);src:local(\"Roboto Bold Italic\"),local(\"Roboto-BoldItalic\"),url({url_themes}webfonts/roboto-v20-latin-700italic.eot?#iefix) format(\"embedded-opentype\"),url({url_themes}webfonts/roboto-v20-latin-700italic.woff2) format(\"woff2\"),url({url_themes}webfonts/roboto-v20-latin-700italic.woff) format(\"woff\"),url({url_themes}webfonts/roboto-v20-latin-700italic.ttf) format(\"truetype\"),url({url_themes}webfonts/roboto-v20-latin-700italic.svg#Roboto) format(\"svg\")}\n        @font-face{font-family:\'Font Awesome 5 Free\';font-style:normal;font-weight:900;font-display:auto;src:url({url_themes}webfonts/fa-solid-900.eot);src:url({url_themes}webfonts/fa-solid-900.eot?#iefix) format(\"embedded-opentype\"),url({url_themes}webfonts/fa-solid-900.woff2) format(\"woff2\"),url({url_themes}webfonts/fa-solid-900.woff) format(\"woff\"),url({url_themes}webfonts/fa-solid-900.ttf) format(\"truetype\"),url({url_themes}webfonts/fa-solid-900.svg#fontawesome) format(\"svg\")}\n        \n        *, :after, :before {\n            box-sizing: inherit;\n        }\n        \n        html {\n            box-sizing: border-box;\n            font-size: 15px;\n            height: 100%;\n            line-height: 1.15;\n        }\n        \n        body {\n            font-family: Roboto,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Ubuntu,\"Helvetica Neue\",Oxygen,Cantarell,sans-serif;\n            height: 100%;\n            font-size: 1rem;\n            line-height: 1.6;\n            color: var(--ee-text-normal);\n            background: var(--ee-main-bg);\n            -webkit-font-smoothing: antialiased;\n            margin: 0;\n        }\n        \n        .panel {\n            margin-bottom: 20px;\n            background-color: var(--ee-panel-bg);\n            border: 1px solid var(--ee-panel-border);\n            border-radius: 6px;\n        }\n        .redirect {\n            max-width: 700px;\n            min-width: 350px;\n            position: absolute;\n            left: 50%;\n            top: 0;\n            transform: translate(-50%);\n            height: 100vh;\n            overflow-y: auto;\n            background: transparent;\n            border: none;\n            border-radius: 0;\n            display: flex;\n        }\n        \n        .redirect-inner {\n          background-color: var(--ee-panel-bg);\n          border: 1px solid var(--ee-panel-border);\n          border-radius: 6px;\n          height: auto;\n          margin-top: auto;\n          margin-bottom: auto;\n        }\n\n        .redirect-inner .qr-code-wrap {\n            text-align: center;\n        }\n        \n        .panel-heading {\n            padding: 20px 25px;\n            position: relative;\n        }\n        \n        .panel-body {\n            padding: 20px 25px;\n        }\n        \n        .panel-body:after, .panel-body:before {\n            content: \" \";\n            display: table;\n        }\n        \n        .redirect p {\n            margin-bottom: 20px;\n        }\n        p {\n            line-height: 1.6;\n        }\n        a, blockquote, code, h1, h2, h3, h4, h5, h6, ol, p, pre, ul {\n            color: inherit;\n            margin: 0;\n            padding: 0;\n            font-weight: inherit;\n        }\n\n        code {\n            font-size: inherit;\n            margin: 0 2px;\n            padding: 3px 6px;\n            border-radius: 5px;\n            border: 1px solid var(--ee-code-border);\n            background-color: var(--ee-bg-blank);\n            font-size: .96em;\n            white-space: normal;\n        }\n        \n        a {\n            color: var(--ee-link);\n            text-decoration: none;\n            -webkit-transition: color .15s ease-in-out;\n            -moz-transition: color .15s ease-in-out;\n            -o-transition: color .15s ease-in-out;\n        }\n        \n        a:hover {\n            color: var(--ee-link-hover);\n        }\n        \n        h3 {\n            font-size: 1.35em;\n            font-weight: 500;\n        }\n        \n        ol, ul {\n            padding-left: 0;\n        }\n        \n        ol li, ul li {\n            list-style-position: inside;\n        }\n        \n        .panel-footer {\n            padding: 20px 25px;\n            position: relative;\n        }\n        \n        fieldset {\n            margin: 0;\n            padding: 0;\n            margin-bottom: 20px;\n            border: 0;\n        }\n        \n        fieldset.last {\n            margin-bottom: 0;\n        }\n        \n        .field-instruct {\n            margin-bottom: 5px;\n        }\n        \n        .field-instruct label {\n            display: block;\n            color: var(--ee-text-normal);\n            margin-bottom: 5px;\n            font-weight: 500;\n        }\n        \n        .field-instruct :last-child {\n            margin-bottom: 0;\n        }\n\n        .field-instruct em {\n            color: var(--ee-text-secondary);\n            display: block;\n            font-size: .8rem;\n            font-style: normal;\n            margin-bottom: 10px;\n        }\n\n        .field-instruct label+em {\n            margin-top: -5px;\n        }\n        \n        button, input, optgroup, select, textarea {\n            font-family: inherit;\n            font-size: 100%;\n            line-height: 1.15;\n            margin: 0;\n        }\n        \n        input[type=text], input[type=password] {\n            display: block;\n            width: 100%;\n            padding: 8px 15px;\n            font-size: 1rem;\n            line-height: 1.6;\n            color: var(--ee-input-color);\n            background-color: var(--ee-input-bg);\n            background-image: none;\n            transition: border-color .2s ease,box-shadow .2s ease;\n            -webkit-appearance: none;\n            border: 1px solid var(--ee-input-border);\n            border-radius: 5px;\n        }\n        \n        input[type=text]:focus, input[type=password]:focus {\n            border-color: var(--ee-input-focus-border);\n        }\n        \n        input:focus {\n            outline: 0;\n        }\n        \n        .button {\n            -webkit-appearance: none;\n            display: inline-block;\n            font-weight: 500;\n            text-align: center;\n            vertical-align: middle;\n            touch-action: manipulation;\n            background-image: none;\n            cursor: pointer;\n            border: 1px solid transparent;\n            white-space: nowrap;\n            -webkit-transition: background-color .15s ease-in-out;\n            -moz-transition: background-color .15s ease-in-out;\n            -o-transition: background-color .15s ease-in-out;\n            -webkit-user-select: none;\n            -moz-user-select: none;\n            -ms-user-select: none;\n            user-select: none;\n            padding: 8px 20px!important;\n            font-size: 1rem;\n            line-height: 1.6;\n            border-radius: 5px;\n        }\n        \n        .button--wide {\n            display: block;\n            width: 100%;\n        }\n        \n        .button--large {\n            padding: 10px 25px!important;\n            font-size: 1.2rem;\n            line-height: 1.7;\n            border-radius: 6px;\n        }\n        \n        .button--primary {\n            color: var(--ee-button-primary-color);\n            background-color: var(--ee-button-primary-bg);\n            border-color: var(--ee-button-primary-border);\n        }\n        \n        .button.disabled {\n            cursor: not-allowed;\n            opacity: .55;\n            box-shadow: none;\n        }\n        \n        .app-notice {\n            border: 1px solid var(--ee-border);\n            overflow: hidden;\n            background-color: var(--ee-bg-0);\n            border-radius: 5px;\n            display: flex;\n            margin-bottom: 20px;\n        }\n        \n        .app-notice---error {\n            border-color: var(--ee-error);\n            background-color: var(--ee-error-light);\n        }\n        \n        .app-notice---error .app-notice__tag {\n            color: var(--ee-error);\n        }\n\n        .app-notice---important {\n            border-color: var(--ee-warning);\n            background-color: var(--ee-warning-light);\n        }\n\n        .app-notice---important .app-notice__tag {\n            color: var(--ee-warning);\n        }\n        \n        .app-notice__tag {\n            padding: 15px 20px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            font-size: 16px;\n        }\n        \n        .app-notice__icon {\n            position: relative;\n        }\n\n        .app-notice__icon::before {\n            font-family: \'Font Awesome 5 Free\';\n            font-weight: 900;\n            content: \"\\\\f06a\";\n            position: relative;\n            z-index: 2;\n        }\n        \n        .app-notice---error .app-notice__icon::after {\n            background: var(--ee-error-light);\n        }\n        \n        .app-notice__tag+.app-notice__content {\n            padding-left: 0;\n        }\n        \n        .app-notice__content {\n            flex: 1 1;\n            padding: 15px 20px;\n        }\n\n        .app-notice__content p {\n            margin: 0;\n            color: var(--ee-text-primary);\n            opacity: .6;\n        }\n        \n                </style>\n            </head>\n            <body>\n                <section class=\"flex-wrap\">\n                    <section class=\"wrap\">\n                        <div class=\"panel redirect\">\n                            <div class=\"redirect-inner\">\n                                <div class=\"panel-heading\">\n                                    <h3>{heading}</h3>\n                                </div>\n                                <div class=\"panel-body\">\n                                    {content}\n                                </div>\n                                <div class=\"panel-footer\">\n                                    {link}\n                                </div>\n                            </div>\n                        </div>\n                    </section>\n                </section>\n            </body>\n        </html>',NULL,1645569843,0);
 
 /*!40000 ALTER TABLE `exp_specialty_templates` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2549,7 +2562,7 @@ CREATE TABLE `exp_stats` (
   `site_id` int(4) unsigned NOT NULL DEFAULT '1',
   `total_members` mediumint(7) NOT NULL DEFAULT '0',
   `recent_member_id` int(10) NOT NULL DEFAULT '0',
-  `recent_member` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `recent_member` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_entries` mediumint(8) NOT NULL DEFAULT '0',
   `total_forum_topics` mediumint(8) NOT NULL DEFAULT '0',
   `total_forum_posts` mediumint(8) NOT NULL DEFAULT '0',
@@ -2570,7 +2583,7 @@ LOCK TABLES `exp_stats` WRITE;
 
 INSERT INTO `exp_stats` (`stat_id`, `site_id`, `total_members`, `recent_member_id`, `recent_member`, `total_entries`, `total_forum_topics`, `total_forum_posts`, `total_comments`, `last_entry_date`, `last_forum_post_date`, `last_comment_date`, `last_visitor_date`, `most_visitors`, `most_visitor_date`, `last_cache_clear`)
 VALUES
-	(1,1,1,1,'admin',0,0,0,0,1607033726,0,0,0,0,0,1637117385);
+	(1,1,1,1,'admin',0,0,0,0,1607033726,0,0,0,0,0,1646174602);
 
 /*!40000 ALTER TABLE `exp_stats` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2727,7 +2740,8 @@ LOCK TABLES `exp_structure_nav_history` WRITE;
 
 INSERT INTO `exp_structure_nav_history` (`id`, `site_id`, `site_pages`, `structure`, `note`, `structure_version`, `date`, `current`, `restored_date`)
 VALUES
-	(1,1,'','[]','Upgraded Structure to 4.7.0','4.7.0','2020-12-17 17:04:30',1,NULL);
+	(1,1,'','[]','Upgraded Structure to 4.7.0','4.7.0','2020-12-17 17:04:30',0,NULL),
+	(2,1,'YToxOntpOjE7YToxOntzOjM6InVybCI7czoxMToie2Jhc2VfdXJsfS8iO319','[]','Upgraded Structure to 5.0.0','5.0.0','2021-11-09 21:58:05',1,NULL);
 
 /*!40000 ALTER TABLE `exp_structure_nav_history` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2859,7 +2873,7 @@ LOCK TABLES `exp_templates` WRITE;
 
 INSERT INTO `exp_templates` (`template_id`, `site_id`, `group_id`, `template_name`, `template_type`, `template_data`, `template_notes`, `edit_date`, `last_author_id`, `cache`, `refresh`, `no_auth_bounce`, `enable_http_auth`, `allow_php`, `php_parse_location`, `hits`, `protect_javascript`, `enable_frontedit`)
 VALUES
-	(2,1,2,'index','webpage','',NULL,1634577892,0,'n',0,'','n','n','o',0,'n','y'),
+	(2,1,2,'index','webpage','{layout=\"site/_base-layout\"}',NULL,1643251278,0,'n',0,'','n','n','o',0,'n','y'),
 	(3,1,2,'_base-layout','webpage','<!doctype html>\n<html lang=\"en\">\n\n<head>\n    <!-- Required meta tags -->\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n\n    <title>{site_name}{if layout:seo_title != \'\'} | {layout:seo_title}{/if}</title>\n\n    <meta name=\"description\" content=\"{layout:seo_description}\">\n    <link rel=\"canonical\" href=\"{site_url}{current_path}\"/>\n\n    <!-- Favicon Code -->\n    <!-- https://realfavicongenerator.net -->\n    <!-- End Favicon Code -->\n\n    <link rel=\"stylesheet\" href=\"{site_url}css/styles.min.css?v=0.0.1\" type=\"text/css\">\n    {layout:css}\n\n    <!-- Google Tag Manager -->\n\n    <!-- End Google Tag Manager -->\n</head>\n\n<body>\n    {layout:contents}\n    {layout:js}\n</body>\n\n</html>',NULL,1636512585,1,'n',0,'','n','n','o',0,'n','y');
 
 /*!40000 ALTER TABLE `exp_templates` ENABLE KEYS */;
@@ -2958,7 +2972,15 @@ VALUES
 	(22,1636512662,'Running database update step: runUpdateFile[ud_6_01_03.php]',NULL,NULL,NULL),
 	(23,1636512662,'Running database update step: runUpdateFile[ud_6_01_04.php]',NULL,NULL,NULL),
 	(24,1636512662,'Running database update step: runUpdateFile[ud_6_01_05.php]',NULL,NULL,NULL),
-	(25,1636512662,'Update complete. Now running version 6.1.5',NULL,NULL,NULL);
+	(25,1636512662,'Update complete. Now running version 6.1.5',NULL,NULL,NULL),
+	(26,1645569843,'Running database update step: runUpdateFile[ud_6_01_06.php]',NULL,NULL,NULL),
+	(27,1645569843,'Running database update step: runUpdateFile[ud_6_02_00.php]',NULL,NULL,NULL),
+	(28,1645569844,'Running database update step: runUpdateFile[ud_6_02_01.php]',NULL,NULL,NULL),
+	(29,1645569844,'Running database update step: runUpdateFile[ud_6_02_02.php]',NULL,NULL,NULL),
+	(30,1645569844,'Running database update step: runUpdateFile[ud_6_02_03.php]',NULL,NULL,NULL),
+	(31,1645569844,'Running database update step: runUpdateFile[ud_6_02_04.php]',NULL,NULL,NULL),
+	(32,1645569844,'Running database update step: runUpdateFile[ud_6_02_05.php]',NULL,NULL,NULL),
+	(33,1645569844,'Update complete. Now running version 6.2.5',NULL,NULL,NULL);
 
 /*!40000 ALTER TABLE `exp_update_log` ENABLE KEYS */;
 UNLOCK TABLES;

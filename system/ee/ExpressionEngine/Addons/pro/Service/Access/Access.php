@@ -44,7 +44,8 @@ class Access
      * Check if user has edit permission for any of provided channel/entry
      * if caching is enabled, we'll do a lot of guessing here
      */
-    public function hasAnyFrontEditPermission() {
+    public function hasAnyFrontEditPermission()
+    {
         if (ee('Permission')->isSuperAdmin()) {
             return true;
         }
@@ -131,7 +132,7 @@ class Access
                 case 'update_available':
                     static::$hasValidLicense = true;
                     break;
-                
+
                 case 'na':
                     $this->logLicenseError('pro_license_error_na', $showAlert);
                     static::$hasValidLicense = false;
@@ -178,7 +179,7 @@ class Access
         ee()->load->library('logger');
         ee()->lang->load('addons');
         ee()->lang->load('pro', ee()->session->get_language(), false, true, PATH_ADDONS . 'pro/');
-        $message = sprintf(lang('pro_license_check_instructions'), lang($message));
+        $message = sprintf(lang('pro_license_check_instructions'), lang($message), ee('CP/URL')->make('settings/general', [], ee()->config->item('cp_url'))->compile() . '#fieldset-site_license_key');
         ee()->logger->developer($message, true);
         if (REQ == 'CP' && $showAlert) {
             ee('CP/Alert')->makeBanner('pro-license-error')

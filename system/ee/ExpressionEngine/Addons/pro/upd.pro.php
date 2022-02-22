@@ -16,6 +16,30 @@ class Pro_upd extends Installer
             'class' => 'Pro',
             'method' => 'setCookie'
         ],
+        [
+            'class' => 'Pro',
+            'method' => 'qrCode'
+        ],
+        [
+            'class' => 'Pro',
+            'method' => 'validateMfa'
+        ],
+        [
+            'class' => 'Pro',
+            'method' => 'invokeMfa'
+        ],
+        [
+            'class' => 'Pro',
+            'method' => 'enableMfa'
+        ],
+        [
+            'class' => 'Pro',
+            'method' => 'disableMfa'
+        ],
+        [
+            'class' => 'Pro',
+            'method' => 'resetMfa'
+        ],
     ];
 
     public function __construct()
@@ -29,7 +53,8 @@ class Pro_upd extends Installer
         ee()->config->update_site_prefs([
             'enable_dock' => 'y',
             'enable_frontedit' => 'y',
-            'automatic_frontedit_links' => 'y'
+            'automatic_frontedit_links' => 'y',
+            'enable_mfa' => 'y',
         ]);
         if ($installed) {
             //Set the necessary config values
@@ -262,7 +287,7 @@ class Pro_upd extends Installer
                         $class = $addon->getExtensionClass();
                         $extension = ee('Model')->get('Extension')->filter('class', $class)->first();
                         $EXT = new $class();
-                        
+
                         if (!empty($extension) && method_exists($EXT, 'update_extension')) {
                             $EXT->update_extension($extension->version);
                             ee()->extensions->version_numbers[$class] = $addon->getVersion();
@@ -298,13 +323,13 @@ class Pro_upd extends Installer
 
     public function update($current = '')
     {
-        if ($current == '' or version_compare($current, $this->version, '==')) {
-            return false;
-        }
+        $updated = parent::update($current);
 
-        foreach (ee('pro:Addon')->installed() as $addon) {
-            $addon->updateDashboardWidgets();
-            $addon->updateProlets();
+        if ($updated) {
+            foreach (ee('pro:Addon')->installed() as $addon) {
+                $addon->updateDashboardWidgets();
+                $addon->updateProlets();
+            }
         }
 
         return true;

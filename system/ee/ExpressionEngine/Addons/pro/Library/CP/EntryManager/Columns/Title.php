@@ -27,6 +27,7 @@ class Title extends Core\Columns\Title
                     'site_id' => $entry->site_id,
                     'hide_closer' => 'y',
                     'preview' => 'y',
+                    'prefer_system_preview' => 'y',
                     'return' => ee('Request')->get('current_uri')
                 ],
                 ee()->config->item('cp_url')
