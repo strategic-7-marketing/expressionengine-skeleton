@@ -1,7 +1,7 @@
 {
   "name": "expressionengine-skeleton-foundation",
   "version": "1.0.0",
-  "description": "Preconfigured ExpressionEngine Skeleton With Foundation Front-end",
+  "description": "Preconfigured ExpressionEngine Skeleton With Foundation Front End",
   "main": "index.js",
   "dependencies": {
     "foundation-sites": "^6.6.3"
