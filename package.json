@@ -1,7 +1,7 @@
 {
   "name": "expressionengine-skeleton-bootstrap",
   "version": "1.0.0",
-  "description": "Preconfigured ExpressionEngine Skeleton With Bootstrap Front-end",
+  "description": "Preconfigured ExpressionEngine Skeleton With Bootstrap Front End",
   "main": "index.js",
   "dependencies": {
     "bootstrap": "^5.0.1"
