@@ -1,7 +1,7 @@
 {
-  "name": "expressionengine-skeleton-foundation",
+  "name": "expressionengine-skeleton-bootstrap",
   "version": "1.0.0",
-  "description": "Preconfigured ExpressionEngine Skeleton With Foundation Front-end",
+  "description": "Preconfigured ExpressionEngine Skeleton With Bootstrap Front-end",
   "main": "index.js",
   "dependencies": {
     "bootstrap": "^4.6.0"
@@ -12,8 +12,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/marcum-strategic-marketing/expressionengine-skeleton/tree/foundation"
+    "url": "https://github.com/strategic-7-marketing/expressionengine-skeleton/tree/bootstrap"
   },
-  "author": "Marcum Strategic Marketing (Steven Demanett)",
+  "author": "Steven Demanett",
   "license": "ISC"
 }
