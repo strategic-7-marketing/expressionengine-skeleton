@@ -4,9 +4,8 @@
   "description": "Preconfigured ExpressionEngine Skeleton With Bootstrap Front-end",
   "main": "index.js",
   "dependencies": {
-    "bootstrap": "^4.6.0"
+    "bootstrap": "^5.0.1"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
