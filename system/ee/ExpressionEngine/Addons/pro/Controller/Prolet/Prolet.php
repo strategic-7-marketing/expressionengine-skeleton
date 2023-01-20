@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Controller\Prolet;
@@ -15,7 +15,6 @@ use ExpressionEngine\Controller\Pro\Pro as Pro;
  */
 class Prolet extends Pro
 {
-
     /**
      * Constructor
      */
@@ -61,7 +60,7 @@ class Prolet extends Pro
         }
 
         ee()->lang->loadfile($prolet->source);
-        
+
         if (!$addon->hasProlet() || !ee('pro:License')->isRegisteredProlet($prolet->source, $prolet->class)) {
             show_error(lang('no_prolets_available'), 403);
         }
@@ -87,7 +86,6 @@ class Prolet extends Pro
 
         return $prolet->generateOutput();
     }
-
 }
 
 // EOF

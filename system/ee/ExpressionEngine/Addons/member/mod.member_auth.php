@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -768,11 +768,11 @@ class Member_auth extends Member
                 $reset_url = ee()->functions->fetch_site_index(0, 0) . '/' . $reset_url;
             }
         } else {
-            $reset_url = reduce_double_slashes(ee()->functions->fetch_site_index(0, 0) . '/' . ee()->config->item('profile_trigger') . '/reset_password');
+            $reset_url = ee()->functions->fetch_site_index(0, 0) . '/' . ee()->config->item('profile_trigger') . '/reset_password';
         }
 
         // Add the reset code and possible forum_id to the reset pass url.
-        $reset_url .= '?id=' . $resetcode . $forum_id;
+        $reset_url = reduce_double_slashes($reset_url . '?id=' . $resetcode . $forum_id);
 
         if (! empty($protected['email_template'])) {
             $email_template = ee()->TMPL->fetch_template_and_parse_from_path($protected['email_template']);
@@ -958,21 +958,23 @@ class Member_auth extends Member
             return ee()->output->show_user_error('submission', array(lang('mbr_missing_confirm')), '', $return_error_link);
         }
 
-        // Validate the password, using EE_Validate. This will also
+        // Validate the password. This will also
         // handle checking whether the password and its confirmation
         // match.
-        if (! class_exists('EE_Validate')) {
-            require APPPATH . 'libraries/Validate.php';
-        }
 
-        $VAL = new EE_Validate(array(
+        $pw_data = array(
             'password' => $password,
             'password_confirm' => $password_confirm,
-        ));
+        );
 
-        $VAL->validate_password();
-        if (count($VAL->errors) > 0) {
-            return ee()->output->show_user_error('submission', $VAL->errors, '', $return_error_link);
+        $validationRules = [
+            'password' => 'validPassword|passwordMatchesSecurityPolicy|matches[password_confirm]'
+        ];
+
+        $validationResult = ee('Validation')->make($validationRules)->validate($pw_data);
+
+        if ($validationResult->isNotValid()) {
+            return ee()->output->show_user_error('submission', $validationResult->getAllErrors(), '', $return_error_link);
         }
 
         // Update the database with the new password.  Apply the appropriate salt first.

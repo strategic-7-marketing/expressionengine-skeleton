@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Model\Prolet;
@@ -105,7 +105,7 @@ class Prolet extends Model
     }
 
     /**
-     * The name of javascript method that will be invoked by prolet 
+     * The name of javascript method that will be invoked by prolet
      *
      * @return string
      */

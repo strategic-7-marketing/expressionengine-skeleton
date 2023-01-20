@@ -2,7 +2,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\Addon;
@@ -17,7 +17,6 @@ use ExpressionEngine\Addons\Pro\Service\Prolet\InitializableProletInterface;
  */
 class Addon extends Core\Addon
 {
-
     /**
      * Has a pro.* file?
      *
@@ -178,7 +177,7 @@ class Addon extends Core\Addon
             if (empty($dock)) {
                 $dock = ee('Model')->make('pro:Dock', ['site_id' => ee()->config->item('site_id')])->save();
             }
-            
+
             foreach ($prolets as $prolet) {
                 $proletModel = ee('Model')->make('pro:Prolet');
                 $proletModel->set($prolet);
@@ -199,7 +198,7 @@ class Addon extends Core\Addon
         if (!class_exists($class)) {
             return false;
         }
-        
+
         $interfaces = class_implements($class);
 
         return isset($interfaces[DashboardWidgetInterface::class]);
@@ -230,7 +229,6 @@ class Addon extends Core\Addon
 
         return isset($interfaces[InitializableProletInterface::class]);
     }
-
 }
 
 // EOF

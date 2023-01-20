@@ -3,20 +3,20 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
  /**
  * namespace is required and must be unique (include file name),
  * because we'll be reusing same class name
  */
+
 namespace ExpressionEngine\Addons\Pro\Widgets;
 
 use ExpressionEngine\Addons\Pro\Service\Dashboard;
 
 class Recent_entries extends Dashboard\AbstractDashboardWidget implements Dashboard\DashboardWidgetInterface
 {
-
     public $title = 'Recent entries';
     public $content = "Static content here";
 

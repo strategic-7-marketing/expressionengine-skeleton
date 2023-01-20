@@ -2,7 +2,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\Prolet;
@@ -29,7 +29,7 @@ interface ProletInterface
     public function getName();
 
     /**
-     * The name of javascript method that will be invoked by prolet 
+     * The name of javascript method that will be invoked by prolet
      *
      * @return string
      */
@@ -58,7 +58,7 @@ interface ProletInterface
 
     /**
      * Check if current member allowed to this prolet
-     * 
+     *
      * @return bool
      */
     public function checkPermissions();

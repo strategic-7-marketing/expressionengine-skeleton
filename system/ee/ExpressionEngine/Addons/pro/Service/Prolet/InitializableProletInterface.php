@@ -2,7 +2,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\Prolet;
@@ -14,5 +14,4 @@ namespace ExpressionEngine\Addons\Pro\Service\Prolet;
  */
 interface InitializableProletInterface extends ProletInterface
 {
-
 }

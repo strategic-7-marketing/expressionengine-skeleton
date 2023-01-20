@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Model\Dashboard;
@@ -110,7 +110,7 @@ class DashboardWidget extends Model
 
         return false;
     }
-    
+
     /**
      * genereate html for this widget
      */
@@ -159,23 +159,28 @@ class DashboardWidget extends Model
         switch ($this->widget_type) {
             case 'php':
                 if (empty($file_path)) {
-                    return $html;
+                    return $html; //no valid path
                 }
                 if (!$fs->exists($file_path)) {
-                    return $html;
+                    return $html; // file does not exist
                 }
                 if (empty($this->_addon)) {
-                    $addon = $this->_addon = ee('pro:Addon')->get($this->widget_source);
+                    $this->_addon = ee('pro:Addon')->get($this->widget_source);
+                }
+                if (empty($this->_addon)) {
+                    return $html; // addon does not exist
                 }
                 include_once($file_path);
                 $widgetClass = trim($this->_addon->getProvider()->getNamespace(), '\\') . '\\Widgets\\' . ucfirst($this->widget_file);
+                $addon = $this->_addon;
                 if (!$addon::implementsDashboardWidgetInterface($widgetClass)) {
                     return $html;
                 }
                 try {
                     $widget = new $widgetClass($this, $edit_mode, $enabled);// we will load the widget instance into contructor
                     $html = $widget->getHtml();
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
                 break;
             case 'html':
             default:
