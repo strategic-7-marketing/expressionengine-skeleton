@@ -58,7 +58,7 @@ abstract class Filter
     /**
      * @var string The value to use for the custom input's placeholder="" attribute
      */
-    protected $placeholder;
+    protected $placeholder = '';
 
     /**
      * @var bool Whether or not this filter has a custom <input> element
@@ -169,7 +169,7 @@ abstract class Filter
         $options = $this->prepareOptions($url);
 
         if (empty($options)) {
-            return;
+            //return;
         }
 
         $value = $this->display_value;

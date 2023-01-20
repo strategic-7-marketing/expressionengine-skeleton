@@ -859,12 +859,13 @@ class Member_memberlist extends Member
         }
 
         if ($is_search_form && !empty($tagdata)) {
+            $data = [];
             if (ee()->TMPL->fetch_param('form_name', '') != "") {
-	            $data['name'] = ee()->TMPL->fetch_param('form_name');
-	        }
+                $data['name'] = ee()->TMPL->fetch_param('form_name');
+            }
 
-	        $data['id'] = ee()->TMPL->form_id;
-	        $data['class'] = ee()->TMPL->form_class;
+            $data['id'] = ee()->TMPL->form_id;
+            $data['class'] = ee()->TMPL->form_class;
 
             $data['hidden_fields'] = array(
                 'ACT' => ee()->functions->fetch_action_id('Member', 'do_member_search'),

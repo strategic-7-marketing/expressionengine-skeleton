@@ -181,6 +181,14 @@ class Edit extends AbstractPublishController
 
         $statuses = ee('Model')->get('Status')->all(true)->indexBy('status');
 
+        $addQueryString = ee('CP/URL')->getCurrentUrl()->qs;
+        if ($page != 1) {
+            $addQueryString['page'] = $page;
+        }
+        if (isset($addQueryString['page']) && isset($addQueryString['sort_col']) && $addQueryString['sort_col'] == 'edit_date') {
+            unset($addQueryString['page']);
+        }
+
         foreach ($entries as $entry) {
             // wW had a delete cascade issue that could leave entries orphaned and
             // resulted in errors, so we'll sneakily use this controller to clean up
@@ -203,7 +211,7 @@ class Edit extends AbstractPublishController
 
             $data[] = array(
                 'attrs' => $attrs,
-                'columns' => $column_renderer->getRenderedTableRowForEntry($entry)
+                'columns' => $column_renderer->getRenderedTableRowForEntry($entry, 'list', false, $addQueryString)
             );
         }
 
@@ -229,7 +237,7 @@ class Edit extends AbstractPublishController
             'class' => 'entries'
         );
 
-        if ($table->sort_dir != 'desc' && $table->sort_col != 'column_entry_date') {
+        if (! ($table->sort_dir == 'desc' && $table->sort_col == 'column_entry_date')) {
             $base_url->addQueryStringVariables(
                 array(
                     'sort_dir' => $table->sort_dir,
@@ -519,7 +527,10 @@ class Edit extends AbstractPublishController
                 'ee_filebrowser',
                 'ee_fileuploader',
             ),
-            'file' => array('cp/publish/publish')
+            'file' => array(
+                'cp/publish/publish',
+                'cp/publish/entry-list',
+            )
         ));
 
         ee()->view->cp_breadcrumbs = array(
@@ -537,7 +548,7 @@ class Edit extends AbstractPublishController
             $vars['layout']->setIsInModalContext(true);
             ee()->output->enable_profiler(false);
 
-            if (IS_PRO && ee('Request')->get('hide_closer') == 'y') {
+            if (ee('Request')->get('hide_closer') == 'y') {
                 ee()->cp->add_js_script(array(
                     'pro_file' => array(
                         'iframe-listener'
@@ -644,7 +655,7 @@ class Edit extends AbstractPublishController
                     $entry->Site->save();
                 }
             }
-            
+
             $entries->delete();
         }
 

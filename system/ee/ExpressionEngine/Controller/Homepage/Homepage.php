@@ -41,7 +41,7 @@ class Homepage extends CP_Controller
             'dashboard' => $dashboard_layout->generateDashboardHtml()
         ];
 
-        if (IS_PRO && ee('pro:Access')->hasValidLicense()) {
+        if (ee('pro:Access')->hasRequiredLicense()) {
             $vars['header']['toolbar_items'] = array(
                 'settings' => array(
                     'href' => ee('CP/URL')->make('pro/dashboard/layout/' . $member->member_id),
@@ -179,6 +179,27 @@ class Homepage extends CP_Controller
     public function toggleSidebarNav()
     {
         ee()->input->set_cookie('collapsed_nav', (int) ee()->input->get('collapsed'), 31104000);
+
+        ee()->output->send_ajax_response(['success']);
+    }
+
+    /**
+     * Toggles the secondary sidebar navigation to/from collapsed state
+     *
+     * @return void
+     */
+    public function toggleSecondarySidebarNav()
+    {
+        if (empty(ee('Request')->get('owner'))) {
+            ee()->output->send_ajax_response(['error']);
+        }
+        $state = json_decode(ee()->input->cookie('secondary_sidebar'));
+        if (is_null($state)) {
+            $state = new \stdClass();
+        }
+        $owner = ee('Security/XSS')->clean(ee('Request')->get('owner'));
+        $state->$owner = (int) ee()->input->get('collapsed');
+        ee()->input->set_cookie('secondary_sidebar', json_encode($state), 31104000);
 
         ee()->output->send_ajax_response(['success']);
     }

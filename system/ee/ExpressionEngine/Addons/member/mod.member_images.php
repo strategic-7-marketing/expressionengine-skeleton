@@ -211,13 +211,14 @@ class Member_images extends Member
 
         //if we run EE template parser, do some things differently
         if (! empty($tagdata)) {
+            $data = [];
             if (ee()->TMPL->fetch_param('form_name', '') != "") {
-	            $data['name'] = ee()->TMPL->fetch_param('form_name');
-	        }
+                $data['name'] = ee()->TMPL->fetch_param('form_name');
+            }
 
-	        $data['id'] = ee()->TMPL->form_id;
-	        $data['class'] = ee()->TMPL->form_class;
-			$data['enctype'] = 'multi';
+            $data['id'] = ee()->TMPL->form_id;
+            $data['class'] = ee()->TMPL->form_class;
+            $data['enctype'] = 'multi';
 
             $data['hidden_fields'] = array(
                 'RET' => (ee()->TMPL->fetch_param('return', '') != "") ? ee()->functions->create_url(ee()->TMPL->fetch_param('return')) : ee()->functions->fetch_current_uri(),

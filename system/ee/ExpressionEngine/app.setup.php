@@ -57,10 +57,15 @@ use ExpressionEngine\Addons\FilePicker\Service\FilePicker;
 use ExpressionEngine\Service\Generator\ActionGenerator;
 use ExpressionEngine\Service\Generator\AddonGenerator;
 use ExpressionEngine\Service\Generator\CommandGenerator;
+use ExpressionEngine\Service\Generator\CpRouteGenerator;
 use ExpressionEngine\Service\Generator\ExtensionHookGenerator;
+use ExpressionEngine\Service\Generator\ExtensionGenerator;
+use ExpressionEngine\Service\Generator\FieldtypeGenerator;
+use ExpressionEngine\Service\Generator\JumpsGenerator;
 use ExpressionEngine\Service\Generator\ModelGenerator;
 use ExpressionEngine\Service\Generator\ProletGenerator;
-use ExpressionEngine\Service\Generator\TagGenerator;
+use ExpressionEngine\Service\Generator\SidebarGenerator;
+use ExpressionEngine\Service\Generator\TemplateTagGenerator;
 use ExpressionEngine\Service\Generator\WidgetGenerator;
 use ExpressionEngine\Model\Channel\ChannelEntry;
 
@@ -357,14 +362,16 @@ $setup = [
 
         'AddonGenerator' => function ($ee, $data) {
             $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
 
-            return new AddonGenerator($filesystem, $data);
+            return new AddonGenerator($filesystem, $str, $data);
         },
 
         'CommandGenerator' => function ($ee, $data) {
             $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
 
-            return new CommandGenerator($filesystem, $data);
+            return new CommandGenerator($filesystem, $str, $data);
         },
 
         'ExtensionHookGenerator' => function ($ee, $data) {
@@ -374,29 +381,67 @@ $setup = [
             return new ExtensionHookGenerator($filesystem, $str, $data);
         },
 
+        'ExtensionGenerator' => function ($ee, $data) {
+            $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
+
+            return new ExtensionGenerator($filesystem, $str, $data);
+        },
+
+        'FieldtypeGenerator' => function ($ee, $data) {
+            $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
+
+            return new FieldtypeGenerator($filesystem, $str, $data);
+        },
+
+        'JumpsGenerator' => function ($ee, $data) {
+            $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
+
+            return new JumpsGenerator($filesystem, $str, $data);
+        },
+
         'ModelGenerator' => function ($ee, $data) {
             $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
 
-            return new ModelGenerator($filesystem, $data);
+            return new ModelGenerator($filesystem, $str, $data);
+        },
+
+        'CpRouteGenerator' => function ($ee, $data) {
+            $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
+
+            return new CpRouteGenerator($filesystem, $str, $data);
         },
 
         'ProletGenerator' => function ($ee, $data) {
             $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
 
-            return new ProletGenerator($filesystem, $data);
+            return new ProletGenerator($filesystem, $str, $data);
         },
 
-        'TagGenerator' => function ($ee, $data) {
+        'SidebarGenerator' => function ($ee, $data) {
             $filesystem = $ee->make('Filesystem');
             $str = $ee->make('Str');
 
-            return new TagGenerator($filesystem, $str, $data);
+            return new SidebarGenerator($filesystem, $str, $data);
+        },
+
+        'TemplateTagGenerator' => function ($ee, $data) {
+            $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
+
+            return new TemplateTagGenerator($filesystem, $str, $data);
         },
 
         'WidgetGenerator' => function ($ee, $data) {
             $filesystem = $ee->make('Filesystem');
+            $str = $ee->make('Str');
 
-            return new WidgetGenerator($filesystem, $data);
+            return new WidgetGenerator($filesystem, $str, $data);
         },
 
         'Consent' => function ($ee, $member_id = null) {
@@ -529,6 +574,10 @@ $setup = [
             return new Filesystem\Filesystem();
         },
 
+        'Filesystem/Adapter' => function ($ee) {
+            return new Filesystem\AdapterManager();
+        },
+
         'IpAddress' => function ($ee) {
             return new IpAddress\Factory();
         },
@@ -542,6 +591,13 @@ $setup = [
 
         'Member' => function ($ee) {
             return new Member\Member();
+        },
+
+        'MimeType' => function ($ee) {
+            $mimeType = new ExpressionEngine\Library\Mime\MimeType();
+            $mimeType->whitelistMimesFromConfig();
+
+            return $mimeType;
         },
 
         'Model/Datastore' => function ($ee) {
@@ -626,7 +682,10 @@ $setup = [
         // ..\File
         'UploadDestination' => 'Model\File\UploadDestination',
         'FileDimension' => 'Model\File\FileDimension',
+        'FileSystemEntity' => 'Model\File\FileSystemEntity',
         'File' => 'Model\File\File',
+        'Directory' => 'Model\File\Directory',
+        //'FileField' => 'Model\File\FileField',
         'Watermark' => 'Model\File\Watermark',
 
         // ..\Log
@@ -734,7 +793,9 @@ $setup = [
 
         // ..\EntryManager
         'EntryManagerView' => 'Model\EntryManager\View',
-        'EntryManagerViewColumn' => 'Model\EntryManager\ViewColumn',
+
+        // ..\FileManager
+        'FileManagerView' => 'Model\File\FileManagerView',
     ),
 
     'cookies.necessary' => [
@@ -752,6 +813,7 @@ $setup = [
         'viewtype',
         'cp_last_site_id',
         'ee_cp_viewmode',
+        'secondary_sidebar',
         'collapsed_nav'
     ],
     'cookie_settings' => [
@@ -792,6 +854,10 @@ $setup = [
         ],
         'collapsed_nav' => [
             'description' => 'lang:cookie_collapsed_nav_desc',
+            'provider' => 'cp',
+        ],
+        'secondary_sidebar' => [
+            'description' => 'lang:cookie_secondary_sidebar_desc',
             'provider' => 'cp',
         ],
         'ee_cp_viewmode' => [
