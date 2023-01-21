@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\Dock;
@@ -61,7 +61,7 @@ class DockFactory
                     - Member has access to frontedit feature
                 */
                 $proAccess = ee('pro:Access');
-                if ($proAccess->hasValidLicense() && $proAccess->hasDockPermission()) {
+                if ((!ee('pro:Access')->requiresValidLicense() || $proAccess->hasValidLicense()) && $proAccess->hasDockPermission()) {
                     // enable frontedit and load required assets
                     ee('pro:FrontEdit')->ensureEntryId();
                     if (ee()->input->cookie('frontedit') != 'off' && $proAccess->hasAnyFrontEditPermission()) {
@@ -90,7 +90,7 @@ class DockFactory
     {
         ee()->TMPL->log_item("Pro: Building the Dock.");
         ee()->lang->load('cp');
-        ee()->lang->load('pro', ee()->session->get_language(), false, true, PATH_ADDONS . 'pro/');
+        ee()->lang->load('pro');
 
         // Get version of asset cache busting
         $addon = ee('Addon')->get('pro');

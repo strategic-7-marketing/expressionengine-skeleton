@@ -33,9 +33,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 function makeFilterableComponent(WrappedComponent) {
   var _temp;
 
-  return _temp =
-  /*#__PURE__*/
-  function (_React$Component) {
+  return _temp = /*#__PURE__*/function (_React$Component) {
     _inherits(_temp, _React$Component);
 
     function _temp(props) {

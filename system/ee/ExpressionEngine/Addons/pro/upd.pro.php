@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
 */
 
 use ExpressionEngine\Service\Addon\Installer;
@@ -208,7 +208,7 @@ class Pro_upd extends Installer
                 $tmpl_group_data = [
                     'group_name' => 'pro-dashboard-widgets',
                     'is_site_default' => 'n',
-                    'site_id' => ee()->config->item('site_id')
+                    'site_id' => ee()->config->item('site_id') ?: 1
                 ];
                 $group = ee('Model')->make('TemplateGroup', $tmpl_group_data)->save();
 
@@ -220,7 +220,7 @@ class Pro_upd extends Installer
                     'template_type' => 'webpage',
                     'last_author_id' => 0,
                     'edit_date' => time(),
-                    'site_id' => ee()->config->item('site_id')
+                    'site_id' => ee()->config->item('site_id') ?: 1
                 ];
 
                 $template = ee('Model')->make('Template', $tmpl_info)->save();
@@ -239,8 +239,12 @@ class Pro_upd extends Installer
             $self->updateProlets();
 
             // Install or update bundled add-ons
-            ee()->load->library('addons');
-            ee()->load->library('addons/addons_installer');
+            if (!isset(ee()->addons)) {
+                ee()->load->library('addons');
+            }
+            if (!isset(ee()->addons_installer)) {
+                ee()->load->library('addons/addons_installer');
+            }
 
             $fs = new Filesystem();
 
@@ -250,6 +254,13 @@ class Pro_upd extends Installer
             ];
 
             $bundledAddonsInstalled = [];
+
+            $inEEInstallMode = is_dir(SYSPATH . 'ee/installer/') && (! defined('INSTALL_MODE') or INSTALL_MODE != false);
+
+            //bundled add-ons will be handled separately, skip if installing with EE
+            if ($inEEInstallMode || REQ == 'CLI') {
+                return $installed;
+            }
 
             foreach ($bundledAddons as $addonName => $addonReadableName) {
                 if (!$fs->exists(PATH_THIRD . $addonName)) {

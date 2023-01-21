@@ -16,8 +16,8 @@ class Member_auth extends Member
     /**
      * Login Page
      *
-     * @param 	string 	number of pages to return back to in the
-     *					exp_tracker cookie
+     * @param   string  number of pages to return back to in the
+     *                  exp_tracker cookie
      */
     public function profile_login_form($return = '-2')
     {
@@ -189,10 +189,10 @@ class Member_auth extends Member
     /**
      * Check against minimum username/password length
      *
-     * @param 	object 	member auth object
-     * @param 	string 	username
-     * @param 	string 	password
-     * @return 	void 	a redirect on failure, or nothing
+     * @param   object  member auth object
+     * @param   string  username
+     * @param   string  password
+     * @return  void    a redirect on failure, or nothing
      */
     private function _check_min_unpwd($member_obj, $username, $password)
     {
@@ -222,9 +222,9 @@ class Member_auth extends Member
     /**
      * Do member auth
      *
-     * @param 	string 	POSTed username
-     * @param 	string 	POSTed password
-     * @return 	object 	session data.
+     * @param   string  POSTed username
+     * @param   string  POSTed password
+     * @return  object  session data.
      */
     private function _do_auth($username, $password)
     {
@@ -279,12 +279,11 @@ class Member_auth extends Member
      *
      * @param array $sites Array of site URLs to login to
      * @param string $login_state The hash identifying the member
-     * @return 	object 	member auth object
+     * @return  object  member auth object
      */
     private function _do_multi_auth($sites, $login_state)
     {
-        if (! $sites
-            or empty($login_state)) {
+        if (! $sites or empty($login_state)) {
             return ee()->output->show_user_error('general', lang('not_authorized'));
         }
 
@@ -383,8 +382,10 @@ class Member_auth extends Member
      */
     private function _update_online_user_stats()
     {
-        if (ee()->config->item('enable_online_user_tracking') == 'n' or
-            ee()->config->item('disable_all_tracking') == 'y') {
+        if (
+            ee()->config->item('enable_online_user_tracking') == 'n'
+            or ee()->config->item('disable_all_tracking') == 'y'
+        ) {
             return;
         }
 
@@ -472,8 +473,10 @@ class Member_auth extends Member
         /* -------------------------------------------*/
 
         if (ee()->input->get_post('FROM') == 'forum' && bool_config_item('forum_is_installed')) {
-            if (ee()->input->get_post('board_id') !== false &&
-                is_numeric(ee()->input->get_post('board_id'))) {
+            if (
+                ee()->input->get_post('board_id') !== false
+                && is_numeric(ee()->input->get_post('board_id'))
+            ) {
                 $query = ee()->db->select("board_forum_url, board_label")
                     ->where('board_id', (int) ee()->input->get_post('board_id'))
                     ->get('forum_boards');
@@ -518,8 +521,10 @@ class Member_auth extends Member
         }
 
         if (ee()->input->get_post('FROM') == 'forum' && bool_config_item('forum_is_installed')) {
-            if (ee()->input->get_post('board_id') !== false &&
-                is_numeric(ee()->input->get_post('board_id'))) {
+            if (
+                ee()->input->get_post('board_id') !== false
+                && is_numeric(ee()->input->get_post('board_id'))
+            ) {
                 $query = ee()->db->select('board_forum_url, board_id, board_label')
                     ->where('board_id', (int) ee()->input->get_post('board_id'))
                     ->get('forum_boards');
@@ -621,7 +626,7 @@ class Member_auth extends Member
      * the results to Member_auth::send_reset_token().  If the user is logged
      * in, it sends them away.
      *
-     * @param 	string 	pages to return back to
+     * @param   string  pages to return back to
      */
     public function forgot_password($ret = '-3')
     {
@@ -648,10 +653,35 @@ class Member_auth extends Member
 
         $this->_set_page_title(lang('mbr_forgotten_password'));
 
+        $forgot_form = $this->_load_element('forgot_form');
+
+        // match {form_declaration} or {form_declaration form_class="foo"}
+        // [0] => {form_declaration form_class="foo"}
+        // [1] => form_declaration form_class="foo"
+        // [2] =>  form_class="foo"
+        // [3] => "
+        // [4] => foo
+        preg_match(
+            "/" . LD . "(form_declaration" . "(\s+form_class\s*=\s*(\042|\047)([^\\3]*?)\\3)?)" . RD . "/s",
+            $forgot_form,
+            $match
+        );
+
+        if (empty($match)) {
+            // don't even return the template because the form will not work since
+            // the template does not contain a {form_declaration}
+            return;
+        }
+
+        // check for the form_class variable from the template and add to $data
+        if (isset($match['4'])) {
+            $data['class'] = $match['4'];
+        }
+
         return $this->_var_swap(
-            $this->_load_element('forgot_form'),
+            $forgot_form,
             array(
-                'form_declaration' => ee()->functions->form_declaration($data)
+                $match[1] => ee()->functions->form_declaration($data)
             )
         );
     }
@@ -696,8 +726,10 @@ class Member_auth extends Member
         }
 
         if (ee()->input->get_post('FROM') == 'forum' && bool_config_item('forum_is_installed')) {
-            if (ee()->input->get_post('board_id') !== false &&
-                is_numeric(ee()->input->get_post('board_id'))) {
+            if (
+                ee()->input->get_post('board_id') !== false
+                && is_numeric(ee()->input->get_post('board_id'))
+            ) {
                 $query = ee()->db->select('board_forum_url, board_id, board_label')
                     ->where('board_id', (int) ee()->input->get_post('board_id'))
                     ->get('forum_boards');
@@ -768,11 +800,11 @@ class Member_auth extends Member
                 $reset_url = ee()->functions->fetch_site_index(0, 0) . '/' . $reset_url;
             }
         } else {
-            $reset_url = ee()->functions->fetch_site_index(0, 0) . '/' . ee()->config->item('profile_trigger') . '/reset_password';
+            $reset_url = reduce_double_slashes(ee()->functions->fetch_site_index(0, 0) . '/' . ee()->config->item('profile_trigger') . '/reset_password');
         }
 
         // Add the reset code and possible forum_id to the reset pass url.
-        $reset_url = reduce_double_slashes($reset_url . '?id=' . $resetcode . $forum_id);
+        $reset_url .= '?id=' . $resetcode . $forum_id;
 
         if (! empty($protected['email_template'])) {
             $email_template = ee()->TMPL->fetch_template_and_parse_from_path($protected['email_template']);
@@ -974,7 +1006,12 @@ class Member_auth extends Member
         $validationResult = ee('Validation')->make($validationRules)->validate($pw_data);
 
         if ($validationResult->isNotValid()) {
-            return ee()->output->show_user_error('submission', $validationResult->getAllErrors(), '', $return_error_link);
+            $errors = [];
+            foreach ($validationResult->getAllErrors() as $error) {
+                $errors = array_merge($errors, array_values($error));
+            }
+
+            return ee()->output->show_user_error('submission', $errors, '', $return_error_link);
         }
 
         // Update the database with the new password.  Apply the appropriate salt first.

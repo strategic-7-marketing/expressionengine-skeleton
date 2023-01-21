@@ -14,6 +14,7 @@
 $(document).ready(function() {
 
 	$('table').eeTableReorder({
+		appendTo: 'table',
 		afterSort: function(row) {
 			$.ajax({
 				url: EE.member_fields.reorder_url,
@@ -22,7 +23,7 @@ $(document).ready(function() {
 				dataType: 'json',
 				error: function(xhr, text, error) {
 					// Let the user know something went wrong
-					if ($('body > .banner').size() == 0) {
+					if ($('body > .banner').length == 0) {
 						$('body').prepend(EE.alert.reorder_ajax_fail);
 					}
 				}

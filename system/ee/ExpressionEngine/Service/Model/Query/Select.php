@@ -27,6 +27,15 @@ class Select extends Query
     protected $additional_search = array();
 
     /**
+     * List of reserved MySQL functions that can be used in query
+     *
+     * @var array
+     */
+    private $reservedMysqlFunctions = [
+        'FIELD'
+    ];
+
+    /**
      * @var int $table_join_limit MySQL only allows 61 tables in a single
      *   statement. We'll keep our joins nunder that.
      */
@@ -210,14 +219,17 @@ class Select extends Query
         $class = $meta->getClass();
 
         $fields = $this->getFields();
+        $requestedFieldIds = [];
 
         // Bail if this query is selecting specific fields and none of those
         // fields would be found in the field data tables
         if (! empty($fields)) {
             $found = false;
+            // if we need just some fields, get their IDs
             foreach ($fields as $field) {
-                if (strpos($field, 'field_id_') !== false) {
+                if (($pos = strpos($field, 'field_id_')) !== false) {
                     $found = true;
+                    $requestedFieldIds[] = substr($field, $pos + 9);
                 }
             }
 
@@ -253,7 +265,10 @@ class Select extends Query
             $fields = array();
             foreach ($structure_models as $model) {
                 foreach ($model->getAllCustomFields() as $f) {
-                    if (! $f->legacy_field_data) {
+                    // only mark for join the fields that are:
+                    // a) using their own tables
+                    // b) requested directly - or not custom fields specifically requested (which means all fields)
+                    if (! $f->legacy_field_data && (empty($requestedFieldIds) || in_array($f->field_id, $requestedFieldIds))) {
                         $fields[$f->field_id] = $f;
                     }
                 }
@@ -515,11 +530,11 @@ class Select extends Query
     protected function applyOrders($query, $orders)
     {
         foreach ($orders as $order) {
-            list($property, $direction) = $order;
+            list($property, $direction, $escape) = $order;
 
             $property = $this->translateProperty($property);
 
-            $query->order_by($property, $direction);
+            $query->order_by($property, $direction, $escape);
         }
     }
 
@@ -691,6 +706,10 @@ class Select extends Query
      */
     protected function translateProperty($property)
     {
+        if (($bracketPos = strpos($property, '(')) !== false && in_array(substr($property, 0, $bracketPos), $this->reservedMysqlFunctions, true)) {
+            return $property;
+        }
+
         if (strpos($property, '.') === false) {
             $alias = $this->root_alias;
 

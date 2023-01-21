@@ -50,6 +50,9 @@ class Str
      */
     public static function snakecase($value)
     {
+        // handle the case of going from PascalCase to snake_case
+        $value = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $value));
+
         return trim(str_replace(['-', ' ', '.'], '_', strtolower($value)));
     }
 
@@ -62,5 +65,15 @@ class Str
     public static function string_contains($textToSearch, $word)
     {
         return (strpos($textToSearch, $word) !== false);
+    }
+
+    /**
+     * Filters $string so it only contains alpha characters
+     * @param string $string
+     * @return string
+     */
+    public static function alphaFilter($string)
+    {
+        return preg_replace("/[^A-Za-z]/", '', $string);
     }
 }
