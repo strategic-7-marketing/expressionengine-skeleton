@@ -68,7 +68,8 @@ class Wygwam_mcp extends Mcp
 
         $defaultConfigSettings = Helper::defaultConfigSettings();
 
-        if (($configId = $request->get('configId'))
+        if (
+            ($configId = $request->get('configId'))
             && ($config = ee('Model')->get('wygwam:Config')->filter('config_id', '==', $configId)->first())
         ) {
             /**
@@ -79,10 +80,10 @@ class Wygwam_mcp extends Mcp
             // Clone a config?
             if ($request->get('clone') == 'y') {
                 $config->config_id = '';
-                $config->config_name .= ' '.lang('wygwam_clone');
+                $config->config_name .= ' ' . lang('wygwam_clone');
                 $headingTitle = lang('wygwam_create_config');
             } else {
-                $headingTitle = lang('wygwam_edit_config').' - '.$config->config_name;
+                $headingTitle = lang('wygwam_edit_config') . ' - ' . $config->config_name;
             }
         } else {
             $config = ee('Model')->make('wygwam:Config', array(
@@ -136,7 +137,7 @@ class Wygwam_mcp extends Mcp
             //$all_sources = ee('assets:Assets')->getAllSources();
 
             foreach ($all_sources as $source) {
-                $uploadDirs[$source->type.':'.$source->id] = ($msm && $source->type == 'ee' ? $siteMap[$source->site_id] . ' - ' : '') . $source->name;
+                $uploadDirs[$source->type . ':' . $source->id] = ($msm && $source->type == 'ee' ? $siteMap[$source->site_id] . ' - ' : '') . $source->name;
             }
         } else {
             $uploadDirs = array('' => '--');
@@ -148,7 +149,7 @@ class Wygwam_mcp extends Mcp
                 ->all();
 
             foreach ($uploadDestinations as $destination) {
-                $uploadDirs[$destination->id] = ($msm ? $destination->Site->site_label.' - ' : '') . $destination->name;
+                $uploadDirs[$destination->id] = ($msm ? $destination->Site->site_label . ' - ' : '') . $destination->name;
             }
         }
 
@@ -189,7 +190,7 @@ class Wygwam_mcp extends Mcp
             }
 
             $json = json_encode($value);
-            $js .= 'new wygwam_addSettingRow("'.$setting.'", '.$json.');' . NL;
+            $js .= 'new wygwam_addSettingRow("' . $setting . '", ' . $json . ');' . NL;
         }
 
         $js .= 'new wygwam_addSettingRow();' . NL;
@@ -648,7 +649,7 @@ class Wygwam_mcp extends Mcp
         /**
          * @var $view EllisLab\ExpressionEngine\Service\View\View
          */
-        $view = ee('View')->make('wygwam:'.$viewFile);
+        $view = ee('View')->make('wygwam:' . $viewFile);
         return $view->render($variables);
     }
 }

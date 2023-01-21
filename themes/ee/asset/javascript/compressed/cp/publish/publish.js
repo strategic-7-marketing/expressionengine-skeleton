@@ -14,7 +14,6 @@ function preventNavigateAway(e) {
 	}
 }
 $(document).ready(function () {
-
 	if(typeof isNavigatingAway === 'undefined') {
 		var isNavigatingAway
 	}
@@ -74,7 +73,6 @@ $(document).ready(function () {
 			cmdPressed = false;
 		}
 	});
-
 	//prevent navigating away
 	$('body .ee-wrapper').on('click', 'a', function(e) {
 		if (
@@ -84,7 +82,7 @@ $(document).ready(function () {
 			$(this).attr('href').indexOf('#') != 0  && 
 			$(this).attr('href').indexOf('javascript:') != 0 &&
 			$(this).attr('target') != '_blank' && 
-			(!e.target.closest('[data-publish]') || (typeof(e.target.closest('[data-publish]').length)!=='undefined' && !e.target.closest('[data-publish]').length)) &&
+			(!e.target.closest('[data-publish]') || (typeof(e.target.closest('[data-publish]').length)!=='undefined' && !e.target.closest('[data-publish]').length)) && 
 			!cmdPressed
 		) {
 			isNavigatingAway = confirm(EE.lang.confirm_exit);
@@ -122,7 +120,7 @@ $(document).ready(function () {
 					url: EE.publish.autosave.URL,
 					data: publishForm.serialize(),
 					success: function(result) {
-						var publishHeading = $('.panel-heading .title-bar h3');
+						var publishHeading = $('.ee-wrapper .panel-heading .title-bar h3');
 						publishHeading.find('.app-badge').remove();
 
 						if (result.error) {

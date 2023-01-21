@@ -67,8 +67,8 @@ class ColumnFactory
     public static function getAvailableColumns($channel = false)
     {
         return array_merge(
-            self::getStandardColumns(),
-            self::getChannelFieldColumns($channel)
+            static::getStandardColumns(),
+            static::getCustomFieldColumns($channel)
         );
     }
 
@@ -79,9 +79,16 @@ class ColumnFactory
      */
     private static function getStandardColumns()
     {
-        return array_map(function ($identifier, $column) {
-            return self::getColumn($identifier);
-        }, array_keys(self::$standard_columns), self::$standard_columns);
+        return array_filter(
+            array_map(function ($identifier, $column) {
+                if ($identifier != 'comments' || bool_config_item('enable_comments')) {
+                    return static::getColumn($identifier);
+                }
+            }, array_keys(static::$standard_columns), static::$standard_columns),
+            function ($column) {
+                return (! empty($column));
+            }
+        );
     }
 
     /**
@@ -89,7 +96,7 @@ class ColumnFactory
      *
      * @return array[Column]
      */
-    private static function getChannelFieldColumns($channel = false)
+    protected static function getCustomFieldColumns($channel = false)
     {
         // Grab all the applicable fields based on the channel if there is one.
         if (! empty($channel)) {

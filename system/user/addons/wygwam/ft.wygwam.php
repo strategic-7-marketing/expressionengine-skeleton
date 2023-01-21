@@ -17,6 +17,15 @@ class Wygwam_ft extends Ft
     public $entry_manager_compatible = true;
 
     /**
+     * A list of operators that this field type supports
+     *
+     * @var array
+     */
+    public $supportedEvaluationRules = ['contains', 'notContains', 'isEmpty', 'isNotEmpty'];
+
+    public $defaultEvaluationRule = 'isNotEmpty';
+
+    /**
      * Construct the fieldtype and populate Wygwam_ft::$info.
      */
     public function __construct()
@@ -167,7 +176,7 @@ class Wygwam_ft extends Ft
      */
     public function grid_settings_modify_column($data)
     {
-        return $this->get_column_type($data, TRUE);
+        return $this->get_column_type($data, true);
     }
 
     /**
@@ -177,7 +186,7 @@ class Wygwam_ft extends Ft
      * @param bool  $grid Is grid field?
      * @return array  [column => column_definition]
      */
-    protected function get_column_type($data, $grid = FALSE)
+    protected function get_column_type($data, $grid = false)
     {
         $column = ($grid) ? 'col' : 'field';
 
@@ -186,8 +195,8 @@ class Wygwam_ft extends Ft
 
         $fields = [
             $column . '_id_' . $data[$column . '_id'] => [
-                'type'		=> $field_content_type,
-                'null'		=> TRUE
+                'type'      => $field_content_type,
+                'null'      => true
             ]
         ];
 
@@ -212,7 +221,7 @@ class Wygwam_ft extends Ft
         $defer = (isset($this->settings['defer']) && $this->settings['defer'] == 'y') ? 'true' : 'false';
 
         if (strpos($id, '_new_') === false) {
-            Helper::insertJs('new Wygwam("'.$id.'", "'.$configHandle.'", '.$defer.');');
+            Helper::insertJs('new Wygwam("' . $id . '", "' . $configHandle . '", ' . $defer . ');');
         }
 
         // pass the data through form_prep() if this is SafeCracker
@@ -233,7 +242,7 @@ class Wygwam_ft extends Ft
             $data = ee()->extensions->call('wygwam_before_display', $this, $data);
         }
 
-        return '<div class="wygwam"><textarea id="'.$id.'" name="'.$this->field_name.'" rows="10" data-config="'.$configHandle.'" class="wygwam-textarea" data-defer="'.(isset($this->settings['defer']) && !empty($this->settings['defer']) && $this->settings['defer'] == 'y' ? 'y' : 'n').'">'.$data.'</textarea></div>'.$this->_generateAssetInputsString($assetInfo);
+        return '<div class="wygwam"><textarea id="' . $id . '" name="' . $this->field_name . '" rows="10" data-config="' . $configHandle . '" class="wygwam-textarea" data-defer="' . (isset($this->settings['defer']) && !empty($this->settings['defer']) && $this->settings['defer'] == 'y' ? 'y' : 'n') . '">' . $data . '</textarea></div>' . $this->_generateAssetInputsString($assetInfo);
     }
 
     /**
@@ -262,7 +271,7 @@ class Wygwam_ft extends Ft
         if (! isset($cache['displayed_grid_cols'][$this->settings['col_id']])) {
             $defer = (isset($this->settings['defer']) && $this->settings['defer'] == 'y') ? 'true' : 'false';
 
-            Helper::insertJs('Wygwam.gridColConfigs.col_id_'.$this->settings['col_id'].' = ["'.$configHandle.'", '.$defer.'];');
+            Helper::insertJs('Wygwam.gridColConfigs.col_id_' . $this->settings['col_id'] . ' = ["' . $configHandle . '", ' . $defer . '];');
 
             $cache['displayed_grid_cols'][$this->settings['col_id']] = true;
         }
@@ -280,7 +289,7 @@ class Wygwam_ft extends Ft
             $data = ee()->extensions->call('wygwam_before_display', $this, $data);
         }
 
-        return '<textarea name="'.$this->field_name.'" rows="10" data-config="'.$configHandle.'">'.$data.'</textarea>'.$this->_generateAssetInputsString($assetInfo);
+        return '<textarea name="' . $this->field_name . '" rows="10" data-config="' . $configHandle . '">' . $data . '</textarea>' . $this->_generateAssetInputsString($assetInfo);
     }
 
     /**
@@ -309,7 +318,7 @@ class Wygwam_ft extends Ft
         if (! isset($cache['displayed_cols'][$this->settings['col_id']])) {
             $defer = (isset($this->settings['defer']) && $this->settings['defer'] == 'y') ? 'true' : 'false';
 
-            Helper::insertJs('Wygwam.matrixColConfigs.col_id_'.$this->settings['col_id'].' = ["'.$configHandle.'", '.$defer.'];');
+            Helper::insertJs('Wygwam.matrixColConfigs.col_id_' . $this->settings['col_id'] . ' = ["' . $configHandle . '", ' . $defer . '];');
 
             $cache['displayed_cols'][$this->settings['col_id']] = true;
         }
@@ -327,7 +336,7 @@ class Wygwam_ft extends Ft
             $data = ee()->extensions->call('wygwam_before_display', $this, $data);
         }
 
-        return '<textarea class="wygwam-textarea" name="'.$this->cell_name.'" rows="10" data-config="'.$configHandle.'">'.$data.'</textarea>'.$this->_generateAssetInputsString($assetInfo);
+        return '<textarea class="wygwam-textarea" name="' . $this->cell_name . '" rows="10" data-config="' . $configHandle . '">' . $data . '</textarea>' . $this->_generateAssetInputsString($assetInfo);
     }
 
     /**
@@ -376,6 +385,7 @@ class Wygwam_ft extends Ft
      */
     public function save($data)
     {
+
         // Trim out any whitespace/empty tags
         $data = preg_replace('/^(\s|<(\w+)>(&nbsp;|\s)*<\/\2>|<br \/>)*/', '', $data);
         $data = preg_replace('/(\s|<(\w+)>(&nbsp;|\s)*<\/\2>|<br \/>)*$/', '', $data);
@@ -399,6 +409,7 @@ class Wygwam_ft extends Ft
         // Convert URLs to tags if we have to.
         $preventConversion = ee()->config->item('wygwam_prevent_url_conversion');
 
+
         if (!$preventConversion || $preventConversion == "n" || $preventConversion == "no") {
             $data = $this->_convertUrlsToTags($data);
         }
@@ -410,6 +421,7 @@ class Wygwam_ft extends Ft
         if (ee()->extensions->active_hook('wygwam_before_save')) {
             $data = ee()->extensions->call('wygwam_before_save', $this, $data);
         }
+
 
         return $data;
     }
@@ -479,10 +491,9 @@ class Wygwam_ft extends Ft
         // return images only?
         if (isset($params['images_only']) && $params['images_only'] == 'yes') {
             $data = $this->_parseImages($data, $params, $tagdata);
-        }
+        } elseif (isset($params['text_only']) && $params['text_only'] == 'yes') {
+            // Text only?
 
-        // Text only?
-        elseif (isset($params['text_only']) && $params['text_only'] == 'yes') {
             // Strip out the HTML tags
             $data = preg_replace('/<[^<]+?>/', '', $data);
         } else {
@@ -621,14 +632,14 @@ class Wygwam_ft extends Ft
                 ),
                 array(
                     'type'    => 'html',
-                    'content' => '(<a href="'.Helper::getMcpUrl('index').'">'.lang('wygwam_edit_configs').'</a>)'
+                    'content' => '(<a href="' . Helper::getMcpUrl('index') . '">' . lang('wygwam_edit_configs') . '</a>)'
                 )
             );
         } else {
             $configFields = array(
                 array(
                     'type'    => 'html',
-                    'content' => '<a href="'.Helper::getMcpUrl('editConfig').'">'.lang('wygwam_create_config').'</a>'
+                    'content' => '<a href="' . Helper::getMcpUrl('editConfig') . '">' . lang('wygwam_create_config') . '</a>'
                 )
             );
         }
@@ -711,8 +722,8 @@ class Wygwam_ft extends Ft
         $num_assets = (!empty($assetInfo['ids']) ? count($assetInfo['ids']) : 0);
 
         for ($counter = 0; $counter < $num_assets; $counter++) {
-            $inputString .= '<input type="hidden" name="wygwam_asset_ids[]" value="'.$assetInfo['ids'][$counter].'" />';
-            $inputString .= '<input type="hidden" name="wygwam_asset_urls[]" value="'.$assetInfo['urls'][$counter].'" />';
+            $inputString .= '<input type="hidden" name="wygwam_asset_ids[]" value="' . $assetInfo['ids'][$counter] . '" />';
+            $inputString .= '<input type="hidden" name="wygwam_asset_urls[]" value="' . $assetInfo['urls'][$counter] . '" />';
         }
 
         return $inputString;
@@ -732,7 +743,7 @@ class Wygwam_ft extends Ft
         $images = array();
 
         if ($tagdata) {
-            $p = !empty($params['var_prefix']) ? rtrim($params['var_prefix'], ':').':' : '';
+            $p = !empty($params['var_prefix']) ? rtrim($params['var_prefix'], ':') . ':' : '';
         }
 
         // find all the image tags
@@ -746,36 +757,36 @@ class Wygwam_ft extends Ft
                 preg_match_all('/\s([\w-]+)=([\'"])([^\2]*?)\2/', $img_match[1], $attr_matches, PREG_SET_ORDER);
 
                 foreach ($attr_matches as $attr_match) {
-                    $img[$p.$attr_match[1]] = $attr_match[3];
+                    $img[$p . $attr_match[1]] = $attr_match[3];
                 }
 
                 // ignore image if it doesn't have a source
-                if (empty($img[$p.'src'])) {
+                if (empty($img[$p . 'src'])) {
                     continue;
                 }
 
                 // find all the styles
-                if (! empty($img[$p.'style'])) {
-                    $styles = array_filter(explode(';', trim($img[$p.'style'])));
+                if (! empty($img[$p . 'style'])) {
+                    $styles = array_filter(explode(';', trim($img[$p . 'style'])));
 
                     foreach ($styles as $style) {
                         $style = explode(':', $style, 2);
-                        $img[$p.'style:'.trim($style[0])] = trim($style[1]);
+                        $img[$p . 'style:' . trim($style[0])] = trim($style[1]);
                     }
                 }
 
                 // use the width and height styles if they're set
-                if (! empty($img[$p.'style:width']) && preg_match('/(\d+?\.?\d+)(px|%)/', $img[$p.'style:width'], $width_match)) {
-                    $img[$p.'width'] = $width_match[1];
+                if (! empty($img[$p . 'style:width']) && preg_match('/(\d+?\.?\d+)(px|%)/', $img[$p . 'style:width'], $width_match)) {
+                    $img[$p . 'width'] = $width_match[1];
                     if ($width_match[2] == '%') {
-                        $img[$p.'width'] .= '%';
+                        $img[$p . 'width'] .= '%';
                     }
                 }
 
-                if (! empty($img[$p.'style:height']) && preg_match('/(\d+?\.?\d+)(px|%)/', $img[$p.'style:height'], $height_match)) {
-                    $img[$p.'height'] = $height_match[1];
+                if (! empty($img[$p . 'style:height']) && preg_match('/(\d+?\.?\d+)(px|%)/', $img[$p . 'style:height'], $height_match)) {
+                    $img[$p . 'height'] = $height_match[1];
                     if ($height_match[2] == '%') {
-                        $img[$p.'height'] .= '%';
+                        $img[$p . 'height'] .= '%';
                     }
                 }
 
@@ -792,7 +803,7 @@ class Wygwam_ft extends Ft
 
         if ($tagdata) {
             // get the absolute number of files before we run the filters
-            $constants[$p.'absolute_total_images'] = (!empty($images) ? count($images) : 0);
+            $constants[$p . 'absolute_total_images'] = (!empty($images) ? count($images) : 0);
         }
 
         // offset and limit params
@@ -810,7 +821,7 @@ class Wygwam_ft extends Ft
 
         if ($tagdata) {
             // get the filtered number of files
-            $constants[$p.'total_images'] = (!empty($images) ? count($images) : 0);
+            $constants[$p . 'total_images'] = (!empty($images) ? count($images) : 0);
 
             // parse {total_images} and {absolute_total_images} first, since they'll never change
             $tagdata = ee()->TMPL->parse_variables_row($tagdata, $constants);

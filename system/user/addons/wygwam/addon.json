@@ -1,8 +1,8 @@
 {
     "name": "Wygwam",
     "shortname": "wygwam",
-    "version": "5.2.0",
-    "foundation_version": "4.6.3",
+    "version": "5.3.5",
+    "foundation_version": "4.9.0",
     "description": "Wysiwyg editor powered by CKEditor",
     "license": "EEHarbor",
     "namespace": "EEHarbor\\Wygwam",

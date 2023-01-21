@@ -1,6 +1,5 @@
 <?php
 
-
 $lang = array(
 
 // -------------------------------------------
@@ -78,5 +77,5 @@ $lang = array(
 'wygwam_site_page' => 'Site Page',
 'wygwam_site_template' => 'Site Template',
 
-''=>''
+'' => ''
 );

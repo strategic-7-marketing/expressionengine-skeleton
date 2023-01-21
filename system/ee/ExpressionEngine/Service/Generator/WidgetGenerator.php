@@ -11,6 +11,7 @@
 namespace ExpressionEngine\Service\Generator;
 
 use ExpressionEngine\Library\Filesystem\Filesystem;
+use ExpressionEngine\Library\String\Str;
 
 class WidgetGenerator
 {
@@ -20,17 +21,19 @@ class WidgetGenerator
     public $addonName;
 
     protected $filesystem;
+    protected $str;
     protected $generatorPath;
     protected $addonPath;
     protected $stubPath;
 
-    public function __construct(Filesystem $filesystem, array $data)
+    public function __construct(Filesystem $filesystem, Str $str, array $data)
     {
-        // Set FS
+        // Set FS and String library
         $this->filesystem = $filesystem;
+        $this->str = $str;
 
         // Set required data for generator to use
-        $this->widgetName = $this->studly($data['name']);
+        $this->widgetName = $this->str->studly($data['name']);
         $this->addon = $data['addon'];
 
         // Set up addon path, generator path, and stub path
@@ -72,7 +75,7 @@ class WidgetGenerator
 
         $this->putFile($this->widgetName . '.php', $widgetStub, 'widgets');
 
-        if (IS_PRO && ee('Addon')->get($this->addon)->isInstalled()) {
+        if (ee('Addon')->get($this->addon)->isInstalled()) {
             // Update the dashboard widgets and prolets
             $addon = ee('pro:Addon')->get($this->addon);
             $addon->updateDashboardWidgets();
@@ -100,24 +103,5 @@ class WidgetGenerator
         if (!$this->filesystem->exists($this->addonPath . $path . $name)) {
             $this->filesystem->write($this->addonPath . $path . $name, $contents);
         }
-    }
-
-    public function slug($word)
-    {
-        $word = strtolower($word);
-
-        return str_replace(['-', ' ', '.'], '_', $word);
-    }
-
-    public function studly($word)
-    {
-        $word = mb_convert_case($word, MB_CASE_TITLE);
-
-        return  str_replace(['-', '_', ' ', '.'], '', $word);
-    }
-
-    public function string_contains($textToSearch, $word)
-    {
-        return (strpos($textToSearch, $word) !== false);
     }
 }

@@ -140,7 +140,7 @@ abstract class FileSyncedModel extends Model
         $path = $this->getFilePath();
         $old_path = $this->getPreviousFilePath($previous);
 
-        if ($path != $old_path && ee('Filesystem')->exists($old_path)) {
+        if ($path != $old_path && $old_path && ee('Filesystem')->exists($old_path)) {
             ee('Filesystem')->delete($old_path);
         }
     }
@@ -164,7 +164,12 @@ abstract class FileSyncedModel extends Model
     {
         $path = $this->getFilePath();
 
-        if (isset($path) && ee('Filesystem')->exists(ee('Filesystem')->dirname($path))) {
+        if (!isset($path)) {
+            return;
+        }
+
+        $directory = ee('Filesystem')->dirname($path);
+        if (ee('Filesystem')->exists($directory) && ee('Filesystem')->isWritable($directory)) {
             ee('Filesystem')->write($path, $this->serializeFileData(), true);
         }
     }

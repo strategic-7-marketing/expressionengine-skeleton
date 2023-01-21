@@ -1,4 +1,5 @@
 <?php
+
 /**
  * EEHarbor PHAR Loader for Wygwam
  * Register a new auto-loader to handle loading files from the

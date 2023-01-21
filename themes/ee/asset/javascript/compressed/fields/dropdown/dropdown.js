@@ -28,9 +28,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
-var Dropdown =
-/*#__PURE__*/
-function (_React$Component) {
+var Dropdown = /*#__PURE__*/function (_React$Component) {
   _inherits(Dropdown, _React$Component);
 
   function Dropdown(props) {
@@ -67,8 +65,46 @@ function (_React$Component) {
       });
     });
 
+    _defineProperty(_assertThisInitialized(_this), "checkChildDirectory", function (items, value) {
+      items.map(function (item) {
+        if (item.value == value) {
+          return window.selectedEl = item;
+        } else if (item.value != value && Array.isArray(item.children) && item.children.length) {
+          _this.checkChildDirectory(item.children, value);
+        }
+      });
+      return window.selectedEl;
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "selectRecursion", function (items) {
+      return React.createElement(React.Fragment, null, items.map(function (item) {
+        return React.createElement("div", {
+          className: "select__dropdown-item-parent"
+        }, React.createElement(DropdownItem, {
+          key: item.value ? item.value : item.section,
+          item: item,
+          selected: _this.state.selected && item.value == _this.state.selected.value,
+          onClick: function onClick(e) {
+            return _this.selectionChanged(item);
+          },
+          name: _this.props.name
+        }), item.children && item.children.length ? _this.selectRecursion(item.children) : null);
+      }));
+    });
+
+    window.selectedEl;
+
+    var _selected; // use different function for file manager part and other site pages
+
+
+    if (props.fileManager) {
+      _selected = _this.checkChildDirectory(_this.props.initialItems, props.selected);
+    } else {
+      _selected = _this.getItemForSelectedValue(props.selected);
+    }
+
     _this.state = {
-      selected: _this.getItemForSelectedValue(props.selected),
+      selected: _selected,
       open: false
     };
     return _this;
@@ -110,7 +146,15 @@ function (_React$Component) {
       var _this2 = this;
 
       var tooMany = this.props.items.length > this.props.tooMany && !this.state.loading;
-      var selected = this.state.selected;
+      var selected;
+
+      if (window.selectedFolder) {
+        selected = this.checkChildDirectory(this.props.initialItems, window.selectedFolder);
+        this.state.selected = selected;
+      } else {
+        selected = this.state.selected;
+      }
+
       return React.createElement("div", {
         className: "select button-segment" + (tooMany ? ' select--resizable' : '') + (this.state.open ? ' select--open' : '')
       }, React.createElement("div", {
@@ -119,7 +163,7 @@ function (_React$Component) {
         tabIndex: "0"
       }, React.createElement("label", {
         className: 'select__button-label' + (this.state.selected ? ' act' : '')
-      }, selected && React.createElement("span", null, selected.sectionLabel ? selected.sectionLabel + ' / ' : '', React.createElement("span", {
+      }, selected && React.createElement("span", null, selected.sectionLabel && !this.props.ignoreSectionLabel ? selected.sectionLabel + ' / ' : '', React.createElement("span", {
         dangerouslySetInnerHTML: {
           __html: selected.label
         }
@@ -149,17 +193,7 @@ function (_React$Component) {
         text: this.props.noResults
       }), this.state.loading && React.createElement(Loading, {
         text: EE.lang.loading
-      }), this.props.items.map(function (item) {
-        return React.createElement(DropdownItem, {
-          key: item.value ? item.value : item.section,
-          item: item,
-          selected: _this2.state.selected && item.value == _this2.state.selected.value,
-          onClick: function onClick(e) {
-            return _this2.selectionChanged(item);
-          },
-          name: _this2.props.name
-        });
-      }))));
+      }), this.selectRecursion(this.props.items))));
     }
   }], [{
     key: "renderFields",
@@ -171,6 +205,10 @@ function (_React$Component) {
 
         if ($(this).data('initialValue')) {
           props.selected = $(this).data('initialValue');
+        }
+
+        if (window.selectedFolder) {
+          props.selected = window.selectedFolder;
         }
 
         ReactDOM.render(React.createElement(FilterableDropdown, props, null), this);

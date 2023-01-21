@@ -36,9 +36,17 @@ $lang = array(
 
     'light_theme' => 'Light Theme',
 
+    'snow_theme' => 'Snow Theme',
+
+    'slate_theme' => 'Slate Theme',
+
     'dark' => 'Dark',
 
     'light' => 'Light',
+
+    'snow' => 'Snow',
+
+    'slate' => 'Slate',
 
     'jump_menu_item' => 'Jump Menu',
 
@@ -71,6 +79,8 @@ $lang = array(
 
     'captcha_explanation' => 'A CAPTCHA is an image containing a security code that users have to submit. Please consult the user guide for more info.',
 
+    'category' => 'Category',
+
     'categories' => 'Categories',
 
     'channels' => 'Channels',
@@ -89,6 +99,8 @@ $lang = array(
 
     'custom_limit' => 'custom limit',
 
+    'custom_date' => 'custom date',
+
     'details' => 'Details',
 
     'do_not_duplicate' => 'Do not duplicate',
@@ -98,6 +110,8 @@ $lang = array(
     'edit_quicklinks' => 'Edit Quick Links',
 
     'fields' => 'Fields',
+
+    'sort_filter' => 'Sort by',
 
     'forgot_password' => 'Forgot your password?',
 
@@ -178,6 +192,8 @@ $lang = array(
     'submit_email_address' => 'Submit your email address',
 
     'templates' => 'Templates',
+
+    'toggle_sidebar' => 'Toggle Sidebar',
 
     'unauthorized' => 'Unauthorized',
 
@@ -337,6 +353,8 @@ $lang = array(
     'select_row' => 'Select Row',
 
     'select_all' => 'Select All',
+
+    'select_all_files' => 'Select All Files',
 
     'search_in' => 'Search in',
 
@@ -579,7 +597,7 @@ $lang = array(
 
     'none' => 'None',
 
-    'preferences_updated' => 'Preferences updated',
+    'preferences_updated' => 'Preferences Updated',
 
     'preferences_updated_desc' => 'Your preferences have been saved successfully.',
 
@@ -640,7 +658,7 @@ $lang = array(
 
     'one_click_major_update_instructions' => '<a href="https://docs.expressionengine.com/latest/installation/updating.html#upgrading-major-version" target="_blank">Read update warnings before continuing!</a><br>Enter your password to continue:',
 
-    'one_click_major_update_pro_license_required' => "Due to the current number of members, you will need to <a href='https://expressionengine.com/pro' target='_blank'>purchase an ExpressionEngine Pro license</a> after upgrading to ExpressionEngine 7.",
+    'one_click_major_update_pro_license_required' => "Due to the current number of members, you will need to <a href='https://expressionengine.com/store/purchase-pro/pro-yearly' target='_blank'>purchase an ExpressionEngine Pro license</a> after upgrading to ExpressionEngine 7.",
 
     'one_click_major_update_pro_license_info' => "Starting in ExpressionEngine 7, all sites with multiple members require a Pro license.",
 
@@ -694,6 +712,7 @@ $lang = array(
 
     'your_license_is' => 'Your license is:',
 
+    'license_skip' => 'Free',
     'license_trial' => 'Trial',
     'license_expired' => 'Expired',
     'license_invalid' => 'Unlicensed',
@@ -719,6 +738,10 @@ $lang = array(
 
     'btn_confirm_and_save_working' => 'Saving...',
 
+    'move_toggle_to_confirm' => 'Move the toggle <b>on</b> to confirm.',
+
+    'confirmation_toggle_required' => 'You must confirm this action with the toggle',
+
     /* confirm delete modal */
     'btn_confirm_and_delete' => 'Confirm and Delete',
 
@@ -736,6 +759,9 @@ $lang = array(
     'confirm_show_all_btn' => 'Show All',
 
     'confirm_show_all_desc' => 'Viewing more than %d items at a time may result in reduced performance.',
+
+    /* moving */
+    'btn_confirm_and_move' => 'Confirm and Move',
 
     /* HTML Buttons */
     'html_btn_anchor' => 'Link',
@@ -807,6 +833,8 @@ $lang = array(
     'dashboard_layout_save_error' => 'Could not save layout',
 
     'dashboard_needs_some_widgets' => 'Please enable at least one widget',
+
+    'unexpected_error' => 'Unexpected error',
 
 );
 

@@ -100,10 +100,6 @@ $lang = array(
 
     'create_entry_with_channel_name' => 'New Entry: %s',
 
-    'custom_date' => 'custom date',
-
-    'custom_limit' => 'custom limit',
-
     'edit_channel_entries' => 'Edit Channel Entries',
 
     'edit_comment_error' => 'Cannot Edit Comment',
@@ -120,7 +116,7 @@ $lang = array(
 
     'edit_entry_success' => 'Entry Updated',
 
-    'edit_entry_success_desc' => 'The entry <a href=\'%1$s\'><b>%2$s</b></a> has been updated.',
+    'edit_entry_success_desc' => 'The entry <a href=\'%1$s\'><b>%2$s</b></a> has been updated at %3$s.',
 
     'edit_entry_with_title' => 'Edit Entry: %s',
 
@@ -394,8 +390,6 @@ $lang = array(
     'file_exists' => 'A file already exists with this name',
 
     'file_exists_warning' => 'File Exists Warning',
-
-    'file_manager' => 'File Manager',
 
     'file_saved' => 'File Saved',
 

@@ -142,8 +142,9 @@ var DropdownController = (function() {
 	function updateDropdownPositions() {
 		$('.dropdown.dropdown--open').each(function() {
 			var dropdown = this
+
 			if (dropdown._popper) {
-				dropdown._popper.update()
+				dropdown._popper.update();
 				dropdown._popper.scheduleUpdate();
 			}
 		})

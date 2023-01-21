@@ -22,7 +22,20 @@ class Writable extends ValidationRule
 
     public function validate($key, $value)
     {
-        return ee('Filesystem')->isWritable(parse_config_variables($value, $this->all_values));
+        $filesystem = ee('Filesystem');
+
+        if (array_key_exists('filesystem_provider', $this->all_values)) {
+            try {
+                $provider = $this->all_values['filesystem_provider'];
+                $filesystem = $provider->getFilesystem();
+                unset($this->all_values['filesystem_provider']);
+            } catch (\Exception $e) {
+                $this->stop();
+            }
+        }
+
+        $parsed = parse_config_variables($value, $this->all_values);
+        return $filesystem->isWritable($parsed);
     }
 
     public function getLanguageKey()

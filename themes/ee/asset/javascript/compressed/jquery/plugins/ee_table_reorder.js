@@ -67,6 +67,9 @@ $.fn.eeTableReorder = function(params) {
 			items: config.item,				// Only allow these to be sortable
 			sort: EE.sortable_sort_helper,	// Custom sort handler
 			forcePlaceholderSize: true,		// Set an explict size on the placeholder
+			appendTo: config.appendTo,
+			cursor: "move",
+			tolerance: 'pointer',
 			helper: function(event, row)	// Fix issue where cell widths collapse on drag
 			{
 				var $originals = row.children();
