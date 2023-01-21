@@ -2,7 +2,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\Cookie;
@@ -56,7 +56,7 @@ class Cookie extends Core\Cookie
                 $filteredCookies = [];
                 foreach ($allCookies as $cookie) {
                     foreach ($providers as $provider) {
-                        if (($cookie->cookie_provider == $provider) === $include)  {
+                        if (($cookie->cookie_provider == $provider) === $include) {
                             $filteredCookies[] = $cookie;
                         }
                     }

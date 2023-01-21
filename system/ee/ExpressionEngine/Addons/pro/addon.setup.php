@@ -5,7 +5,7 @@ return array(
     'author_url'     => 'https://packettide.com/',
     'name'           => 'ExpressionEngine Pro',
     'description'    => 'Super charge EE with more power, features, and flexibility!',
-    'version'        => '1.2.0',
+    'version'        => '1.2.1',
     'namespace'      => 'ExpressionEngine\Addons\Pro',
     'settings_exist' => true,
     'requires'       => [

@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\FrontEdit;
@@ -13,7 +13,6 @@ namespace ExpressionEngine\Addons\Pro\Service\FrontEdit;
  */
 class FrontEdit
 {
-
     public function validateField($field, $data)
     {
         return true;
@@ -64,7 +63,8 @@ class FrontEdit
      * @param string $prefix
      * @return string
      */
-    public function prepareTemplate($tagdata, $prefix = '') {
+    public function prepareTemplate($tagdata, $prefix = '')
+    {
         //if a config setting is missing, we assume it's on
         if (ee()->config->item('automatic_frontedit_links') !== false && ee()->config->item('automatic_frontedit_links') != 'y') {
             return $tagdata;
@@ -149,7 +149,7 @@ class FrontEdit
                 if (preg_match_all($field_regexp, $tagdata, $matches, PREG_SET_ORDER|PREG_OFFSET_CAPTURE)) {
                     $matches = array_reverse($matches);
                     foreach ($matches as $match) {
-                        if (strpos($match[2][0], 'disable') !== false && strpos($match[2][0], 'frontedit') !== false ) {
+                        if (strpos($match[2][0], 'disable') !== false && strpos($match[2][0], 'frontedit') !== false) {
                             continue;
                         }
                         $tag = '{' . $match[1][0] . ':frontedit}';
@@ -167,6 +167,7 @@ class FrontEdit
                 '/\<[\w\-]+?\s[^\>]*?(?P<link>\{[\w:]+\:frontedit\}).*?\>/si' => true,//in the middle of tag
                 //'/\<a\s.*?\>.*?(?P<link>\{[\w:]+\:frontedit\}).*?\<\/a\>/si' => true,//inside A tag
                 '/\{if\s[^\}]*?(?P<link>\{[\w:]+\:frontedit\}).*?\}/s' => true,//EE {if} conditional
+                '/\{if\s([^\}]*?\{[\w:]+\}[^\}]*?)+(?P<link>\{[\w:]+\:frontedit\}).*?\}/s' => false,//EE {if} conditional (more complex one)
                 '/\{encode=[^\}]*?(?P<link>\{[\w:]+\:frontedit\}).*?\}/s' => true,//EE {encode} tag
                 '/\<\!--\s*disable\s*frontedit\s*--\>.*?(?P<link>\{[\w:]+\:frontedit\}).*?\<\!--\s*\/\/\s*disable\s*frontedit\s*--\>/si' => false,
             ];
@@ -231,10 +232,9 @@ class FrontEdit
                             (strpos($substr, '<') === false && strpos($substr, '>') === false) ||
                             (strpos($substr, '<') !== false && strpos($substr, '>') !== false && strpos($substr, '</') === false)
                             ) {
-                            $tagdata = str_replace($substr,  $tag . str_replace($tag, '', $substr), $tagdata);
+                            $tagdata = str_replace($substr, $tag . str_replace($tag, '', $substr), $tagdata);
                         }
                     }
-
                 }
             }
 
@@ -288,7 +288,7 @@ class FrontEdit
                     . '" data-editableurl="'
                     . $fieldEditUrl
                     . '" data-entry_id="ENTRY_ID" data-site_id="SITE_ID" data-size="WINDOW_SIZE" title="FIELD_NAME">'
-                    . '<img src="' . $pencilUrl . '" width="24px" height="24px" style="cursor:pointer !important; filter: drop-shadow(0 1px 3px rgba(0,0,0,.20)) !important; vertical-align: bottom !important; border-radius: 0 !important;" />'
+                    . '<img src="' . $pencilUrl . '" width="24px" height="24px" style="cursor:pointer !important; filter: drop-shadow(0 1px 3px rgba(0,0,0,.20)) !important; vertical-align: bottom !important; border-radius: 0 !important; width: unset !important;" />'
                     . '</span>';
         $frontEditPermission = [];
         $entry_data = [];
@@ -322,7 +322,7 @@ class FrontEdit
                     }
                     if ($frontEditPermission[$frontEditPermissionKey]) {
                         $windowSize = '';
-                        if(isset($fieldsById[$replace['field_id']])) {
+                        if (isset($fieldsById[$replace['field_id']])) {
                             $field = $fieldsById[$replace['field_id']];
                             $fieldName = $field->field_label;
                             if (isset(ee()->api_channel_fields->field_types[$field->field_type])) {
@@ -433,8 +433,7 @@ class FrontEdit
         /** --------------------------------------
         /**  Parse category indicator
         /** --------------------------------------*/
-        if (!empty($entry_id))
-        {
+        if (!empty($entry_id)) {
             if (in_array(ee()->config->item('reserved_category_word'), explode("/", $qstring))) {
                 return;
             }
@@ -492,7 +491,7 @@ class FrontEdit
             '/\<script.*?\<\/script\>/si',
             '/\<style.*?\<\/style\>/si',
             '/[^\s]=[\"\']?[^\"\s]*?\{frontedit_link\s+.*?\}/s',
-            //'/\<\!--\s*disable\s*frontedit\s*--\>.*?\<\!--\s*\/\/\s*disable\s*frontedit\s*--\>/si'
+            '/\<\!--\s*disable\s*frontedit\s*--\>.*?\<\!--\s*\/\/\s*disable\s*frontedit\s*--\>/si'
         ];
         foreach ($stripFromTags as $tag) {
             $tagPresent = preg_match_all($tag, $output, $matches);
@@ -555,7 +554,6 @@ class FrontEdit
         $bytes = openssl_random_pseudo_bytes(16);
         return bin2hex($bytes);
     }
-
 }
 
 // EOF

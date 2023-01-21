@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Pack et Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -345,7 +345,11 @@ class EntryListing
                     break;
             }
 
-            $entries->search($search_fields, $this->search_value);
+            if (is_numeric($this->search_value) && strlen($this->search_value) < 3) {
+                $entries->filter('entry_id', $this->search_value);
+            } else {
+                $entries->search($search_fields, $this->search_value);
+            }
         }
 
         $filter_values = $this->filters->values();
@@ -478,7 +482,7 @@ class EntryListing
         if ($channel) {
             $statuses = $channel->Statuses;
         } else {
-            $statuses = ee('Model')->get('Status')->all();
+            $statuses = ee('Model')->get('Status')->all(true);
         }
 
         $status_options = array();

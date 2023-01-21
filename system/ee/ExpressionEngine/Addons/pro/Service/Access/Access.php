@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\Access;
@@ -13,7 +13,6 @@ namespace ExpressionEngine\Addons\Pro\Service\Access;
  */
 class Access
 {
-
     protected static $hasValidLicense = null;
 
     public function __construct()
@@ -116,7 +115,7 @@ class Access
 
     /**
      * Checks whether license/subscription is valid and active
-     * 
+     *
      * @param bool $showAlert whether to show alert in CP if license is not valid
      *
      * @return boolean the license is valid and active
@@ -161,7 +160,8 @@ class Access
      *
      * @return boolean
      */
-    public function shouldInjectLinks() {
+    public function shouldInjectLinks()
+    {
         if ($this->hasValidLicense() && $this->hasDockPermission() && $this->hasAnyFrontEditPermission() && ee()->input->cookie('frontedit') != 'off') {
             return true;
         }
@@ -190,7 +190,6 @@ class Access
                 ->now();
         }
     }
-
 }
 
 // EOF

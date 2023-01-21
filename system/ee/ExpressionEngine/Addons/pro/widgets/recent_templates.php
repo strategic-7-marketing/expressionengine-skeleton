@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Widgets;
@@ -18,9 +18,8 @@ class Recent_templates extends Dashboard\AbstractDashboardWidget implements Dash
     public function __construct(DashboardWidgetModel $widgetObject, $edit_mode, $enabled)
     {
         parent::__construct($widgetObject, $edit_mode, $enabled);
-        
     }
-    
+
     public function getTitle()
     {
         return lang('recent_templates');
@@ -33,7 +32,7 @@ class Recent_templates extends Dashboard\AbstractDashboardWidget implements Dash
         } else {
             $allowedTemplateGroups = ee('Model')->get('TemplateGroup')->all()->pluck('group_id');
         }
-        
+
         if (!empty($allowedTemplateGroups)) {
             $templates = ee('Model')
                 ->get('Template')

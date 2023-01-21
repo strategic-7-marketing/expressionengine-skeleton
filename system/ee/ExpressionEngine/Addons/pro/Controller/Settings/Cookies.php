@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Controller\Settings;
@@ -16,7 +16,6 @@ use ExpressionEngine\Library\CP\Table;
  */
 class Cookies extends Settings\Pro
 {
-
     public function __construct()
     {
         ee()->view->header = array(
@@ -35,7 +34,7 @@ class Cookies extends Settings\Pro
 
         $allCookies = ee('Model')->get('CookieSetting')->all();
         $providers = ee('App')->getProviders();
-        
+
         foreach (['Necessary', 'Functionality', 'Performance', 'Targeting'] as $type) {
             $data = array();
             foreach ($allCookies as $cookie) {
@@ -90,8 +89,8 @@ class Cookies extends Settings\Pro
      * @param int $id CookieSetting ID
      * @return string
      */
-    public function manage($id) {
-        
+    public function manage($id)
+    {
         $cookie = ee('Model')->get('CookieSetting', $id)->first();
 
         if (empty($cookie)) {
@@ -113,7 +112,7 @@ class Cookies extends Settings\Pro
         }
 
         $cookie_prefix = (! ee()->config->item('cookie_prefix')) ? 'exp_' : ee()->config->item('cookie_prefix') . '_';
-        
+
         $vars['sections'] = array(
             array(
                 array(
