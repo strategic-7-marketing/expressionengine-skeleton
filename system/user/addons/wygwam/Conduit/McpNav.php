@@ -38,6 +38,6 @@ class McpNav extends FluxNav
 
     public function badge($content, $style = 'info')
     {
-        return '<span class="st-'.$style.'" style="float:right;">'.$content.'</span>';
+        return '<span class="st-' . $style . '" style="float:right;">' . $content . '</span>';
     }
 }

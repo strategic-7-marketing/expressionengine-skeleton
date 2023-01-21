@@ -129,7 +129,7 @@ class Wygwam_upd extends Upd
 
         // If older version
         if (version_compare($current, '4.1.14', '<')) {
-            $version = new Version;
+            $version = new Version();
             $settings = Helper::getGlobalSettings();
 
             if (!empty($settings['license_key'])) {

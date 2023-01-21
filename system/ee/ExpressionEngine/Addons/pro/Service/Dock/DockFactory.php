@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Service\Dock;
@@ -48,7 +48,7 @@ class DockFactory
     public function buildOutput($output)
     {
         if (
-            REQ == 'PAGE' && 
+            REQ == 'PAGE' &&
             ee()->session->userdata('member_id') != 0 &&
             ee()->session->userdata('admin_sess') == 1 &&
             (ee()->config->item('enable_dock') == 'y' || ee()->config->item('enable_dock') === false)
@@ -102,7 +102,7 @@ class DockFactory
         $assets .= '<script type="text/javascript" src="' . URL_PRO_THEMES . 'js/fronteditor.min.js?v=' . $version . '-' . $cacheBuster .'"></script>';
         $assets .= '<link rel="stylesheet" type="text/css"  media="screen" href="' . URL_PRO_THEMES . 'css/fronteditor.min.css?v=' . $version . '-' . $cacheBuster .'" />';
         $output = ee()->output->add_to_foot($output, $assets);
-        
+
         ee()->load->library('javascript');
         $fullpageEditUrl = ee('CP/URL')->make(
             'publish/edit/entry/ENTRY_ID',
@@ -116,7 +116,7 @@ class DockFactory
         )->compile();
         $frontEditState = ee()->input->cookie('frontedit') == 'off' ? 'off' : 'on';
         if (
-            (ee()->config->item('enable_frontedit') !== false && ee()->config->item('enable_frontedit') != 'y') 
+            (ee()->config->item('enable_frontedit') !== false && ee()->config->item('enable_frontedit') != 'y')
             || ! ee('pro:Access')->hasAnyFrontEditPermission()
             || ee()->TMPL->enable_frontedit == 'n'
         ) {
@@ -220,7 +220,7 @@ class DockFactory
             }
             $addons[$proletModel->source] = $addon;
         }
-        
+
         ee()->javascript->set_global($globals);
         $output = ee()->output->add_to_foot($output, ee()->javascript->get_global());
 

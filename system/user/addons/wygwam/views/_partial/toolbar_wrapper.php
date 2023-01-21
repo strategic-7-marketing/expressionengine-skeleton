@@ -1,3 +1,3 @@
 <div id="wygwam-toolbar">
-	<?= $html ?>
+    <?= $html ?>
 </div>

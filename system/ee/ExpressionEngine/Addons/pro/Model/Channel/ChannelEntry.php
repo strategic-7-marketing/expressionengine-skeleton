@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Model\Channel;
@@ -20,8 +20,7 @@ class ChannelEntry extends Core\ChannelEntry
     {
         if (IS_PRO && ee('Request')->get('field_id')) {
             $field_id = ee('Request')->get('field_id');
-            foreach ($data as $key => $value)
-            {
+            foreach ($data as $key => $value) {
                 if ($field_id != $key && strrpos($key, '_' . $field_id) !== (strlen($key) - strlen('_' . $field_id))) {
                     unset($data[$key]);
                 }
@@ -33,14 +32,14 @@ class ChannelEntry extends Core\ChannelEntry
 
         return parent::set($data);
     }
-    
+
     /*public function validate()
     {
         if (IS_PRO && ee('Request')->get('field_id') == '') {
             return parent::validate();
         }
 
-        
+
         return $result;
     }*/
 }

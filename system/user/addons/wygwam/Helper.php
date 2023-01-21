@@ -2,8 +2,8 @@
 
 namespace EEHarbor\Wygwam;
 
-if (file_exists(PATH_THIRD.'assets/helper.php')) {
-    include_once(PATH_THIRD .'assets/helper.php');
+if (file_exists(PATH_THIRD . 'assets/helper.php')) {
+    include_once(PATH_THIRD . 'assets/helper.php');
 }
 
 /**
@@ -52,7 +52,7 @@ class Helper
      */
     public static function getMcpUrl($action = 'index', $params = array())
     {
-        return ee('CP/URL')->make('addons/settings/wygwam/'.$action, $params)->compile();
+        return ee('CP/URL')->make('addons/settings/wygwam/' . $action, $params)->compile();
     }
 
     /**
@@ -365,9 +365,9 @@ class Helper
                         $toolbar[$groupSelectionIndex] = array();
                     }
 
-                    $toolbar[$groupSelectionIndex]['b'.$buttonIndex] = $button;
+                    $toolbar[$groupSelectionIndex]['b' . $buttonIndex] = $button;
                 } elseif ($includeMissing) {
-                    $missing['b'.$buttonIndex] = '!'.$button;
+                    $missing['b' . $buttonIndex] = '!' . $button;
                 }
             }
 
@@ -481,8 +481,8 @@ class Helper
     {
         if (! isset(static::$_themeUrl)) {
             // TODO: Bug?
-            $themeFolderUrl = defined('URL_THIRD_THEMES') ? URL_THIRD_THEMES : ee()->config->slash_item('theme_folder_url').'third_party/';
-            static::$_themeUrl = $themeFolderUrl.'wygwam/';
+            $themeFolderUrl = defined('URL_THIRD_THEMES') ? URL_THIRD_THEMES : ee()->config->slash_item('theme_folder_url') . 'third_party/';
+            static::$_themeUrl = $themeFolderUrl . 'wygwam/';
         }
 
         return static::$_themeUrl;
@@ -495,7 +495,7 @@ class Helper
      */
     public static function includeThemeCss($file)
     {
-        ee()->cp->add_to_head('<link rel="stylesheet" type="text/css" href="'.static::themeUrl().$file.'" />');
+        ee()->cp->add_to_head('<link rel="stylesheet" type="text/css" href="' . static::themeUrl() . $file . '" />');
     }
 
     /**
@@ -505,7 +505,7 @@ class Helper
      */
     public static function includeThemeJs($file)
     {
-        ee()->cp->add_to_foot('<script type="text/javascript" src="'.static::themeUrl().$file.'"></script>');
+        ee()->cp->add_to_foot('<script type="text/javascript" src="' . static::themeUrl() . $file . '"></script>');
     }
 
     /**
@@ -515,7 +515,7 @@ class Helper
      */
     public static function insertCss($css)
     {
-        ee()->cp->add_to_head('<style type="text/css">'.$css.'</style>');
+        ee()->cp->add_to_head('<style type="text/css">' . $css . '</style>');
     }
 
     /**
@@ -525,7 +525,7 @@ class Helper
      */
     public static function insertJs($js)
     {
-        ee()->cp->add_to_foot('<script type="text/javascript">'.$js.'</script>');
+        ee()->cp->add_to_foot('<script type="text/javascript">' . $js . '</script>');
     }
 
     /**
@@ -538,10 +538,10 @@ class Helper
             static::includeThemeJs('lib/ckeditor/config.js');
             static::includeThemeJs('scripts/wygwam.js?cache=2018082401');
             static::includeThemeCss('styles/wygwam.css');
-            static::insertCss('.content_elements_icon_wygwam { background: url('.static::themeUrl().'images/ce_icon.png); background-size: 16px; }');
+            static::insertCss('.content_elements_icon_wygwam { background: url(' . static::themeUrl() . 'images/ce_icon.png); background-size: 16px; }');
 
-            $js = 'Wygwam.themeUrl = "'.static::themeUrl().'";'
-                . 'Wygwam.ee2plus = '.(version_compare(APP_VER, '2.2', '>=') ? 'true' : 'false').';';
+            $js = 'Wygwam.themeUrl = "' . static::themeUrl() . '";'
+                . 'Wygwam.ee2plus = ' . (version_compare(APP_VER, '2.2', '>=') ? 'true' : 'false') . ';';
 
             $filedirs = static::getUploadDestinations(1);
 
@@ -551,7 +551,7 @@ class Helper
                     $filedir_urls[$filedir['id']] = $filedir['url'];
                 }
 
-                $js .= 'Wygwam.filedirUrls = '.json_encode($filedir_urls).';';
+                $js .= 'Wygwam.filedirUrls = ' . json_encode($filedir_urls) . ';';
             }
 
             static::insertJs($js);
@@ -559,6 +559,43 @@ class Helper
             static::$_includedFieldResources = true;
         }
     }
+
+    /**
+	 * Copy of function from filemanager, which is private in v7, but not 7.
+     * Takes a string like `{filedir_1}somefile.jpg` and returns a file model for it
+     *
+     * @param string $data Standard file field data string
+     * @return File Model
+     */
+    private static function getFileModelForFieldData($data)
+    {
+		if (version_compare(APP_VER, '7.0', '>=')) {
+			
+			return ee()->file_field->getFileModelForFieldData($data);
+		}
+		
+        $file = null;
+
+        // If the file field is in the "{filedir_n}image.jpg" format
+        if (preg_match('/^{filedir_(\d+)}/', (string) $data, $matches)) {
+            // Set upload directory ID and file name
+            $dir_id = $matches[1];
+            $file_name = str_replace($matches[0], '', $data);
+
+            $file = ee('Model')->get('File')
+                ->filter('file_name', $file_name)
+                ->filter('upload_location_id', $dir_id)
+                ->filter('site_id', ee()->config->item('site_id'))
+                ->first();
+        }
+        // If file field is just a file ID
+        elseif (! empty($data) && is_numeric($data)) {
+            $file = ee('Model')->get('File', $data)->first();
+        }
+
+        return $file;
+		
+	}
 
     /**
      * Inserts the Wygwam config JS in the page foot by config ID.
@@ -579,7 +616,8 @@ class Helper
         // -------------------------------------------
 
 
-        if (ee()->db->table_exists('wygwam_configs')
+        if (
+            ee()->db->table_exists('wygwam_configs')
             && is_numeric($configId)
             && $config = ee('Model')->get('wygwam:Config')->filter('config_id', '==', $configId)->first()
         ) {
@@ -588,7 +626,7 @@ class Helper
              */
             // merge custom settings into config
             $customSettings = $config->settings;
-            $configHandle = preg_replace('/[^a-z0-9]/i', '_', $config->config_name).$configId;
+            $configHandle = preg_replace('/[^a-z0-9]/i', '_', $config->config_name) . $configId;
             $config = array_merge($baseConfig, $customSettings);
         } else {
             $customSettings = array();
@@ -661,7 +699,6 @@ class Helper
 
         switch ($fileBrowser) {
             case 'assets':
-
                 // make sure Assets is actually installed
                 // (otherwise, just use the EE File Manager)
                 if (static::isAssetsInstalled()) {
@@ -675,36 +712,80 @@ class Helper
 
                     // If this has a source type passed in as well, wrap it in quotes.
                     if (strpos($uploadDir, ":")) {
-                        $uploadDir = '"'.$uploadDir.'"';
+                        $uploadDir = '"' . $uploadDir . '"';
                     }
 
-                    $config['filebrowserBrowseFunc']      = 'function(params) { Wygwam.loadAssetsSheet(params, '.$uploadDir.', "any"); }';
-                    $config['filebrowserImageBrowseFunc'] = 'function(params) { Wygwam.loadAssetsSheet(params, '.$uploadDir.', "image"); }';
-                    $config['filebrowserFlashBrowseFunc'] = 'function(params) { Wygwam.loadAssetsSheet(params, '.$uploadDir.', "flash"); }';
+                    $config['filebrowserBrowseFunc']      = 'function(params) { Wygwam.loadAssetsSheet(params, ' . $uploadDir . ', "any"); }';
+                    $config['filebrowserImageBrowseFunc'] = 'function(params) { Wygwam.loadAssetsSheet(params, ' . $uploadDir . ', "image"); }';
+                    $config['filebrowserFlashBrowseFunc'] = 'function(params) { Wygwam.loadAssetsSheet(params, ' . $uploadDir . ', "flash"); }';
 
                     break;
                 }
 
                 // no break
             default:
-
                 if (! $uploadDestination) {
                     break;
                 }
 
                 // load the file browser
                 // pass in the uploadDir to limit the directory to the one choosen
-                $dir_link = ee('CP/FilePicker')->make($uploadDir)->getUrl();
 
-                static::insertJs(NL."\t"."Wygwam.fpUrl = '" .$dir_link ."';".NL);
+                // We are in some sort of Channel form or something like that: we wont have the filepicker available so we do...
+                if (REQ == 'PAGE') {
 
-                // if no upload directory was set, just default to "all"
-                if (! $uploadDir) {
-                    $uploadDir = '"all"';
+                    if (! $uploadDir) {
+                        $uploadDir = '"all"';
+                    }
+
+                    ee()->load->library('file_field');
+                    $results = ee()->db->query("SELECT * FROM exp_files");
+                    $vars = array();
+                    $vars['urls'] = array();
+
+
+                    foreach ($results->result_array() as $row) {
+                        if (version_compare(ee()->config->item('app_version'), '7.0.0', '>=') && !bool_config_item('file_manager_compatibility_mode')) {
+                            $format = "{file:". $row['file_id'] .":url}";
+                        } else {
+                            $format = "{filedir_". $row['upload_location_id'] ."}" . $row['title'];
+                        }
+
+                        $file = static::getFileModelForFieldData($format);
+
+                        // we try one more thing if the format for whatever reason doesnt work... since it allows a single id as well but formats perfered
+                        if ($file == null) {
+                            $file = static::getFileModelForFieldData($row['file_id']);
+                        }
+
+                        if ($file != null) {
+                            $url = $file->getAbsoluteURL();
+                            $vars['urls'][$row['title']] = $url;
+                        }
+                    }
+
+                    $string = '<select name="file" id="unique_file_id">';
+
+                    foreach ($vars['urls'] as $url => $value) {
+                        $string .= '<option value="'.$value.'">'.$url.'</option>';
+                    }
+
+                    $string .= '</select>';
+
+                    $config['filebrowserBrowseFunc']      = "function(params) { Wygwam.loadEEFileBrowserFront(params, ' . $uploadDir . ', 'any', '" . $string . "'); }";
+                    $config['filebrowserImageBrowseFunc'] = "function(params) { Wygwam.loadEEFileBrowserFront(params, ' . $uploadDir . ', 'any', '" . $string . "'); }";
+                } else {
+                    $dir_link = ee('CP/FilePicker')->make($uploadDir)->getUrl();
+                    static::insertJs(NL . "\t" . "Wygwam.fpUrl = '" . $dir_link . "';" . NL);
+
+                    if (! $uploadDir) {
+                        $uploadDir = '"all"';
+                    }
+
+                    $dir_link->qs['hasUpload'] = 1;
+                    $config['filebrowserBrowseFunc']      = 'function(params) { Wygwam.loadEEFileBrowser(params, ' . $uploadDir . ', "any", "' . $dir_link . '"); }';
+                    $config['filebrowserImageBrowseFunc'] = 'function(params) { Wygwam.loadEEFileBrowser(params, ' . $uploadDir . ', "image", "' . $dir_link . '"); }';
                 }
-
-                $config['filebrowserBrowseFunc']      = 'function(params) { Wygwam.loadEEFileBrowser(params, '.$uploadDir.', "any", "'.$dir_link.'"); }';
-                $config['filebrowserImageBrowseFunc'] = 'function(params) { Wygwam.loadEEFileBrowser(params, '.$uploadDir.', "image", "'.$dir_link.'"); }';
         }
 
         // add any site page data to wygwam config
@@ -756,14 +837,14 @@ class Helper
                 }
             }
 
-            $js .= ($js ? ','.NL : '')
-                . "\t\t".'"'.$setting.'": '.$value;
+            $js .= ($js ? ',' . NL : '')
+                . "\t\t" . '"' . $setting . '": ' . $value;
         }
 
         // Strip out any non-space whitespace chars
         $js = str_replace(array(chr(10), chr(11), chr(12), chr(13)), ' ', $js);
 
-        static::insertJs(NL."\t".'Wygwam.configs["'.$configHandle.'"] = {'.NL.$js.NL."\t".'};'.NL);
+        static::insertJs(NL . "\t" . 'Wygwam.configs["' . $configHandle . '"] = {' . NL . $js . NL . "\t" . '};' . NL);
         static::$_includedConfigs[] = $configHandle;
 
         return $configHandle;
@@ -815,7 +896,7 @@ class Helper
                         continue;
                     }
 
-                    $tags[] = LD.'filedir_'.$id.RD;
+                    $tags[] = LD . 'filedir_' . $id . RD;
                     $urls[] = $url;
                 }
             }
@@ -833,12 +914,59 @@ class Helper
      */
     public static function replaceFileTags(&$data)
     {
+        //ee 7 we need to change things around internally to have our _getFileTags method work correctly
+
+        if (version_compare(ee()->config->item('app_version'), '7.0.0', '>=')) {
+            //we need to see if this is an empty / new wygwam field.  If so Data is null and we need to be careful of calling preg match on nulls
+            if ($data === null) {
+                return;
+            }
+
+            preg_match_all('/{file\:(\d+)\:url}/', $data, $matches);
+
+            if ($matches) {
+                $file_ids = $matches[1];
+                foreach ($file_ids as $current => $id) {
+                    $file = ee('Model')->get('File', $id)->with('UploadDestination')->first(true);
+                    $additional_subfolder_info = '';
+                    $base_upload_location = $file->directory_id;
+                    $count = 0;
+                    $current_dir_id = $file->directory_id;
+                    while ($base_upload_location != 0) {
+                        ee()->db->select('title, file_id, directory_id');
+                        $query = ee()->db->get_where('files', array('file_id' => $current_dir_id), 1, 0);
+                        $sub_name = $query->result_array()[0]["title"];
+                        $additional_subfolder_info = $sub_name . "/" . $additional_subfolder_info;
+                        $base_upload_location = $query->result_array()[0]["directory_id"];
+                        $current_dir_id = $query->result_array()[0]["directory_id"];
+                    }
+                    $find = '/{file:'.$file->file_id .':url}/';
+                    $data = (preg_replace($find, '{filedir_'. $file->upload_location_id .'}'. $additional_subfolder_info .$file->file_name, $data));
+                }
+            }
+        }
+
+        //ee 6 and below
         $tags = static::_getFileTags();
-        $data = str_replace($tags[0], $tags[1], $data);
+        $data = str_replace($tags[0], $tags[1], (string) $data);
     }
 
     /**
-     * Replaces File URLs with {filedir_X} tags.
+     * Helper for replaceFileUrls, find the old {filedir_X} format and replace with {file:XX:url}
+     * ***Only if they have compatibility mode set to false which we check for below.
+     */
+    static function getBetween($content,$start,$end)
+    {
+        $r = explode($start, $content);
+        if (isset($r[1])){
+            $r = explode($end, $r[1]);
+            return $r[0];
+        }
+        return '';
+    }
+
+    /**
+     * Replaces File URLs with {filedir_X} tags. Convert to {file:XX:url} for 7
      *
      * @param string &$data
      */
@@ -846,6 +974,38 @@ class Helper
     {
         $tags = static::_getFileTags();
         $data = str_replace($tags[1], $tags[0], $data);
+
+        if (version_compare(ee()->config->item('app_version'), '7.0.0', '>=')) {
+
+            if (!bool_config_item('file_manager_compatibility_mode')) {
+
+                $number_of_images = substr_count($data, '{filedir_');
+
+                for ($x = 0; $x < $number_of_images; $x++) {
+                    $start_old_tag = strpos((string)$data, '{filedir_');
+                    $new_data = substr($data, $start_old_tag + 9); // rip the {filedir_ off so we can grab the directory id
+                    $directory_id_old_tag = strtok($new_data, '}');
+                    $new_data = substr($new_data, strlen($directory_id_old_tag) + 1); //rip off the X file dir and the closing }
+                    $test = strtok($new_data, '"');
+                    $subfolders = explode("/" , $test);
+                    $previous_dir = (int)$directory_id_old_tag;
+                    $filter = 'upload_location_id';
+
+                    foreach ($subfolders as $k => $name) {
+                        ee()->db->select('title, file_id');
+                        $query = ee()->db->get_where('files', array('file_name' => $name, $filter => $previous_dir), 1, 0);
+                        if (isset($query->result_array()[0]["file_id"])) {
+                            $previous_dir = $query->result_array()[0]["file_id"];
+                        }
+                        $filter = "directory_id";
+                    }
+
+                    $new_tag = "{file:" . $previous_dir . ":url}";
+                    $oldfile = "{filedir_" . static::getBetween($data, '{filedir_' , '"');
+                    $data = str_replace($oldfile, $new_tag, $data);
+                }
+            }   
+        }     
     }
 
     /**
@@ -858,9 +1018,9 @@ class Helper
     public static function replaceAssetUrls(&$data, $assetIds, $assetUrls)
     {
         foreach ($assetUrls as $key => $assetUrl) {
-            $replace = '{assets_'.$assetIds[$key].':'.$assetUrl.'}';
+            $replace = '{assets_' . $assetIds[$key] . ':' . $assetUrl . '}';
             $search = str_replace('/', '\/', preg_quote(rtrim($assetUrl, '/')));
-            $search = '/(?!\")('.$search.')\/?(?=\")/uU';
+            $search = '/(?!\")(' . $search . ')\/?(?=\")/uU';
 
             $data = preg_replace($search, $replace, $data);
         }
@@ -875,6 +1035,10 @@ class Helper
      */
     public static function replaceAssetTags(&$data)
     {
+        if ($data === null) {
+            return;
+        }
+
         preg_match_all("/\\{assets_(\\d*):((.*)(\\}))/uU", $data, $matches);
 
         if ($matches && !empty($matches[0])) {
@@ -883,7 +1047,7 @@ class Helper
 
             if (static::isAssetsInstalled()) {
                 $EE = ee();
-                $EE->load->add_package_path(PATH_THIRD.'assets/');
+                $EE->load->add_package_path(PATH_THIRD . 'assets/');
                 $EE->load->library('assets_lib');
                 $files = $EE->assets_lib->get_file_by_id($assetIds);
             }
@@ -898,7 +1062,7 @@ class Helper
                     $replace = $files[$fileId]->url();
                 }
 
-                $data = str_replace('{assets_'.$fileId.':'.$matches[3][$counter].'}', $replace, $data);
+                $data = str_replace('{assets_' . $fileId . ':' . $matches[3][$counter] . '}', $replace, $data);
             }
 
             return array('ids' => $assetIds, 'urls' => $assetUrls);
@@ -929,7 +1093,7 @@ class Helper
             }
 
             foreach ($pageData as $page) {
-                $tags[] = LD.'page_'.$page[0].RD;
+                $tags[] = LD . 'page_' . $page[0] . RD;
                 $urls[] = $page[4];
             }
 
@@ -946,17 +1110,21 @@ class Helper
      */
     public static function replacePageTags(&$data)
     {
-        if (strpos($data, LD.'page_') !== false) {
+        if ($data === null) {
+            return;
+        }
+
+        if (strpos($data, LD . 'page_') !== false) {
             $tags = static::_getPageTags();
 
             foreach ($tags[0] as $key => $pageTag) {
-                $pattern = '/(?!&quot;|\")('.preg_quote($pageTag).')(&quot;|\"|\/)?/u';
+                $pattern = '/(?!&quot;|\")(' . preg_quote($pageTag) . ')(&quot;|\"|\/)?/u';
                 preg_match_all($pattern, $data, $matches);
 
                 if ($matches && count($matches[0]) > 0) {
                     // $matches[2] should either be &quot;, ", / or empty
                     foreach ($matches[2] as $innerKey => $match) {
-                        $search = '/('.preg_quote($matches[1][$innerKey]).')/uU';
+                        $search = '/(' . preg_quote($matches[1][$innerKey]) . ')/uU';
                         $replace = $tags[1][$key];
 
                         // If there is not a trailing quote or slash, we're going to add one.
@@ -982,7 +1150,7 @@ class Helper
 
         foreach ($tags[1] as $key => $pageUrl) {
             $pageUrl = str_replace('/', '\/', preg_quote(rtrim($pageUrl, '/')));
-            $search = '/(?!\")('.$pageUrl.')\/?(?=\")/uU';
+            $search = '/(?!\")(' . $pageUrl . ')\/?(?=\")/uU';
             $data = preg_replace($search, $tags[0][$key], $data);
         }
     }
@@ -1060,7 +1228,7 @@ class Helper
 
                 $query = ee()->db->query('SELECT entry_id, channel_id, title, url_title, status
                                         FROM exp_channel_titles
-                                        WHERE entry_id IN ('.implode(',', $pageIds).')
+                                        WHERE entry_id IN (' . implode(',', $pageIds) . ')
                                         ORDER BY entry_id DESC');
 
                 // index entries by entry_id
@@ -1075,7 +1243,7 @@ class Helper
 
                 // Check if the trailing slash setting in Structure is turned on.
                 if (static::isStructureInstalled()) {
-                    $slash_result = ee()->db->get_where('structure_settings', array('var'=>'add_trailing_slash'), 1)->row();
+                    $slash_result = ee()->db->get_where('structure_settings', array('var' => 'add_trailing_slash'), 1)->row();
                     if ($slash_result && $slash_result->var_value == 'y') {
                         $add_trailing_slash = true;
                     }

@@ -1,6 +1,6 @@
 <?php
 
-use \EllisLab\ExpressionEngine\Library\CP\Table;
+use EllisLab\ExpressionEngine\Library\CP\Table;
 
 /**
  * @var $table Table
@@ -27,7 +27,7 @@ $rows = array();
 foreach ($configs as $config) {
     $rows[] = array(
         array(
-            'href'=>$config['edit'],
+            'href' => $config['edit'],
             'content' => $config['name']
         ),
         array(
@@ -44,15 +44,15 @@ foreach ($configs as $config) {
                 'href'    => '',
                 'title'   => lang('delete'),
                 'class'   => 'm-link',
-                'rel'     => 'modal-deleteConfig-'.$config['id'],
+                'rel'     => 'modal-deleteConfig-' . $config['id'],
             ),
         )
     ));
 
     ee('CP/Modal')->addModal(
-        'remove-'.$config['id'],
+        'remove-' . $config['id'],
         $this->make('ee:_shared/modal_confirm_remove')->render(array(
-            'name'     => 'modal-deleteConfig-'.$config['id'],
+            'name'     => 'modal-deleteConfig-' . $config['id'],
             'form_url' => $config['delete'],
             'hidden' => array('deleteConfigId' => $config['id']),
             'checklist' => array(array('desc' => $config['name'], 'kind' => lang('wygwam_config')))

@@ -20,7 +20,7 @@ EE.proletProcessing = {
 					window.parent.postMessage({type: 'ee-pro-save-success', name: mainEvent.data.name, status: 'success'});
 					window.parent.postMessage({type: 'ee-pro-save-success-ajax', id: mainEvent.data.name, status: 'success'});
 				} catch(error) {
-					alert('error: ' + error)
+					// alert('error: ' + error)
 					window.parent.postMessage({type: 'ee-pro-save-failure', name: mainEvent.data.name, status: 'failure'});
 					var body = document.body
 					body.innerHTML = xhr.responseText

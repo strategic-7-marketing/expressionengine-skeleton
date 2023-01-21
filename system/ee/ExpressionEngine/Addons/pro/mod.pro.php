@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 class Pro
@@ -211,8 +211,8 @@ class Pro
             ee()->lang->load('myaccount');
             ee()->lang->load('pro', ee()->session->get_language(), false, true, PATH_ADDONS . 'pro/');
             $vars = [
-                'title' => lang('disable_mfa'), 
-                'heading' => lang('disable_mfa'), 
+                'title' => lang('disable_mfa'),
+                'heading' => lang('disable_mfa'),
                 'content' => ee('pro:Mfa')->form('disableMfa', 'pro:messages/mfa-disable', 'disable'),
                 'url_themes' => URL_THEMES,
             ];
@@ -291,5 +291,4 @@ class Pro
     {
         ee()->functions->redirect(ee()->functions->create_url(ee('Security/XSS')->clean(ee('Request')->post('RET'))));
     }
-
 }

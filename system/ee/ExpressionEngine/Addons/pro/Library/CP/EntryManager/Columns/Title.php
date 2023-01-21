@@ -2,7 +2,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Library\CP\EntryManager\Columns;
@@ -20,7 +20,6 @@ class Title extends Core\Columns\Title
         $title = ee('Format')->make('Text', $entry->title)->convertToEntities();
 
         if ($this->canEdit($entry)) {
-            
             $edit_link = ee('CP/URL')->make(
                 'publish/edit/entry/' . $entry->entry_id,
                 [

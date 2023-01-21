@@ -3,7 +3,7 @@
 /**
  * ExpressionEngine Pro
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2022, Packet Tide, LLC (https://www.packettide.com)
 */
 
 namespace ExpressionEngine\Addons\Pro\Controller\Authenticate;
@@ -15,7 +15,6 @@ use ExpressionEngine\Controller\Pro\Pro as Pro;
  */
 class Authenticate extends Pro
 {
-
     /**
      * Constructor
      */
@@ -38,8 +37,6 @@ class Authenticate extends Pro
             'output'      => ee('View')->make('pro:account/idle-login')->render()
         ]);
     }
-
-
 }
 
 // EOF

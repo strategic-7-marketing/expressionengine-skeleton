@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2021, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -246,6 +246,10 @@ class Grid_parser
         $prefix = $field_name . ':';
 
         $columns = ee()->grid_model->get_columns_for_field($field_id, $content_type);
+
+        // since the get_columns_for_field was passed a single filed ID and NOT
+        // an array we need to make it an array as pre_loop expects an array
+        $this->_pre_loop(array($columns));
 
         // Prepare the relationship data
         $relationships = array();
@@ -494,7 +498,7 @@ class Grid_parser
             // Finally, do the replacement
             $grid_row = str_replace(
                 $match[0],
-                $replace_data,
+                (string) $replace_data,
                 $grid_row
             );
         }
@@ -511,6 +515,11 @@ class Grid_parser
     protected function _pre_loop($cols)
     {
         $grid_data = ee()->grid_model->get_grid_data();
+
+        // $grid_data always has a type first array element.
+        if(isset($grid_data['channel'])) {
+            $grid_data = $grid_data['channel'];
+        }
 
         $columns = array();
 
@@ -533,8 +542,19 @@ class Grid_parser
             }
 
             foreach ($grid_data[$column['field_id']] as $marker) {
+
                 foreach ($marker as $row) {
+
+                    // fluid fields will just give an int...
+                    // If it's not an array or object
+                    // something we can foreach on
+                    // skip it
+                    if( is_scalar($row)) {
+                        continue;
+                    }
+
                     foreach ($row as $row_id => $data) {
+
                         if (! is_array($data) || ! isset($data['col_id_' . $column['col_id']])) {
                             continue;
                         }
