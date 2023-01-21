@@ -1,13 +1,13 @@
 # ************************************************************
 # Sequel Ace SQL dump
-# Version 3028
+# Version 20039
 #
 # https://sequel-ace.com/
 # https://github.com/Sequel-Ace/Sequel-Ace
 #
 # Host: localhost (MySQL 5.7.30)
 # Database: ee-skeleton
-# Generation Time: 2022-02-22 22:48:59 +0000
+# Generation Time: 2023-01-21 04:00:32 +0000
 # ************************************************************
 
 
@@ -70,7 +70,14 @@ VALUES
 	(31,'Member','update_profile',0),
 	(32,'Member','upload_avatar',0),
 	(33,'Member','recaptcha_check',1),
-	(34,'Member','validate',0);
+	(34,'Member','validate',0),
+	(35,'Pro','setCookie',0),
+	(36,'Pro','qrCode',0),
+	(37,'Pro','validateMfa',0),
+	(38,'Pro','invokeMfa',0),
+	(39,'Pro','enableMfa',0),
+	(40,'Pro','disableMfa',0),
+	(41,'Pro','resetMfa',0);
 
 /*!40000 ALTER TABLE `exp_actions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -255,6 +262,19 @@ CREATE TABLE `exp_channel_entries_autosave` (
 
 
 
+# Dump of table exp_channel_entry_hidden_fields
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_channel_entry_hidden_fields`;
+
+CREATE TABLE `exp_channel_entry_hidden_fields` (
+  `entry_id` int(10) unsigned NOT NULL,
+  `field_id` int(10) unsigned NOT NULL,
+  KEY `entry_id_field_id` (`entry_id`,`field_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
 # Dump of table exp_channel_field_groups_fields
 # ------------------------------------------------------------
 
@@ -297,6 +317,7 @@ CREATE TABLE `exp_channel_fields` (
   `field_settings` text COLLATE utf8mb4_unicode_ci,
   `legacy_field_data` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `enable_frontedit` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
+  `field_is_conditional` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   PRIMARY KEY (`field_id`),
   KEY `field_type` (`field_type`),
   KEY `site_id` (`site_id`)
@@ -438,6 +459,8 @@ CREATE TABLE `exp_channels` (
   `sticky_enabled` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `allow_preview` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   `enable_entry_cloning` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
+  `conditional_sync_required` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `title_field_instructions` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`channel_id`),
   KEY `cat_group` (`cat_group`(191)),
   KEY `channel_name` (`channel_name`),
@@ -682,7 +705,7 @@ VALUES
 	(133,1,'ban_message','This site is currently unavailable'),
 	(134,1,'ban_destination','http://www.yahoo.com/'),
 	(135,1,'enable_emoticons','y'),
-	(136,1,'emoticon_url','{base_url}images/smileys/'),
+	(136,1,'emoticon_url','https://dev.ee-skeleton.com/images/smileys/'),
 	(137,1,'recount_batch_total','1000'),
 	(138,1,'new_version_check','y'),
 	(139,1,'enable_throttling','n'),
@@ -715,7 +738,25 @@ VALUES
 	(166,1,'site_license_key',''),
 	(167,1,'show_ee_news','n'),
 	(168,0,'cli_enabled','y'),
-	(169,1,'password_security_policy','none');
+	(169,1,'password_security_policy','none'),
+	(170,0,'legacy_member_data','n'),
+	(171,0,'legacy_channel_data','n'),
+	(172,0,'legacy_category_field_data','n'),
+	(173,0,'file_manager_compatibility_mode','n'),
+	(175,0,'enable_dock','n'),
+	(176,0,'enable_frontedit','y'),
+	(177,0,'automatic_frontedit_links','y'),
+	(178,0,'enable_mfa','y'),
+	(179,0,'autosave_interval_seconds','10'),
+	(180,1,'enable_entry_cloning','n'),
+	(181,0,'legacy_member_data','n'),
+	(182,0,'legacy_channel_data','n'),
+	(183,0,'legacy_category_field_data','n'),
+	(184,0,'file_manager_compatibility_mode','n'),
+	(186,0,'legacy_member_data','n'),
+	(187,0,'legacy_channel_data','n'),
+	(188,0,'legacy_category_field_data','n'),
+	(189,0,'file_manager_compatibility_mode','n');
 
 /*!40000 ALTER TABLE `exp_config` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -882,7 +923,7 @@ INSERT INTO `exp_cookie_settings` (`cookie_id`, `cookie_provider`, `cookie_name`
 VALUES
 	(1,'ee','csrf_token',7200,NULL,'CSRF Token','A security cookie used to identify the user and prevent Cross Site Request Forgery attacks.'),
 	(2,'ee','flash',0,NULL,'Flash data','Control panel user feedback messages, encrypted for security.'),
-	(3,'ee','remember',NULL,NULL,'Remember Me','Determines whether a user is automatically logged in upon visiting the site.'),
+	(3,'ee','remember',1209600,NULL,'Remember Me','Determines whether a user is automatically logged in upon visiting the site.'),
 	(4,'ee','sessionid',3600,NULL,'Session ID','Session id, used to associate a logged in user with their data.'),
 	(5,'ee','visitor_consents',NULL,NULL,'Visitor Consents','Saves responses to Consent requests for non-logged in visitors'),
 	(6,'ee','last_activity',NULL,NULL,'Last Activity','Records the time of the last page load. Used in in calculating active sessions.'),
@@ -901,7 +942,8 @@ VALUES
 	(19,'comment','notify_me',NULL,NULL,'Notify me','If set to ‘yes’, notifications will be sent to the saved email address when new comments are made.'),
 	(20,'comment','save_info',NULL,NULL,'Save info','If set to ‘yes’, allows additional cookies (my_email, my_location, my_name, my_url) to store guest user information for use when filling out comment forms. This cookie is only set if you submit a comment.'),
 	(21,'forum','forum_theme',NULL,NULL,'Forum Theme','If multiple forum themes exist, this cookie allows the user to save their theme preference.'),
-	(22,'forum','forum_topics',NULL,NULL,'Forum Topics','Tracks the id number for read topics, allows setting the ‘read’ status. Saved in the cookie for guests, the database for members.');
+	(22,'forum','forum_topics',NULL,NULL,'Forum Topics','Tracks the id number for read topics, allows setting the ‘read’ status. Saved in the cookie for guests, the database for members.'),
+	(23,'cp','secondary_sidebar',NULL,NULL,'Secondary Sidebar State','Determines whether secondary navigation sidebar in the Control Panel should be collapsed for each corresponding section.');
 
 /*!40000 ALTER TABLE `exp_cookie_settings` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -966,7 +1008,16 @@ VALUES
 	(35,1,1,'admin','::1',1636512626,'Logged in'),
 	(36,1,1,'admin','::1',1636512631,'Logged out'),
 	(37,1,1,'admin','::1',1636512646,'Logged in'),
-	(38,1,1,'admin','::1',1645569821,'Logged in');
+	(38,1,1,'admin','::1',1645569821,'Logged in'),
+	(39,1,1,'admin','::1',1646692248,'Logged in'),
+	(40,1,1,'admin','::1',1674257253,'Logged in'),
+	(41,1,1,'admin','::1',1674257417,'Started updating file usage'),
+	(42,1,1,'admin','::1',1674257417,'File usage update complete. 1 database tables were affected.'),
+	(43,1,1,'admin','::1',1674271882,'Logged in'),
+	(44,1,1,'admin','::1',1674271941,'Started updating file usage'),
+	(45,1,1,'admin','::1',1674271941,'File usage update complete. 1 database tables were affected.'),
+	(46,1,1,'admin','::1',1674273108,'Started updating file usage'),
+	(47,1,1,'admin','::1',1674273108,'File usage update complete. 1 database tables were affected.');
 
 /*!40000 ALTER TABLE `exp_cp_log` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1017,6 +1068,20 @@ CREATE TABLE `exp_dashboard_widgets` (
   PRIMARY KEY (`widget_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+LOCK TABLES `exp_dashboard_widgets` WRITE;
+/*!40000 ALTER TABLE `exp_dashboard_widgets` DISABLE KEYS */;
+
+INSERT INTO `exp_dashboard_widgets` (`widget_id`, `widget_name`, `widget_data`, `widget_type`, `widget_source`, `widget_file`)
+VALUES
+	(1,NULL,NULL,'php','pro','comments'),
+	(2,NULL,NULL,'php','pro','eecms_news'),
+	(3,NULL,NULL,'php','pro','members'),
+	(4,NULL,NULL,'php','pro','recent_entries'),
+	(5,NULL,NULL,'php','pro','recent_templates'),
+	(6,NULL,NULL,'html','pro','support');
+
+/*!40000 ALTER TABLE `exp_dashboard_widgets` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table exp_developer_log
@@ -1044,6 +1109,50 @@ CREATE TABLE `exp_developer_log` (
   PRIMARY KEY (`log_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+
+# Dump of table exp_dock_prolets
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_dock_prolets`;
+
+CREATE TABLE `exp_dock_prolets` (
+  `dock_id` int(10) unsigned NOT NULL,
+  `prolet_id` int(10) unsigned NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+LOCK TABLES `exp_dock_prolets` WRITE;
+/*!40000 ALTER TABLE `exp_dock_prolets` DISABLE KEYS */;
+
+INSERT INTO `exp_dock_prolets` (`dock_id`, `prolet_id`)
+VALUES
+	(1,1),
+	(1,2);
+
+/*!40000 ALTER TABLE `exp_dock_prolets` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# Dump of table exp_docks
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_docks`;
+
+CREATE TABLE `exp_docks` (
+  `dock_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `site_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`dock_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+LOCK TABLES `exp_docks` WRITE;
+/*!40000 ALTER TABLE `exp_docks` DISABLE KEYS */;
+
+INSERT INTO `exp_docks` (`dock_id`, `site_id`)
+VALUES
+	(1,0);
+
+/*!40000 ALTER TABLE `exp_docks` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table exp_eeharbor_licenses
@@ -1146,7 +1255,13 @@ CREATE TABLE `exp_entry_manager_views` (
   `member_id` int(10) unsigned NOT NULL,
   `name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `columns` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`view_id`)
+  PRIMARY KEY (`view_id`),
+  KEY `channel_id` (`channel_id`,`member_id`),
+  KEY `channel_id_2` (`channel_id`,`member_id`),
+  KEY `channel_id_3` (`channel_id`,`member_id`),
+  KEY `channel_id_4` (`channel_id`,`member_id`),
+  KEY `channel_id_5` (`channel_id`,`member_id`),
+  KEY `channel_id_6` (`channel_id`,`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -1183,7 +1298,8 @@ CREATE TABLE `exp_extensions` (
   `priority` int(2) NOT NULL DEFAULT '10',
   `version` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `enabled` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
-  PRIMARY KEY (`extension_id`)
+  PRIMARY KEY (`extension_id`),
+  KEY `enabled` (`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `exp_extensions` WRITE;
@@ -1192,23 +1308,69 @@ LOCK TABLES `exp_extensions` WRITE;
 INSERT INTO `exp_extensions` (`extension_id`, `class`, `method`, `hook`, `settings`, `priority`, `version`, `enabled`)
 VALUES
 	(1,'Comment_ext','addCommentMenu','cp_custom_menu','a:0:{}',10,'2.3.3','y'),
-	(4,'Structure_ext','after_channel_entry_save','after_channel_entry_save','a:0:{}',10,'5.0.0','y'),
-	(5,'Structure_ext','sessions_end','sessions_end','a:0:{}',10,'5.0.0','y'),
-	(6,'Structure_ext','entry_submission_redirect','entry_submission_redirect','a:0:{}',10,'5.0.0','y'),
-	(7,'Structure_ext','cp_member_login','cp_member_login','a:0:{}',10,'5.0.0','y'),
-	(8,'Structure_ext','sessions_start','sessions_start','a:0:{}',10,'5.0.0','y'),
-	(9,'Structure_ext','pagination_create','pagination_create','a:0:{}',10,'5.0.0','y'),
-	(10,'Structure_ext','wygwam_config','wygwam_config','a:0:{}',10,'5.0.0','y'),
-	(11,'Structure_ext','core_template_route','core_template_route','a:0:{}',10,'5.0.0','y'),
-	(12,'Structure_ext','entry_submission_end','entry_submission_end','a:0:{}',10,'5.0.0','y'),
-	(13,'Structure_ext','channel_form_submit_entry_end','channel_form_submit_entry_end','a:0:{}',10,'5.0.0','y'),
-	(14,'Structure_ext','template_post_parse','template_post_parse','a:0:{}',10,'5.0.0','y'),
-	(15,'Structure_ext','cp_custom_menu','cp_custom_menu','a:0:{}',10,'5.0.0','y'),
-	(16,'Structure_ext','publish_live_preview_route','publish_live_preview_route','a:0:{}',10,'5.0.0','y'),
-	(17,'Structure_ext','entry_save_and_close_redirect','entry_save_and_close_redirect','a:0:{}',10,'5.0.0','y');
+	(4,'Structure_ext','after_channel_entry_save','after_channel_entry_save','a:0:{}',10,'6.0.0','y'),
+	(5,'Structure_ext','sessions_end','sessions_end','a:0:{}',10,'6.0.0','y'),
+	(6,'Structure_ext','entry_submission_redirect','entry_submission_redirect','a:0:{}',10,'6.0.0','y'),
+	(7,'Structure_ext','cp_member_login','cp_member_login','a:0:{}',10,'6.0.0','y'),
+	(8,'Structure_ext','sessions_start','sessions_start','a:0:{}',10,'6.0.0','y'),
+	(9,'Structure_ext','pagination_create','pagination_create','a:0:{}',10,'6.0.0','y'),
+	(10,'Structure_ext','wygwam_config','wygwam_config','a:0:{}',10,'6.0.0','y'),
+	(11,'Structure_ext','core_template_route','core_template_route','a:0:{}',10,'6.0.0','y'),
+	(12,'Structure_ext','entry_submission_end','entry_submission_end','a:0:{}',10,'6.0.0','y'),
+	(13,'Structure_ext','channel_form_submit_entry_end','channel_form_submit_entry_end','a:0:{}',10,'6.0.0','y'),
+	(14,'Structure_ext','template_post_parse','template_post_parse','a:0:{}',10,'6.0.0','y'),
+	(15,'Structure_ext','cp_custom_menu','cp_custom_menu','a:0:{}',10,'6.0.0','y'),
+	(16,'Structure_ext','publish_live_preview_route','publish_live_preview_route','a:0:{}',10,'6.0.0','y'),
+	(17,'Structure_ext','entry_save_and_close_redirect','entry_save_and_close_redirect','a:0:{}',10,'6.0.0','y');
 
 /*!40000 ALTER TABLE `exp_extensions` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+# Dump of table exp_field_condition_sets
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_field_condition_sets`;
+
+CREATE TABLE `exp_field_condition_sets` (
+  `condition_set_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `match` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'all',
+  `order` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`condition_set_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+# Dump of table exp_field_condition_sets_channel_fields
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_field_condition_sets_channel_fields`;
+
+CREATE TABLE `exp_field_condition_sets_channel_fields` (
+  `condition_set_id` int(10) unsigned NOT NULL,
+  `field_id` int(10) unsigned NOT NULL,
+  KEY `condition_set_id_field_id` (`condition_set_id`,`field_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+# Dump of table exp_field_conditions
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_field_conditions`;
+
+CREATE TABLE `exp_field_conditions` (
+  `condition_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `condition_set_id` int(10) unsigned NOT NULL,
+  `condition_field_id` int(10) unsigned NOT NULL,
+  `evaluation_rule` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `value` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `order` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`condition_id`),
+  KEY `condition_set_id` (`condition_set_id`),
+  KEY `condition_field_id` (`condition_field_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
 # Dump of table exp_field_groups
@@ -1262,9 +1424,14 @@ VALUES
 	(15,'rte','2.1.0','YTowOnt9','n'),
 	(16,'toggle','1.0.0','YTowOnt9','n'),
 	(17,'url','1.0.0','YTowOnt9','n'),
-	(18,'structure','5.0.0','YToxOntzOjE5OiJzdHJ1Y3R1cmVfbGlzdF90eXBlIjtzOjU6InBhZ2VzIjt9','n'),
-	(19,'wygwam','5.2.0','YTowOnt9','n'),
-	(20,'colorpicker','1.0.0','YTowOnt9','n');
+	(18,'structure','6.0.0','YToxOntzOjE5OiJzdHJ1Y3R1cmVfbGlzdF90eXBlIjtzOjU6InBhZ2VzIjt9','n'),
+	(19,'wygwam','5.3.5','YTowOnt9','n'),
+	(20,'colorpicker','1.0.0','YTowOnt9','n'),
+	(21,'slider','1.0.0','YTowOnt9','n'),
+	(22,'range_slider','1.0.0','YTowOnt9','n'),
+	(23,'selectable_buttons','1.0.0','YTowOnt9','n'),
+	(24,'number','1.0.0','YTowOnt9','n'),
+	(25,'notes','1.0.0','YTowOnt9','n');
 
 /*!40000 ALTER TABLE `exp_fieldtypes` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1282,6 +1449,18 @@ CREATE TABLE `exp_file_categories` (
   `is_cover` char(1) COLLATE utf8mb4_unicode_ci DEFAULT 'n',
   PRIMARY KEY (`file_id`,`cat_id`),
   KEY `cat_id` (`cat_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+# Dump of table exp_file_data
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_file_data`;
+
+CREATE TABLE `exp_file_data` (
+  `file_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -1304,6 +1483,40 @@ CREATE TABLE `exp_file_dimensions` (
   `watermark_id` int(4) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `upload_location_id` (`upload_location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+# Dump of table exp_file_manager_views
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_file_manager_views`;
+
+CREATE TABLE `exp_file_manager_views` (
+  `view_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `viewtype` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'list',
+  `upload_id` int(6) unsigned NOT NULL,
+  `member_id` int(10) unsigned NOT NULL,
+  `name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `columns` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`view_id`),
+  KEY `viewtype_upload_id_member_id` (`viewtype`,`upload_id`,`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+# Dump of table exp_file_usage
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_file_usage`;
+
+CREATE TABLE `exp_file_usage` (
+  `file_id` int(10) unsigned NOT NULL,
+  `entry_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `cat_id` int(10) unsigned NOT NULL DEFAULT '0',
+  KEY `file_id` (`file_id`),
+  KEY `entry_id` (`entry_id`),
+  KEY `cat_id` (`cat_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -1347,10 +1560,13 @@ DROP TABLE IF EXISTS `exp_files`;
 
 CREATE TABLE `exp_files` (
   `file_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `model_type` enum('File','Directory') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'File',
   `site_id` int(4) unsigned DEFAULT '1',
   `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `upload_location_id` int(4) unsigned DEFAULT '0',
+  `directory_id` int(10) unsigned NOT NULL DEFAULT '0',
   `mime_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `file_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `file_size` int(10) DEFAULT '0',
   `description` text COLLATE utf8mb4_unicode_ci,
@@ -1361,9 +1577,13 @@ CREATE TABLE `exp_files` (
   `modified_by_member_id` int(10) unsigned DEFAULT '0',
   `modified_date` int(10) DEFAULT NULL,
   `file_hw_original` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `total_records` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`file_id`),
   KEY `upload_location_id` (`upload_location_id`),
-  KEY `site_id` (`site_id`)
+  KEY `site_id` (`site_id`),
+  KEY `model_type` (`model_type`),
+  KEY `file_type` (`file_type`),
+  KEY `directory_id` (`directory_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -1681,12 +1901,13 @@ CREATE TABLE `exp_members` (
   `show_sidebar` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `pmember_id` int(10) NOT NULL DEFAULT '0',
   `cp_homepage` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cp_homepage_channel` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cp_homepage_channel` text COLLATE utf8mb4_unicode_ci,
   `cp_homepage_custom` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dismissed_pro_banner` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `enable_mfa` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `backup_mfa_code` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `pending_role_id` int(10) NOT NULL DEFAULT '0',
+  `dismissed_banner` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   PRIMARY KEY (`member_id`),
   KEY `group_id` (`role_id`),
   KEY `unique_id` (`unique_id`),
@@ -1696,9 +1917,9 @@ CREATE TABLE `exp_members` (
 LOCK TABLES `exp_members` WRITE;
 /*!40000 ALTER TABLE `exp_members` DISABLE KEYS */;
 
-INSERT INTO `exp_members` (`member_id`, `role_id`, `username`, `screen_name`, `password`, `salt`, `unique_id`, `crypt_key`, `authcode`, `email`, `signature`, `avatar_filename`, `avatar_width`, `avatar_height`, `photo_filename`, `photo_width`, `photo_height`, `sig_img_filename`, `sig_img_width`, `sig_img_height`, `ignore_list`, `private_messages`, `accept_messages`, `last_view_bulletins`, `last_bulletin_date`, `ip_address`, `join_date`, `last_visit`, `last_activity`, `total_entries`, `total_comments`, `total_forum_topics`, `total_forum_posts`, `last_entry_date`, `last_comment_date`, `last_forum_post_date`, `last_email_date`, `in_authorlist`, `accept_admin_email`, `accept_user_email`, `notify_by_default`, `notify_of_pm`, `display_signatures`, `parse_smileys`, `smart_notifications`, `language`, `timezone`, `time_format`, `date_format`, `include_seconds`, `profile_theme`, `forum_theme`, `tracker`, `template_size`, `notepad`, `notepad_size`, `bookmarklets`, `quick_links`, `quick_tabs`, `show_sidebar`, `pmember_id`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `dismissed_pro_banner`, `enable_mfa`, `backup_mfa_code`, `pending_role_id`)
+INSERT INTO `exp_members` (`member_id`, `role_id`, `username`, `screen_name`, `password`, `salt`, `unique_id`, `crypt_key`, `authcode`, `email`, `signature`, `avatar_filename`, `avatar_width`, `avatar_height`, `photo_filename`, `photo_width`, `photo_height`, `sig_img_filename`, `sig_img_width`, `sig_img_height`, `ignore_list`, `private_messages`, `accept_messages`, `last_view_bulletins`, `last_bulletin_date`, `ip_address`, `join_date`, `last_visit`, `last_activity`, `total_entries`, `total_comments`, `total_forum_topics`, `total_forum_posts`, `last_entry_date`, `last_comment_date`, `last_forum_post_date`, `last_email_date`, `in_authorlist`, `accept_admin_email`, `accept_user_email`, `notify_by_default`, `notify_of_pm`, `display_signatures`, `parse_smileys`, `smart_notifications`, `language`, `timezone`, `time_format`, `date_format`, `include_seconds`, `profile_theme`, `forum_theme`, `tracker`, `template_size`, `notepad`, `notepad_size`, `bookmarklets`, `quick_links`, `quick_tabs`, `show_sidebar`, `pmember_id`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `dismissed_pro_banner`, `enable_mfa`, `backup_mfa_code`, `pending_role_id`, `dismissed_banner`)
 VALUES
-	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1636513259,1645570125,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,NULL,NULL,NULL,'y','n',NULL,0);
+	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1674259869,1674273049,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,NULL,NULL,NULL,'y','n',NULL,0,'n');
 
 /*!40000 ALTER TABLE `exp_members` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1900,6 +2121,22 @@ CREATE TABLE `exp_message_listed` (
 
 
 
+# Dump of table exp_migrations
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_migrations`;
+
+CREATE TABLE `exp_migrations` (
+  `migration_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `migration` text COLLATE utf8mb4_unicode_ci,
+  `migration_location` text COLLATE utf8mb4_unicode_ci,
+  `migration_group` int(10) unsigned DEFAULT NULL,
+  `migration_run_date` datetime NOT NULL,
+  PRIMARY KEY (`migration_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
 # Dump of table exp_module_member_roles
 # ------------------------------------------------------------
 
@@ -1941,9 +2178,10 @@ VALUES
 	(7,'File','1.1.0','n','n'),
 	(8,'Filepicker','1.0','y','n'),
 	(9,'Relationship','1.0.0','n','n'),
-	(10,'Search','2.2.2','n','n'),
-	(11,'Structure','5.0.0','y','y'),
-	(12,'Wygwam','5.2.0','y','n');
+	(10,'Search','2.3.0','n','n'),
+	(11,'Structure','6.0.0','y','y'),
+	(12,'Wygwam','5.3.5','y','n'),
+	(13,'Pro','2.0.0','n','n');
 
 /*!40000 ALTER TABLE `exp_modules` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2111,7 +2349,10 @@ VALUES
 	(92,5,1,'can_edit_html_buttons'),
 	(93,5,1,'can_delete_self'),
 	(94,5,1,'can_send_private_messages'),
-	(95,5,1,'can_attach_in_private_messages');
+	(95,5,1,'can_attach_in_private_messages'),
+	(96,1,1,'can_access_dock'),
+	(97,1,1,'can_access_dock'),
+	(98,1,1,'can_access_dock');
 
 /*!40000 ALTER TABLE `exp_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2131,6 +2372,30 @@ CREATE TABLE `exp_plugins` (
   PRIMARY KEY (`plugin_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+
+# Dump of table exp_prolets
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_prolets`;
+
+CREATE TABLE `exp_prolets` (
+  `prolet_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `source` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `class` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`prolet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+LOCK TABLES `exp_prolets` WRITE;
+/*!40000 ALTER TABLE `exp_prolets` DISABLE KEYS */;
+
+INSERT INTO `exp_prolets` (`prolet_id`, `source`, `class`)
+VALUES
+	(1,'structure','Structure_pro'),
+	(2,'pro','Entries_pro');
+
+/*!40000 ALTER TABLE `exp_prolets` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table exp_relationships
@@ -2181,6 +2446,7 @@ LOCK TABLES `exp_remember_me` WRITE;
 
 INSERT INTO `exp_remember_me` (`remember_me_id`, `member_id`, `ip_address`, `user_agent`, `admin_sess`, `site_id`, `expiration`, `last_refresh`)
 VALUES
+	('31c49d60f95d6c4c187c6d78b23a58f0f8f61154',1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.84 Safari/537.36',0,1,1647901848,1646692248),
 	('dd76c6c325407901f30c9b7c5ffb50e5076ed4e9',1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.23 Safari/537.36',0,1,1637722246,1636512646);
 
 /*!40000 ALTER TABLE `exp_remember_me` ENABLE KEYS */;
@@ -2210,8 +2476,8 @@ DROP TABLE IF EXISTS `exp_revision_tracker`;
 CREATE TABLE `exp_revision_tracker` (
   `tracker_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `item_id` int(10) unsigned NOT NULL,
-  `item_table` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `item_field` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `item_table` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `item_field` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `item_date` int(10) NOT NULL,
   `item_author_id` int(10) unsigned NOT NULL,
   `item_data` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2304,7 +2570,7 @@ LOCK TABLES `exp_roles` WRITE;
 
 INSERT INTO `exp_roles` (`role_id`, `name`, `short_name`, `description`, `is_locked`, `total_members`)
 VALUES
-	(1,'Super Admin','super_admin','','y',0),
+	(1,'Super Admin','super_admin','','y',1),
 	(2,'Banned','banned','','n',0),
 	(3,'Guests','guests','','n',0),
 	(4,'Pending','pending','','n',0),
@@ -2371,6 +2637,7 @@ CREATE TABLE `exp_search` (
   `query` mediumtext COLLATE utf8mb4_unicode_ci,
   `custom_fields` mediumtext COLLATE utf8mb4_unicode_ci,
   `result_page` varchar(70) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `no_result_page` varchar(70) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`search_id`),
   KEY `site_id` (`site_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2416,7 +2683,7 @@ LOCK TABLES `exp_security_hashes` WRITE;
 
 INSERT INTO `exp_security_hashes` (`hash_id`, `date`, `session_id`, `hash`)
 VALUES
-	(30,1645569822,'4c984c911c31f6daa5b637adeafc7877bd4141af','e3d0816a72b47d9751fddc8336e48f72e75d3fbf');
+	(33,1674271883,'8ce1bacf621e64cdd1ca1ba4d6e742c4bada6ade','a0ae69feb0eb177aa05dc80d63b1b25723c8cd6b');
 
 /*!40000 ALTER TABLE `exp_security_hashes` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2440,6 +2707,7 @@ CREATE TABLE `exp_sessions` (
   `last_activity` int(10) unsigned NOT NULL DEFAULT '0',
   `can_debug` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `mfa_flag` enum('skip','show','required') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'skip',
+  `pro_banner_seen` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   PRIMARY KEY (`session_id`),
   KEY `member_id` (`member_id`),
   KEY `last_activity_idx` (`last_activity`)
@@ -2448,9 +2716,9 @@ CREATE TABLE `exp_sessions` (
 LOCK TABLES `exp_sessions` WRITE;
 /*!40000 ALTER TABLE `exp_sessions` DISABLE KEYS */;
 
-INSERT INTO `exp_sessions` (`session_id`, `member_id`, `admin_sess`, `ip_address`, `user_agent`, `login_state`, `fingerprint`, `sess_start`, `auth_timeout`, `last_activity`, `can_debug`, `mfa_flag`)
+INSERT INTO `exp_sessions` (`session_id`, `member_id`, `admin_sess`, `ip_address`, `user_agent`, `login_state`, `fingerprint`, `sess_start`, `auth_timeout`, `last_activity`, `can_debug`, `mfa_flag`, `pro_banner_seen`)
 VALUES
-	('4c984c911c31f6daa5b637adeafc7877bd4141af',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.84 Safari/537.36',NULL,'e165040a95df8e599403efc82c9bbdd5',1645569821,0,1645570127,'0','skip');
+	('8ce1bacf621e64cdd1ca1ba4d6e742c4bada6ade',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.33 Safari/537.36',NULL,'f32c4dcbba99d0704e14bfd01cc5e70d',1674271882,0,1674273127,'0','skip','n');
 
 /*!40000 ALTER TABLE `exp_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2468,6 +2736,7 @@ CREATE TABLE `exp_sites` (
   `site_description` text COLLATE utf8mb4_unicode_ci,
   `site_bootstrap_checksums` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `site_pages` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `site_color` varchar(6) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`site_id`),
   KEY `site_name` (`site_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2475,9 +2744,9 @@ CREATE TABLE `exp_sites` (
 LOCK TABLES `exp_sites` WRITE;
 /*!40000 ALTER TABLE `exp_sites` DISABLE KEYS */;
 
-INSERT INTO `exp_sites` (`site_id`, `site_label`, `site_name`, `site_description`, `site_bootstrap_checksums`, `site_pages`)
+INSERT INTO `exp_sites` (`site_id`, `site_label`, `site_name`, `site_description`, `site_bootstrap_checksums`, `site_pages`, `site_color`)
 VALUES
-	(1,'ExpressionEngine Skeleton','default_site',NULL,'YToyOntzOjY4OiIvVXNlcnMvU0RlbWFuZXR0L1NpdGVzL2xvY2FsaG9zdC9leHByZXNzaW9uZW5naW5lLXNrZWxldG9uL2luZGV4LnBocCI7czozMjoiYmY1ZTViNWVhNGVkOWZiYjY3YmNlZDAyZDY2Y2MwYTMiO3M6NzoiZW1haWxlZCI7YTowOnt9fQ==','YToxOntpOjE7YToxOntzOjM6InVybCI7czoxMToie2Jhc2VfdXJsfS8iO319');
+	(1,'ExpressionEngine Skeleton','default_site',NULL,'YToyOntzOjY4OiIvVXNlcnMvU0RlbWFuZXR0L1NpdGVzL2xvY2FsaG9zdC9leHByZXNzaW9uZW5naW5lLXNrZWxldG9uL2luZGV4LnBocCI7czozMjoiYmY1ZTViNWVhNGVkOWZiYjY3YmNlZDAyZDY2Y2MwYTMiO3M6NzoiZW1haWxlZCI7YTowOnt9fQ==','YToxOntpOjE7YToxOntzOjM6InVybCI7czoxMToie2Jhc2VfdXJsfS8iO319','');
 
 /*!40000 ALTER TABLE `exp_sites` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2583,7 +2852,7 @@ LOCK TABLES `exp_stats` WRITE;
 
 INSERT INTO `exp_stats` (`stat_id`, `site_id`, `total_members`, `recent_member_id`, `recent_member`, `total_entries`, `total_forum_topics`, `total_forum_posts`, `total_comments`, `last_entry_date`, `last_forum_post_date`, `last_comment_date`, `last_visitor_date`, `most_visitors`, `most_visitor_date`, `last_cache_clear`)
 VALUES
-	(1,1,1,1,'admin',0,0,0,0,1607033726,0,0,0,0,0,1646174602);
+	(1,1,1,1,'admin',0,0,0,0,1607033726,0,0,0,0,0,1674862042);
 
 /*!40000 ALTER TABLE `exp_stats` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2741,7 +3010,9 @@ LOCK TABLES `exp_structure_nav_history` WRITE;
 INSERT INTO `exp_structure_nav_history` (`id`, `site_id`, `site_pages`, `structure`, `note`, `structure_version`, `date`, `current`, `restored_date`)
 VALUES
 	(1,1,'','[]','Upgraded Structure to 4.7.0','4.7.0','2020-12-17 17:04:30',0,NULL),
-	(2,1,'YToxOntpOjE7YToxOntzOjM6InVybCI7czoxMToie2Jhc2VfdXJsfS8iO319','[]','Upgraded Structure to 5.0.0','5.0.0','2021-11-09 21:58:05',1,NULL);
+	(2,1,'YToxOntpOjE7YToxOntzOjM6InVybCI7czoxMToie2Jhc2VfdXJsfS8iO319','[]','Upgraded Structure to 5.0.0','5.0.0','2021-11-09 21:58:05',0,NULL),
+	(3,1,'YToxOntpOjE7YToxOntzOjM6InVybCI7czoxMToie2Jhc2VfdXJsfS8iO319','[]','Pre 5.1.2 update structure nav','6.0.0','2023-01-20 18:30:58',0,NULL),
+	(4,1,'YToxOntpOjE7YToxOntzOjM6InVybCI7czoxMToie2Jhc2VfdXJsfS8iO319','[]','Upgraded Structure to 6.0.0','6.0.0','2023-01-20 18:30:58',1,NULL);
 
 /*!40000 ALTER TABLE `exp_structure_nav_history` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2801,7 +3072,8 @@ LOCK TABLES `exp_template_groups` WRITE;
 
 INSERT INTO `exp_template_groups` (`group_id`, `site_id`, `group_name`, `group_order`, `is_site_default`)
 VALUES
-	(2,1,'site',1,'y');
+	(2,1,'site',1,'y'),
+	(3,1,'pro-dashboard-widgets',2,'n');
 
 /*!40000 ALTER TABLE `exp_template_groups` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2849,6 +3121,7 @@ CREATE TABLE `exp_templates` (
   `group_id` int(6) unsigned NOT NULL,
   `template_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `template_type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'webpage',
+  `template_engine` varchar(24) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `template_data` mediumtext COLLATE utf8mb4_unicode_ci,
   `template_notes` text COLLATE utf8mb4_unicode_ci,
   `edit_date` int(10) NOT NULL DEFAULT '0',
@@ -2871,10 +3144,12 @@ CREATE TABLE `exp_templates` (
 LOCK TABLES `exp_templates` WRITE;
 /*!40000 ALTER TABLE `exp_templates` DISABLE KEYS */;
 
-INSERT INTO `exp_templates` (`template_id`, `site_id`, `group_id`, `template_name`, `template_type`, `template_data`, `template_notes`, `edit_date`, `last_author_id`, `cache`, `refresh`, `no_auth_bounce`, `enable_http_auth`, `allow_php`, `php_parse_location`, `hits`, `protect_javascript`, `enable_frontedit`)
+INSERT INTO `exp_templates` (`template_id`, `site_id`, `group_id`, `template_name`, `template_type`, `template_engine`, `template_data`, `template_notes`, `edit_date`, `last_author_id`, `cache`, `refresh`, `no_auth_bounce`, `enable_http_auth`, `allow_php`, `php_parse_location`, `hits`, `protect_javascript`, `enable_frontedit`)
 VALUES
-	(2,1,2,'index','webpage','',NULL,1645570105,0,'n',0,'','n','n','o',0,'n','y'),
-	(3,1,2,'_base-layout','webpage','<!doctype html>\n<html lang=\"en\">\n\n<head>\n    <!-- Required meta tags -->\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n\n    <title>{site_name}{if layout:seo_title != \'\'} | {layout:seo_title}{/if}</title>\n\n    <meta name=\"description\" content=\"{layout:seo_description}\">\n    <link rel=\"canonical\" href=\"{site_url}{current_path}\"/>\n\n    <!-- Favicon Code -->\n    <!-- https://realfavicongenerator.net -->\n    <!-- End Favicon Code -->\n\n    <link rel=\"stylesheet\" href=\"{site_url}css/styles.min.css?v=0.0.1\" type=\"text/css\">\n    {layout:css}\n\n    <!-- Google Tag Manager -->\n\n    <!-- End Google Tag Manager -->\n</head>\n\n<body>\n    {layout:contents}\n    {layout:js}\n</body>\n\n</html>',NULL,1636512585,1,'n',0,'','n','n','o',0,'n','y');
+	(2,1,2,'index','webpage',NULL,'{layout=\"site/_base-layout\"}',NULL,1674257689,0,'n',0,'','n','n','o',0,'n','y'),
+	(3,1,2,'_base-layout','webpage',NULL,'<!doctype html>\n<html lang=\"en\">\n\n<head>\n    <!-- Required meta tags -->\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n\n    <title>{site_name}{if layout:seo_title != \'\'} | {layout:seo_title}{/if}</title>\n\n    <meta name=\"description\" content=\"{layout:seo_description}\">\n    <link rel=\"canonical\" href=\"{site_url}{current_path}\"/>\n\n    <!-- Favicon Code -->\n    <!-- https://realfavicongenerator.net -->\n    <!-- End Favicon Code -->\n\n    <link rel=\"stylesheet\" href=\"{site_url}css/styles.min.css?v=0.0.1\" type=\"text/css\">\n    {layout:css}\n\n    <!-- Google Tag Manager -->\n\n    <!-- End Google Tag Manager -->\n</head>\n\n<body>\n    {layout:contents}\n    {layout:js}\n</body>\n\n</html>',NULL,1636512585,1,'n',0,'','n','n','o',0,'n','y'),
+	(4,1,3,'sample-widget','webpage',NULL,'{widget title=\"Demo dashboard widget\" width=\"half\"}\n\n<p>Random entry: {exp:channel:entries dynamic=\"no\" orderby=\"random\" limit=\"1\"}<a href=\"{cp_url}?/cp/publish/edit/entry/{entry_id}&S={cp_session_id}\">{title}</a>{/exp:channel:entries}</p>\n\n<p>To see this code please visit the template <a href=\"{cp_url}?/cp/design/template/edit/4&S={cp_session_id}\">pro-dashboard-widgets/sample-widget</a>.</p>\n',NULL,1674273066,0,'n',0,'','n','n','o',0,'n','y'),
+	(5,1,3,'index','webpage',NULL,'',NULL,1674273066,1,'n',0,'','n','n','o',0,'n','y');
 
 /*!40000 ALTER TABLE `exp_templates` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2897,14 +3172,24 @@ LOCK TABLES `exp_templates_roles` WRITE;
 INSERT INTO `exp_templates_roles` (`role_id`, `template_id`)
 VALUES
 	(1,3),
+	(1,4),
+	(1,5),
 	(2,2),
 	(2,3),
+	(2,4),
+	(2,5),
 	(3,2),
 	(3,3),
+	(3,4),
+	(3,5),
 	(4,2),
 	(4,3),
+	(4,4),
+	(4,5),
 	(5,2),
-	(5,3);
+	(5,3),
+	(5,4),
+	(5,5);
 
 /*!40000 ALTER TABLE `exp_templates_roles` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2996,7 +3281,124 @@ VALUES
 	(46,1645570125,'Running database update step: runUpdateFile[ud_6_02_03.php]',NULL,NULL,NULL),
 	(47,1645570125,'Running database update step: runUpdateFile[ud_6_02_04.php]',NULL,NULL,NULL),
 	(48,1645570125,'Running database update step: runUpdateFile[ud_6_02_05.php]',NULL,NULL,NULL),
-	(49,1645570125,'Update complete. Now running version 6.2.5',NULL,NULL,NULL);
+	(49,1645570125,'Update complete. Now running version 6.2.5',NULL,NULL,NULL),
+	(50,1674257286,'Running database update step: runUpdateFile[ud_6_02_06.php]',NULL,NULL,NULL),
+	(51,1674257286,'Running database update step: runUpdateFile[ud_6_02_07.php]',NULL,NULL,NULL),
+	(52,1674257286,'Running database update step: runUpdateFile[ud_6_03_00.php]',NULL,NULL,NULL),
+	(53,1674257287,'Running database update step: runUpdateFile[ud_6_03_01.php]',NULL,NULL,NULL),
+	(54,1674257287,'Running database update step: runUpdateFile[ud_6_03_02.php]',NULL,NULL,NULL),
+	(55,1674257287,'Running database update step: runUpdateFile[ud_6_03_03.php]',NULL,NULL,NULL),
+	(56,1674257287,'Running database update step: runUpdateFile[ud_6_03_04.php]',NULL,NULL,NULL),
+	(57,1674257287,'Running database update step: runUpdateFile[ud_6_03_05.php]',NULL,NULL,NULL),
+	(58,1674257288,'Running database update step: runUpdateFile[ud_6_04_00.php]',NULL,NULL,NULL),
+	(59,1674257288,'Running database update step: runUpdateFile[ud_6_04_01.php]',NULL,NULL,NULL),
+	(60,1674257288,'Running database update step: runUpdateFile[ud_6_04_02.php]',NULL,NULL,NULL),
+	(61,1674257288,'Running database update step: runUpdateFile[ud_6_04_03.php]',NULL,NULL,NULL),
+	(62,1674257288,'Running database update step: runUpdateFile[ud_6_04_04.php]',NULL,NULL,NULL),
+	(63,1674257288,'Update complete. Now running version 6.4.4',NULL,NULL,NULL),
+	(64,1674257400,'Running database update step: runUpdateFile[ud_7_00_00_rc_1.php]',NULL,NULL,NULL),
+	(65,1674257400,'Smartforge::add_key failed. Table \'exp_dock_prolets\' does not exist.','Smartforge::add_key',202,'/Users/SDemanett/Sites/localhost/expressionengine-skeleton/system/ee/ExpressionEngine/Addons/pro/upd.pro.php'),
+	(66,1674257401,'Running database update step: runUpdateFile[ud_7_00_00_rc_2.php]',NULL,NULL,NULL),
+	(67,1674257401,'Running database update step: runUpdateFile[ud_7_00_00_rc_3.php]',NULL,NULL,NULL),
+	(68,1674257401,'Running database update step: runUpdateFile[ud_7_00_00_rc_4.php]',NULL,NULL,NULL),
+	(69,1674257402,'Running database update step: runUpdateFile[ud_7_00_00.php]',NULL,NULL,NULL),
+	(70,1674257402,'Running database update step: runUpdateFile[ud_7_00_01.php]',NULL,NULL,NULL),
+	(71,1674257402,'Running database update step: runUpdateFile[ud_7_00_02.php]',NULL,NULL,NULL),
+	(72,1674257402,'Running database update step: runUpdateFile[ud_7_00_03.php]',NULL,NULL,NULL),
+	(73,1674257402,'Running database update step: runUpdateFile[ud_7_01_00.php]',NULL,NULL,NULL),
+	(74,1674257402,'Running database update step: runUpdateFile[ud_7_01_01.php]',NULL,NULL,NULL),
+	(75,1674257402,'Running database update step: runUpdateFile[ud_7_01_02.php]',NULL,NULL,NULL),
+	(76,1674257403,'Running database update step: runUpdateFile[ud_7_01_03.php]',NULL,NULL,NULL),
+	(77,1674257403,'Running database update step: runUpdateFile[ud_7_01_04.php]',NULL,NULL,NULL),
+	(78,1674257403,'Running database update step: runUpdateFile[ud_7_01_05.php]',NULL,NULL,NULL),
+	(79,1674257403,'Running database update step: runUpdateFile[ud_7_01_06.php]',NULL,NULL,NULL),
+	(80,1674257403,'Running database update step: runUpdateFile[ud_7_02_00.php]',NULL,NULL,NULL),
+	(81,1674257403,'Running database update step: runUpdateFile[ud_7_02_01.php]',NULL,NULL,NULL),
+	(82,1674257403,'Running database update step: runUpdateFile[ud_7_02_02.php]',NULL,NULL,NULL),
+	(83,1674257403,'Running database update step: runUpdateFile[ud_7_02_03.php]',NULL,NULL,NULL),
+	(84,1674257404,'Running database update step: runUpdateFile[ud_7_02_04.php]',NULL,NULL,NULL),
+	(85,1674257404,'Running database update step: runUpdateFile[ud_7_02_05.php]',NULL,NULL,NULL),
+	(86,1674257404,'Running database update step: runUpdateFile[ud_7_02_06.php]',NULL,NULL,NULL),
+	(87,1674257404,'Running database update step: runUpdateFile[ud_7_02_07.php]',NULL,NULL,NULL),
+	(88,1674257404,'Update complete. Now running version 7.2.7',NULL,NULL,NULL),
+	(89,1674258042,'Running database update step: runUpdateFile[ud_6_02_06.php]',NULL,NULL,NULL),
+	(90,1674258042,'Running database update step: runUpdateFile[ud_6_02_07.php]',NULL,NULL,NULL),
+	(91,1674258042,'Running database update step: runUpdateFile[ud_6_03_00.php]',NULL,NULL,NULL),
+	(92,1674258042,'Running database update step: runUpdateFile[ud_6_03_01.php]',NULL,NULL,NULL),
+	(93,1674258042,'Running database update step: runUpdateFile[ud_6_03_02.php]',NULL,NULL,NULL),
+	(94,1674258042,'Running database update step: runUpdateFile[ud_6_03_03.php]',NULL,NULL,NULL),
+	(95,1674258042,'Running database update step: runUpdateFile[ud_6_03_04.php]',NULL,NULL,NULL),
+	(96,1674258043,'Running database update step: runUpdateFile[ud_6_03_05.php]',NULL,NULL,NULL),
+	(97,1674258043,'Running database update step: runUpdateFile[ud_6_04_00.php]',NULL,NULL,NULL),
+	(98,1674258043,'Could not create key \'enabled\' on table \'exp_extensions\'. Key already exists.','Smartforge::add_key',109,'/Users/SDemanett/Sites/localhost/expressionengine-skeleton/system/ee/installer/updates/ud_6_04_00.php'),
+	(99,1674258043,'Running database update step: runUpdateFile[ud_6_04_01.php]',NULL,NULL,NULL),
+	(100,1674258043,'Running database update step: runUpdateFile[ud_6_04_02.php]',NULL,NULL,NULL),
+	(101,1674258043,'Running database update step: runUpdateFile[ud_6_04_03.php]',NULL,NULL,NULL),
+	(102,1674258043,'Running database update step: runUpdateFile[ud_6_04_04.php]',NULL,NULL,NULL),
+	(103,1674258044,'Update complete. Now running version 6.4.4',NULL,NULL,NULL),
+	(104,1674271926,'Running database update step: runUpdateFile[ud_7_00_00_rc_1.php]',NULL,NULL,NULL),
+	(105,1674271926,'Running database update step: runUpdateFile[ud_7_00_00_rc_2.php]',NULL,NULL,NULL),
+	(106,1674271927,'Running database update step: runUpdateFile[ud_7_00_00_rc_3.php]',NULL,NULL,NULL),
+	(107,1674271927,'Running database update step: runUpdateFile[ud_7_00_00_rc_4.php]',NULL,NULL,NULL),
+	(108,1674271927,'Running database update step: runUpdateFile[ud_7_00_00.php]',NULL,NULL,NULL),
+	(109,1674271927,'Running database update step: runUpdateFile[ud_7_00_01.php]',NULL,NULL,NULL),
+	(110,1674271927,'Running database update step: runUpdateFile[ud_7_00_02.php]',NULL,NULL,NULL),
+	(111,1674271927,'Running database update step: runUpdateFile[ud_7_00_03.php]',NULL,NULL,NULL),
+	(112,1674271927,'Running database update step: runUpdateFile[ud_7_01_00.php]',NULL,NULL,NULL),
+	(113,1674271927,'Running database update step: runUpdateFile[ud_7_01_01.php]',NULL,NULL,NULL),
+	(114,1674271928,'Running database update step: runUpdateFile[ud_7_01_02.php]',NULL,NULL,NULL),
+	(115,1674271928,'Running database update step: runUpdateFile[ud_7_01_03.php]',NULL,NULL,NULL),
+	(116,1674271928,'Running database update step: runUpdateFile[ud_7_01_04.php]',NULL,NULL,NULL),
+	(117,1674271928,'Running database update step: runUpdateFile[ud_7_01_05.php]',NULL,NULL,NULL),
+	(118,1674271928,'Running database update step: runUpdateFile[ud_7_01_06.php]',NULL,NULL,NULL),
+	(119,1674271928,'Running database update step: runUpdateFile[ud_7_02_00.php]',NULL,NULL,NULL),
+	(120,1674271928,'Running database update step: runUpdateFile[ud_7_02_01.php]',NULL,NULL,NULL),
+	(121,1674271928,'Running database update step: runUpdateFile[ud_7_02_02.php]',NULL,NULL,NULL),
+	(122,1674271928,'Running database update step: runUpdateFile[ud_7_02_03.php]',NULL,NULL,NULL),
+	(123,1674271928,'Running database update step: runUpdateFile[ud_7_02_04.php]',NULL,NULL,NULL),
+	(124,1674271929,'Running database update step: runUpdateFile[ud_7_02_05.php]',NULL,NULL,NULL),
+	(125,1674271929,'Running database update step: runUpdateFile[ud_7_02_06.php]',NULL,NULL,NULL),
+	(126,1674271929,'Running database update step: runUpdateFile[ud_7_02_07.php]',NULL,NULL,NULL),
+	(127,1674271929,'Update complete. Now running version 7.2.7',NULL,NULL,NULL),
+	(128,1674273063,'Running database update step: runUpdateFile[ud_6_02_06.php]',NULL,NULL,NULL),
+	(129,1674273063,'Running database update step: runUpdateFile[ud_6_02_07.php]',NULL,NULL,NULL),
+	(130,1674273064,'Running database update step: runUpdateFile[ud_6_03_00.php]',NULL,NULL,NULL),
+	(131,1674273064,'Running database update step: runUpdateFile[ud_6_03_01.php]',NULL,NULL,NULL),
+	(132,1674273064,'Running database update step: runUpdateFile[ud_6_03_02.php]',NULL,NULL,NULL),
+	(133,1674273064,'Running database update step: runUpdateFile[ud_6_03_03.php]',NULL,NULL,NULL),
+	(134,1674273064,'Running database update step: runUpdateFile[ud_6_03_04.php]',NULL,NULL,NULL),
+	(135,1674273064,'Running database update step: runUpdateFile[ud_6_03_05.php]',NULL,NULL,NULL),
+	(136,1674273064,'Running database update step: runUpdateFile[ud_6_04_00.php]',NULL,NULL,NULL),
+	(137,1674273064,'Could not create key \'enabled\' on table \'exp_extensions\'. Key already exists.','Smartforge::add_key',109,'/Users/SDemanett/Sites/localhost/expressionengine-skeleton/system/ee/installer/updates/ud_6_04_00.php'),
+	(138,1674273065,'Running database update step: runUpdateFile[ud_6_04_01.php]',NULL,NULL,NULL),
+	(139,1674273065,'Running database update step: runUpdateFile[ud_6_04_02.php]',NULL,NULL,NULL),
+	(140,1674273065,'Running database update step: runUpdateFile[ud_6_04_03.php]',NULL,NULL,NULL),
+	(141,1674273065,'Running database update step: runUpdateFile[ud_6_04_04.php]',NULL,NULL,NULL),
+	(142,1674273065,'Update complete. Now running version 6.4.4',NULL,NULL,NULL),
+	(143,1674273097,'Running database update step: runUpdateFile[ud_7_00_00_rc_1.php]',NULL,NULL,NULL),
+	(144,1674273097,'Running database update step: runUpdateFile[ud_7_00_00_rc_2.php]',NULL,NULL,NULL),
+	(145,1674273097,'Running database update step: runUpdateFile[ud_7_00_00_rc_3.php]',NULL,NULL,NULL),
+	(146,1674273097,'Running database update step: runUpdateFile[ud_7_00_00_rc_4.php]',NULL,NULL,NULL),
+	(147,1674273097,'Running database update step: runUpdateFile[ud_7_00_00.php]',NULL,NULL,NULL),
+	(148,1674273098,'Running database update step: runUpdateFile[ud_7_00_01.php]',NULL,NULL,NULL),
+	(149,1674273098,'Running database update step: runUpdateFile[ud_7_00_02.php]',NULL,NULL,NULL),
+	(150,1674273098,'Running database update step: runUpdateFile[ud_7_00_03.php]',NULL,NULL,NULL),
+	(151,1674273098,'Running database update step: runUpdateFile[ud_7_01_00.php]',NULL,NULL,NULL),
+	(152,1674273098,'Running database update step: runUpdateFile[ud_7_01_01.php]',NULL,NULL,NULL),
+	(153,1674273098,'Running database update step: runUpdateFile[ud_7_01_02.php]',NULL,NULL,NULL),
+	(154,1674273098,'Running database update step: runUpdateFile[ud_7_01_03.php]',NULL,NULL,NULL),
+	(155,1674273099,'Running database update step: runUpdateFile[ud_7_01_04.php]',NULL,NULL,NULL),
+	(156,1674273099,'Running database update step: runUpdateFile[ud_7_01_05.php]',NULL,NULL,NULL),
+	(157,1674273099,'Running database update step: runUpdateFile[ud_7_01_06.php]',NULL,NULL,NULL),
+	(158,1674273099,'Running database update step: runUpdateFile[ud_7_02_00.php]',NULL,NULL,NULL),
+	(159,1674273099,'Running database update step: runUpdateFile[ud_7_02_01.php]',NULL,NULL,NULL),
+	(160,1674273099,'Running database update step: runUpdateFile[ud_7_02_02.php]',NULL,NULL,NULL),
+	(161,1674273099,'Running database update step: runUpdateFile[ud_7_02_03.php]',NULL,NULL,NULL),
+	(162,1674273100,'Running database update step: runUpdateFile[ud_7_02_04.php]',NULL,NULL,NULL),
+	(163,1674273100,'Running database update step: runUpdateFile[ud_7_02_05.php]',NULL,NULL,NULL),
+	(164,1674273100,'Running database update step: runUpdateFile[ud_7_02_06.php]',NULL,NULL,NULL),
+	(165,1674273100,'Running database update step: runUpdateFile[ud_7_02_07.php]',NULL,NULL,NULL),
+	(166,1674273100,'Update complete. Now running version 7.2.7',NULL,NULL,NULL);
 
 /*!40000 ALTER TABLE `exp_update_log` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3026,9 +3428,13 @@ CREATE TABLE `exp_upload_prefs` (
   `id` int(4) unsigned NOT NULL AUTO_INCREMENT,
   `site_id` int(4) unsigned NOT NULL DEFAULT '1',
   `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `adapter` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'local',
+  `adapter_settings` text COLLATE utf8mb4_unicode_ci,
   `server_path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `url` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `allowed_types` varchar(3) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'img',
+  `allowed_types` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'img',
+  `allow_subfolders` enum('y','n') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `subfolders_on_top` enum('y','n') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   `default_modal_view` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'list',
   `max_size` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `max_height` varchar(6) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -3049,12 +3455,12 @@ CREATE TABLE `exp_upload_prefs` (
 LOCK TABLES `exp_upload_prefs` WRITE;
 /*!40000 ALTER TABLE `exp_upload_prefs` DISABLE KEYS */;
 
-INSERT INTO `exp_upload_prefs` (`id`, `site_id`, `name`, `server_path`, `url`, `allowed_types`, `default_modal_view`, `max_size`, `max_height`, `max_width`, `properties`, `pre_format`, `post_format`, `file_properties`, `file_pre_format`, `file_post_format`, `cat_group`, `batch_location`, `module_id`)
+INSERT INTO `exp_upload_prefs` (`id`, `site_id`, `name`, `adapter`, `adapter_settings`, `server_path`, `url`, `allowed_types`, `allow_subfolders`, `subfolders_on_top`, `default_modal_view`, `max_size`, `max_height`, `max_width`, `properties`, `pre_format`, `post_format`, `file_properties`, `file_pre_format`, `file_post_format`, `cat_group`, `batch_location`, `module_id`)
 VALUES
-	(1,1,'Avatars','{base_path}images/avatars/','{base_url}images/avatars/','img','list','50','100','100',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
-	(3,1,'Member Photos','/','{base_url}images/member_photos/','img','list','50','100','100',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
-	(4,1,'Signature Attachments','{base_path}images/signature_attachments/','{base_url}images/signature_attachments/','img','list','30','80','480',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
-	(5,1,'PM Attachments','{base_path}images/pm_attachments/','{base_url}images/pm_attachments/','img','list','250',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1);
+	(1,1,'Avatars','local',NULL,'{base_path}images/avatars/','{base_url}images/avatars/','img','n','y','list','50','100','100',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+	(3,1,'Member Photos','local',NULL,'/','{base_url}images/member_photos/','img','n','y','list','50','100','100',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+	(4,1,'Signature Attachments','local',NULL,'{base_path}images/signature_attachments/','{base_url}images/signature_attachments/','img','n','y','list','30','80','480',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+	(5,1,'PM Attachments','local',NULL,'{base_path}images/pm_attachments/','{base_url}images/pm_attachments/','img','n','y','list','250',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1);
 
 /*!40000 ALTER TABLE `exp_upload_prefs` ENABLE KEYS */;
 UNLOCK TABLES;
