@@ -1,13 +1,13 @@
 # ************************************************************
 # Sequel Ace SQL dump
-# Version 20039
+# Version 20046
 #
 # https://sequel-ace.com/
 # https://github.com/Sequel-Ace/Sequel-Ace
 #
 # Host: localhost (MySQL 5.7.30)
 # Database: ee-skeleton
-# Generation Time: 2023-01-21 04:00:32 +0000
+# Generation Time: 2023-01-26 16:45:03 +0000
 # ************************************************************
 
 
