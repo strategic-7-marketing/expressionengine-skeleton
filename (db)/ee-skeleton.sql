@@ -7,7 +7,7 @@
 #
 # Host: localhost (MySQL 5.7.30)
 # Database: ee-skeleton
-# Generation Time: 2023-01-26 16:45:03 +0000
+# Generation Time: 2023-02-28 04:05:03 +0000
 # ************************************************************
 
 
@@ -1017,7 +1017,8 @@ VALUES
 	(44,1,1,'admin','::1',1674271941,'Started updating file usage'),
 	(45,1,1,'admin','::1',1674271941,'File usage update complete. 1 database tables were affected.'),
 	(46,1,1,'admin','::1',1674273108,'Started updating file usage'),
-	(47,1,1,'admin','::1',1674273108,'File usage update complete. 1 database tables were affected.');
+	(47,1,1,'admin','::1',1674273108,'File usage update complete. 1 database tables were affected.'),
+	(48,1,1,'admin','::1',1677557026,'Logged in');
 
 /*!40000 ALTER TABLE `exp_cp_log` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1919,7 +1920,7 @@ LOCK TABLES `exp_members` WRITE;
 
 INSERT INTO `exp_members` (`member_id`, `role_id`, `username`, `screen_name`, `password`, `salt`, `unique_id`, `crypt_key`, `authcode`, `email`, `signature`, `avatar_filename`, `avatar_width`, `avatar_height`, `photo_filename`, `photo_width`, `photo_height`, `sig_img_filename`, `sig_img_width`, `sig_img_height`, `ignore_list`, `private_messages`, `accept_messages`, `last_view_bulletins`, `last_bulletin_date`, `ip_address`, `join_date`, `last_visit`, `last_activity`, `total_entries`, `total_comments`, `total_forum_topics`, `total_forum_posts`, `last_entry_date`, `last_comment_date`, `last_forum_post_date`, `last_email_date`, `in_authorlist`, `accept_admin_email`, `accept_user_email`, `notify_by_default`, `notify_of_pm`, `display_signatures`, `parse_smileys`, `smart_notifications`, `language`, `timezone`, `time_format`, `date_format`, `include_seconds`, `profile_theme`, `forum_theme`, `tracker`, `template_size`, `notepad`, `notepad_size`, `bookmarklets`, `quick_links`, `quick_tabs`, `show_sidebar`, `pmember_id`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `dismissed_pro_banner`, `enable_mfa`, `backup_mfa_code`, `pending_role_id`, `dismissed_banner`)
 VALUES
-	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1674259869,1674273049,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,NULL,NULL,NULL,'y','n',NULL,0,'n');
+	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1674273049,1677557027,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,NULL,NULL,NULL,'y','n',NULL,0,'n');
 
 /*!40000 ALTER TABLE `exp_members` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2588,7 +2589,8 @@ DROP TABLE IF EXISTS `exp_roles_role_groups`;
 CREATE TABLE `exp_roles_role_groups` (
   `role_id` int(10) unsigned NOT NULL,
   `group_id` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`role_id`,`group_id`)
+  PRIMARY KEY (`role_id`,`group_id`),
+  KEY `group_id_idx` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -2683,7 +2685,8 @@ LOCK TABLES `exp_security_hashes` WRITE;
 
 INSERT INTO `exp_security_hashes` (`hash_id`, `date`, `session_id`, `hash`)
 VALUES
-	(33,1674271883,'8ce1bacf621e64cdd1ca1ba4d6e742c4bada6ade','a0ae69feb0eb177aa05dc80d63b1b25723c8cd6b');
+	(33,1674271883,'8ce1bacf621e64cdd1ca1ba4d6e742c4bada6ade','a0ae69feb0eb177aa05dc80d63b1b25723c8cd6b'),
+	(34,1677557027,'8ecdb26463784b860c2f6a70056d8bf5e14e7ca6','d1619c5753de969f71ec20c7013fb08114d4da1d');
 
 /*!40000 ALTER TABLE `exp_security_hashes` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2718,7 +2721,8 @@ LOCK TABLES `exp_sessions` WRITE;
 
 INSERT INTO `exp_sessions` (`session_id`, `member_id`, `admin_sess`, `ip_address`, `user_agent`, `login_state`, `fingerprint`, `sess_start`, `auth_timeout`, `last_activity`, `can_debug`, `mfa_flag`, `pro_banner_seen`)
 VALUES
-	('8ce1bacf621e64cdd1ca1ba4d6e742c4bada6ade',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.33 Safari/537.36',NULL,'f32c4dcbba99d0704e14bfd01cc5e70d',1674271882,0,1674273127,'0','skip','n');
+	('8ce1bacf621e64cdd1ca1ba4d6e742c4bada6ade',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.33 Safari/537.36',NULL,'f32c4dcbba99d0704e14bfd01cc5e70d',1674271882,0,1674273127,'0','skip','n'),
+	('8ecdb26463784b860c2f6a70056d8bf5e14e7ca6',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.33 Safari/537.36',NULL,'f32c4dcbba99d0704e14bfd01cc5e70d',1677557026,0,1677557051,'0','skip','n');
 
 /*!40000 ALTER TABLE `exp_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3146,7 +3150,7 @@ LOCK TABLES `exp_templates` WRITE;
 
 INSERT INTO `exp_templates` (`template_id`, `site_id`, `group_id`, `template_name`, `template_type`, `template_engine`, `template_data`, `template_notes`, `edit_date`, `last_author_id`, `cache`, `refresh`, `no_auth_bounce`, `enable_http_auth`, `allow_php`, `php_parse_location`, `hits`, `protect_javascript`, `enable_frontedit`)
 VALUES
-	(2,1,2,'index','webpage',NULL,'{layout=\"site/_base-layout\"}',NULL,1674257689,0,'n',0,'','n','n','o',0,'n','y'),
+	(2,1,2,'index','webpage',NULL,'{layout=\"site/_base-layout\"}',NULL,1674274098,0,'n',0,'','n','n','o',0,'n','y'),
 	(3,1,2,'_base-layout','webpage',NULL,'<!doctype html>\n<html lang=\"en\">\n\n<head>\n    <!-- Required meta tags -->\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n\n    <title>{site_name}{if layout:seo_title != \'\'} | {layout:seo_title}{/if}</title>\n\n    <meta name=\"description\" content=\"{layout:seo_description}\">\n    <link rel=\"canonical\" href=\"{site_url}{current_path}\"/>\n\n    <!-- Favicon Code -->\n    <!-- https://realfavicongenerator.net -->\n    <!-- End Favicon Code -->\n\n    <link rel=\"stylesheet\" href=\"{site_url}css/styles.min.css?v=0.0.1\" type=\"text/css\">\n    {layout:css}\n\n    <!-- Google Tag Manager -->\n\n    <!-- End Google Tag Manager -->\n</head>\n\n<body>\n    {layout:contents}\n    {layout:js}\n</body>\n\n</html>',NULL,1636512585,1,'n',0,'','n','n','o',0,'n','y'),
 	(4,1,3,'sample-widget','webpage',NULL,'{widget title=\"Demo dashboard widget\" width=\"half\"}\n\n<p>Random entry: {exp:channel:entries dynamic=\"no\" orderby=\"random\" limit=\"1\"}<a href=\"{cp_url}?/cp/publish/edit/entry/{entry_id}&S={cp_session_id}\">{title}</a>{/exp:channel:entries}</p>\n\n<p>To see this code please visit the template <a href=\"{cp_url}?/cp/design/template/edit/4&S={cp_session_id}\">pro-dashboard-widgets/sample-widget</a>.</p>\n',NULL,1674273066,0,'n',0,'','n','n','o',0,'n','y'),
 	(5,1,3,'index','webpage',NULL,'',NULL,1674273066,1,'n',0,'','n','n','o',0,'n','y');
@@ -3398,7 +3402,11 @@ VALUES
 	(163,1674273100,'Running database update step: runUpdateFile[ud_7_02_05.php]',NULL,NULL,NULL),
 	(164,1674273100,'Running database update step: runUpdateFile[ud_7_02_06.php]',NULL,NULL,NULL),
 	(165,1674273100,'Running database update step: runUpdateFile[ud_7_02_07.php]',NULL,NULL,NULL),
-	(166,1674273100,'Update complete. Now running version 7.2.7',NULL,NULL,NULL);
+	(166,1674273100,'Update complete. Now running version 7.2.7',NULL,NULL,NULL),
+	(167,1677557048,'Running database update step: runUpdateFile[ud_7_02_08.php]',NULL,NULL,NULL),
+	(168,1677557049,'Running database update step: runUpdateFile[ud_7_02_09.php]',NULL,NULL,NULL),
+	(169,1677557049,'Running database update step: runUpdateFile[ud_7_02_10.php]',NULL,NULL,NULL),
+	(170,1677557049,'Update complete. Now running version 7.2.10',NULL,NULL,NULL);
 
 /*!40000 ALTER TABLE `exp_update_log` ENABLE KEYS */;
 UNLOCK TABLES;
