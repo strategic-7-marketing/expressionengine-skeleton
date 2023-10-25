@@ -599,7 +599,7 @@ class Filesystem
      */
     public function exists($path)
     {
-        if ($this->isLocal() && DIRECTORY_SEPARATOR == '\\' && strpos($path, '/') === 0) {
+        if ($this->isLocal() && DIRECTORY_SEPARATOR == '\\' && !empty($path) && strpos($path, '/') === 0) {
             //on Windows server, the path can't start with /
             return false;
         }
@@ -688,7 +688,7 @@ class Filesystem
 
         if (isset($time) && $this->isLocal()) {
             touch($this->flysystem->getAdapter()->applyPathPrefix($this->normalize($path)), $time);
-        } else {
+        } elseif ($this->isFile($path)) {
             $this->write($this->normalize($path), '');
         }
     }
@@ -1022,6 +1022,9 @@ class Filesystem
      */
     public function actLocally($path, callable $callback)
     {
+        // Remove invisible control characters
+        $path = preg_replace('#\\p{C}+#u', '', $path);
+
         if ($this->isLocal()) {
             return $callback($path);
         }
@@ -1045,6 +1048,9 @@ class Filesystem
         if (empty($path)) {
             return '';
         }
+
+        // Remove invisible control characters
+        $path = preg_replace('#\\p{C}+#u', '', $path);
 
         return str_replace('//', '/', implode([
             in_array(substr($path, 0, 1), ['/', '\\']) ? '/' : '',
