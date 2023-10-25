@@ -778,11 +778,36 @@ class Helper
                     $dir_link = ee('CP/FilePicker')->make($uploadDir)->getUrl();
                     static::insertJs(NL . "\t" . "Wygwam.fpUrl = '" . $dir_link . "';" . NL);
 
+                    if ($uploadDir == '') {
+                        $dir_link->addQueryStringVariables(array(
+                            'requested_directory' => 'all',
+                        ));
+                    } else {
+                        $dir_link->addQueryStringVariables(array(
+                            'requested_directory' => $uploadDir,
+                        ));
+                    }
+
                     if (! $uploadDir) {
                         $uploadDir = '"all"';
                     }
 
                     $dir_link->qs['hasUpload'] = 1;
+                    ee()->load->library('file_field');
+                    ee()->lang->loadfile('fieldtypes');
+                    ee()->file_field->loadDragAndDropAssets();
+
+                    if (REQ == 'CP') {
+                        ee()->cp->add_js_script(['file' => [
+                            'fields/file/file_field_drag_and_drop',
+                            'fields/file/concurrency_queue',
+                            'fields/file/file_upload_progress_table',
+                            'fields/file/drag_and_drop_upload',
+                            'fields/grid/file_grid',
+                            'cp/files/picker']
+                        ]);
+                    }
+
                     $config['filebrowserBrowseFunc']      = 'function(params) { Wygwam.loadEEFileBrowser(params, ' . $uploadDir . ', "any", "' . $dir_link . '"); }';
                     $config['filebrowserImageBrowseFunc'] = 'function(params) { Wygwam.loadEEFileBrowser(params, ' . $uploadDir . ', "image", "' . $dir_link . '"); }';
                 }
@@ -985,24 +1010,32 @@ class Helper
                     $start_old_tag = strpos((string)$data, '{filedir_');
                     $new_data = substr($data, $start_old_tag + 9); // rip the {filedir_ off so we can grab the directory id
                     $directory_id_old_tag = strtok($new_data, '}');
+                   
                     $new_data = substr($new_data, strlen($directory_id_old_tag) + 1); //rip off the X file dir and the closing }
-                    $test = strtok($new_data, '"');
-                    $subfolders = explode("/" , $test);
+                    //clean up $new_data
+                    $new_data = strtok($new_data, '"');
+                    $subfolders = explode("/" , $new_data);
                     $previous_dir = (int)$directory_id_old_tag;
                     $filter = 'upload_location_id';
-
+                    $image_not_found = false;
                     foreach ($subfolders as $k => $name) {
                         ee()->db->select('title, file_id');
                         $query = ee()->db->get_where('files', array('file_name' => $name, $filter => $previous_dir), 1, 0);
                         if (isset($query->result_array()[0]["file_id"])) {
                             $previous_dir = $query->result_array()[0]["file_id"];
+                        } else {
+                            $image_not_found = true;
+                            break;
                         }
                         $filter = "directory_id";
                     }
 
-                    $new_tag = "{file:" . $previous_dir . ":url}";
-                    $oldfile = "{filedir_" . static::getBetween($data, '{filedir_' , '"');
-                    $data = str_replace($oldfile, $new_tag, $data);
+                    if (!$image_not_found) {
+                        $new_tag = "{file:" . $previous_dir . ":url}";
+                        $oldfile = "{filedir_" . static::getBetween($data, '{filedir_' , '"');
+                        $data = str_replace($oldfile, $new_tag, $data);
+                    }
+                   
                 }
             }   
         }     
