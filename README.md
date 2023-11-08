@@ -61,7 +61,7 @@ jobs:
 
 - WYGWAM
 
-### Preconfigurtations
+### Preconfigurations
 
 - Added default additional menu items for Structure and Template Manager in the EE backend dashboard.
 
