@@ -1,15 +1,15 @@
-# ExpressionEngine Skeleton
+# ExpressionEngine Skeleton With Tailwind
 
 **Default DB Credentials:**\
 DB Name: ee-skeleton\
-User: ee-skeleto\
+User: ee-skeleton\
 Pass: ee-skeleton
 
 **Default Admin Login Credentials:**\
 User: admin\
 Pass: ee-skel
 
-An ExpressionEngine Skeleton Website And Template Repository
+## An ExpressionEngine Skeleton Website And Template Repository
 
 This is meant to be a starting point for a new ExpressionEngine website build project.
 Ideally this repository will be kept up to date with the latest needs from a starting point site.
@@ -55,12 +55,27 @@ jobs:
           print ('.htaccess_LIVE not found nothing renamed')
         ftp.quit()
 ```
+## Included Add-Ons And Preconfigurations
 
-Included Structure And WYGWAM Add-Ons and added default additional menu items for Structure and Template Manager in the EE backend.
+### Add-Ons
 
-This Repo also includes branches if you wish to start with a front-end framework.
-Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for using Bootstrap Front-end.
-Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
-Tailwind branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
+- WYGWAM
 
-**Don't Forget To License The Add-Ons For Production**
+### Preconfigurtations
+
+- Added default additional menu items for Structure and Template Manager in the EE backend dashboard.
+
+## Front-end Framework Branches.
+
+- Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for using Bootstrap Front-end.
+
+- Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
+
+- Tailwind branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
+
+## Using Tailwind
+Tailwind is preconfigured to watch the `/system/user/templates/` directory to build the CSS. Modify the `tailwind.config.js` if other locations are required.
+
+To begin watching for changes run: `npx tailwindcss -i ./css/styles.css -o ./css/style.min.css --watch`
+
+## **Don't Forget To License The Add-Ons For Production**
