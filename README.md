@@ -76,6 +76,6 @@ jobs:
 ## Using Tailwind
 Tailwind is preconfigured to watch the `/system/user/templates/` directory to build the CSS. Modify the `tailwind.config.js` if other locations are required.
 
-To begin watching for changes run: `npx tailwindcss -i ./css/styles.css -o ./css/style.min.css --watch`
+To begin watching for changes run: `npx tailwindcss -i ./css/styles.css -o ./css/styles.min.css --watch`
 
 ## **Don't Forget To License The Add-Ons For Production**
