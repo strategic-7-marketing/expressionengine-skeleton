@@ -1,13 +1,13 @@
 # ************************************************************
 # Sequel Ace SQL dump
-# Version 20046
+# Version 20094
 #
 # https://sequel-ace.com/
 # https://github.com/Sequel-Ace/Sequel-Ace
 #
 # Host: localhost (MySQL 5.7.30)
 # Database: ee-skeleton
-# Generation Time: 2023-10-25 14:48:34 +0000
+# Generation Time: 2025-08-01 16:44:58 +0000
 # ************************************************************
 
 
@@ -168,6 +168,25 @@ CREATE TABLE `exp_category_fields` (
 
 
 
+# Dump of table exp_category_group_settings
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_category_group_settings`;
+
+CREATE TABLE `exp_category_group_settings` (
+  `category_group_settings_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `site_id` int(4) unsigned NOT NULL,
+  `channel_id` int(4) unsigned NOT NULL,
+  `group_id` int(6) unsigned NOT NULL,
+  `cat_required` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `cat_allow_multiple` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
+  PRIMARY KEY (`category_group_settings_id`,`channel_id`,`group_id`),
+  KEY `group_id` (`group_id`),
+  KEY `site_id` (`site_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
 # Dump of table exp_category_groups
 # ------------------------------------------------------------
 
@@ -197,6 +216,20 @@ CREATE TABLE `exp_category_posts` (
   `entry_id` int(10) unsigned NOT NULL,
   `cat_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`entry_id`,`cat_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+# Dump of table exp_channel_category_groups
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_channel_category_groups`;
+
+CREATE TABLE `exp_channel_category_groups` (
+  `channel_id` int(4) unsigned NOT NULL,
+  `group_id` int(6) unsigned NOT NULL,
+  PRIMARY KEY (`channel_id`,`group_id`),
+  KEY `group_id` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -240,14 +273,14 @@ CREATE TABLE `exp_channel_entries_autosave` (
   `view_count_four` int(10) unsigned NOT NULL DEFAULT '0',
   `allow_comments` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   `sticky` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
-  `entry_date` int(10) NOT NULL,
+  `entry_date` bigint(10) NOT NULL,
   `year` char(4) COLLATE utf8mb4_unicode_ci NOT NULL,
   `month` char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
   `day` char(3) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `expiration_date` int(10) NOT NULL DEFAULT '0',
-  `comment_expiration_date` int(10) NOT NULL DEFAULT '0',
+  `expiration_date` bigint(10) NOT NULL DEFAULT '0',
+  `comment_expiration_date` bigint(10) NOT NULL DEFAULT '0',
   `edit_date` bigint(14) DEFAULT NULL,
-  `recent_comment_date` int(10) DEFAULT NULL,
+  `recent_comment_date` bigint(10) DEFAULT NULL,
   `comment_total` int(4) unsigned NOT NULL DEFAULT '0',
   `entry_data` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`entry_id`),
@@ -380,14 +413,14 @@ CREATE TABLE `exp_channel_titles` (
   `view_count_four` int(10) unsigned NOT NULL DEFAULT '0',
   `allow_comments` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   `sticky` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
-  `entry_date` int(10) NOT NULL,
+  `entry_date` bigint(10) NOT NULL,
   `year` char(4) COLLATE utf8mb4_unicode_ci NOT NULL,
   `month` char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
   `day` char(3) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `expiration_date` int(10) NOT NULL DEFAULT '0',
-  `comment_expiration_date` int(10) NOT NULL DEFAULT '0',
+  `expiration_date` bigint(10) NOT NULL DEFAULT '0',
+  `comment_expiration_date` bigint(10) NOT NULL DEFAULT '0',
   `edit_date` bigint(14) DEFAULT NULL,
-  `recent_comment_date` int(10) DEFAULT NULL,
+  `recent_comment_date` bigint(10) DEFAULT NULL,
   `comment_total` int(4) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry_id`),
   KEY `channel_id` (`channel_id`),
@@ -418,8 +451,8 @@ CREATE TABLE `exp_channels` (
   `total_entries` mediumint(8) NOT NULL DEFAULT '0',
   `total_records` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `total_comments` mediumint(8) NOT NULL DEFAULT '0',
-  `last_entry_date` int(10) unsigned NOT NULL DEFAULT '0',
-  `last_comment_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `last_entry_date` bigint(10) unsigned NOT NULL DEFAULT '0',
+  `last_comment_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `cat_group` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `deft_status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'open',
   `search_excerpt` int(4) unsigned DEFAULT NULL,
@@ -774,7 +807,7 @@ CREATE TABLE `exp_consent_audit_log` (
   `consent_request_id` int(10) unsigned NOT NULL,
   `member_id` int(10) unsigned NOT NULL,
   `action` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `log_date` int(10) NOT NULL DEFAULT '0',
+  `log_date` bigint(10) NOT NULL DEFAULT '0',
   `consent_request_version_id` int(10) unsigned DEFAULT NULL,
   `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `user_agent` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -790,8 +823,10 @@ CREATE TABLE `exp_consent_audit_log` (
 DROP TABLE IF EXISTS `exp_consent_request_version_cookies`;
 
 CREATE TABLE `exp_consent_request_version_cookies` (
+  `consent_request_version_cookies_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `consent_request_version_id` int(10) unsigned NOT NULL,
   `cookie_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`consent_request_version_cookies_id`),
   KEY `consent_request_version_cookies` (`consent_request_version_id`,`cookie_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -807,7 +842,7 @@ CREATE TABLE `exp_consent_request_versions` (
   `consent_request_id` int(10) unsigned NOT NULL,
   `request` mediumtext COLLATE utf8mb4_unicode_ci,
   `request_format` tinytext COLLATE utf8mb4_unicode_ci,
-  `create_date` int(10) NOT NULL DEFAULT '0',
+  `create_date` bigint(10) NOT NULL DEFAULT '0',
   `author_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`consent_request_version_id`),
   KEY `consent_request_id` (`consent_request_id`)
@@ -869,8 +904,8 @@ CREATE TABLE `exp_consents` (
   `request_format` tinytext COLLATE utf8mb4_unicode_ci,
   `consent_given` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `consent_given_via` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `expiration_date` int(10) DEFAULT NULL,
-  `response_date` int(10) DEFAULT NULL,
+  `expiration_date` bigint(10) DEFAULT NULL,
+  `response_date` bigint(10) DEFAULT NULL,
   PRIMARY KEY (`consent_id`),
   KEY `consent_request_version_id` (`consent_request_version_id`),
   KEY `member_id` (`member_id`)
@@ -962,7 +997,7 @@ CREATE TABLE `exp_cp_log` (
   `member_id` int(10) unsigned NOT NULL,
   `username` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
   `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
-  `act_date` int(10) NOT NULL,
+  `act_date` bigint(10) NOT NULL,
   `action` text COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `site_id` (`site_id`)
@@ -1022,7 +1057,9 @@ VALUES
 	(47,1,1,'admin','::1',1674273108,'File usage update complete. 1 database tables were affected.'),
 	(48,1,1,'admin','::1',1677557026,'Logged in'),
 	(49,1,1,'admin','::1',1697831830,'Logged in'),
-	(50,1,1,'admin','::1',1698245012,'Logged in');
+	(50,1,1,'admin','::1',1698245012,'Logged in'),
+	(51,1,1,'admin','::1',1701808253,'Logged in'),
+	(52,1,1,'admin','::1',1754065393,'Logged in');
 
 /*!40000 ALTER TABLE `exp_cp_log` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1034,8 +1071,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `exp_dashboard_layout_widgets`;
 
 CREATE TABLE `exp_dashboard_layout_widgets` (
+  `dashboard_layout_widgets_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `layout_id` int(10) unsigned NOT NULL,
   `widget_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`dashboard_layout_widgets_id`),
   KEY `layouts_widgets` (`layout_id`,`widget_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1122,18 +1161,20 @@ CREATE TABLE `exp_developer_log` (
 DROP TABLE IF EXISTS `exp_dock_prolets`;
 
 CREATE TABLE `exp_dock_prolets` (
+  `dock_prolets_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `dock_id` int(10) unsigned NOT NULL,
-  `prolet_id` int(10) unsigned NOT NULL
+  `prolet_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`dock_prolets_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `exp_dock_prolets` WRITE;
 /*!40000 ALTER TABLE `exp_dock_prolets` DISABLE KEYS */;
 
-INSERT INTO `exp_dock_prolets` (`dock_id`, `prolet_id`)
+INSERT INTO `exp_dock_prolets` (`dock_prolets_id`, `dock_id`, `prolet_id`)
 VALUES
-	(1,1),
-	(1,2),
-	(1,3);
+	(1,1,1),
+	(2,1,2),
+	(3,1,3);
 
 /*!40000 ALTER TABLE `exp_dock_prolets` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1184,10 +1225,10 @@ DROP TABLE IF EXISTS `exp_email_cache`;
 
 CREATE TABLE `exp_email_cache` (
   `cache_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `cache_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `cache_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `total_sent` int(6) unsigned NOT NULL,
   `from_name` varchar(70) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `from_email` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `from_email` varchar(254) COLLATE utf8mb4_unicode_ci NOT NULL,
   `recipient` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `cc` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `bcc` text COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -1237,7 +1278,7 @@ DROP TABLE IF EXISTS `exp_email_console_cache`;
 
 CREATE TABLE `exp_email_console_cache` (
   `cache_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `cache_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `cache_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `member_id` int(10) unsigned NOT NULL,
   `member_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
@@ -1282,7 +1323,7 @@ CREATE TABLE `exp_entry_versioning` (
   `entry_id` int(10) unsigned NOT NULL,
   `channel_id` int(4) unsigned NOT NULL,
   `author_id` int(10) unsigned NOT NULL,
-  `version_date` int(10) NOT NULL,
+  `version_date` bigint(10) NOT NULL,
   `version_data` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`version_id`),
   KEY `entry_id` (`entry_id`)
@@ -1355,6 +1396,7 @@ DROP TABLE IF EXISTS `exp_field_condition_sets_channel_fields`;
 CREATE TABLE `exp_field_condition_sets_channel_fields` (
   `condition_set_id` int(10) unsigned NOT NULL,
   `field_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`condition_set_id`,`field_id`),
   KEY `condition_set_id_field_id` (`condition_set_id`,`field_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1429,17 +1471,18 @@ VALUES
 	(12,'checkboxes','1.0.0','YTowOnt9','n'),
 	(13,'radio','1.0.0','YTowOnt9','n'),
 	(14,'relationship','1.0.0','YTowOnt9','n'),
-	(15,'rte','2.1.0','YTowOnt9','n'),
+	(15,'rte','2.2.0','YTowOnt9','n'),
 	(16,'toggle','1.0.0','YTowOnt9','n'),
 	(17,'url','1.0.0','YTowOnt9','n'),
 	(18,'structure','6.0.0','YToxOntzOjE5OiJzdHJ1Y3R1cmVfbGlzdF90eXBlIjtzOjU6InBhZ2VzIjt9','n'),
-	(19,'wygwam','5.4.6','YTowOnt9','n'),
+	(19,'wygwam','6.0.2','YTowOnt9','n'),
 	(20,'colorpicker','1.0.0','YTowOnt9','n'),
 	(21,'slider','1.0.0','YTowOnt9','n'),
 	(22,'range_slider','1.0.0','YTowOnt9','n'),
 	(23,'selectable_buttons','1.0.0','YTowOnt9','n'),
 	(24,'number','1.0.0','YTowOnt9','n'),
-	(25,'notes','1.0.0','YTowOnt9','n');
+	(25,'notes','1.0.0','YTowOnt9','n'),
+	(26,'member','2.4.0','YTowOnt9','n');
 
 /*!40000 ALTER TABLE `exp_fieldtypes` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1519,9 +1562,11 @@ CREATE TABLE `exp_file_manager_views` (
 DROP TABLE IF EXISTS `exp_file_usage`;
 
 CREATE TABLE `exp_file_usage` (
+  `file_usage_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `file_id` int(10) unsigned NOT NULL,
   `entry_id` int(10) unsigned NOT NULL DEFAULT '0',
   `cat_id` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`file_usage_id`),
   KEY `file_id` (`file_id`),
   KEY `entry_id` (`entry_id`),
   KEY `cat_id` (`cat_id`)
@@ -1581,9 +1626,9 @@ CREATE TABLE `exp_files` (
   `credit` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `uploaded_by_member_id` int(10) unsigned DEFAULT '0',
-  `upload_date` int(10) DEFAULT NULL,
+  `upload_date` bigint(10) DEFAULT NULL,
   `modified_by_member_id` int(10) unsigned DEFAULT '0',
-  `modified_date` int(10) DEFAULT NULL,
+  `modified_date` bigint(10) DEFAULT NULL,
   `file_hw_original` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `total_records` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`file_id`),
@@ -1626,7 +1671,7 @@ CREATE TABLE `exp_global_variables` (
   `site_id` int(4) unsigned NOT NULL DEFAULT '1',
   `variable_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `variable_data` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `edit_date` int(10) NOT NULL DEFAULT '0',
+  `edit_date` bigint(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`variable_id`),
   KEY `variable_name` (`variable_name`),
   KEY `site_id` (`site_id`)
@@ -1733,7 +1778,7 @@ CREATE TABLE `exp_member_bulletin_board` (
   `bulletin_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sender_id` int(10) unsigned NOT NULL,
   `bulletin_group` int(8) unsigned NOT NULL,
-  `bulletin_date` int(10) unsigned NOT NULL,
+  `bulletin_date` bigint(10) unsigned NOT NULL,
   `hash` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `bulletin_expires` int(10) unsigned NOT NULL DEFAULT '0',
   `bulletin_message` text COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -1775,7 +1820,7 @@ CREATE TABLE `exp_member_fields` (
   `m_field_name` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `m_field_label` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `m_field_description` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `m_field_type` varchar(12) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'text',
+  `m_field_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'text',
   `m_field_list_items` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `m_field_ta_rows` tinyint(2) DEFAULT '8',
   `m_field_maxl` smallint(3) DEFAULT NULL,
@@ -1797,6 +1842,23 @@ CREATE TABLE `exp_member_fields` (
 
 
 
+# Dump of table exp_member_manager_views
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_member_manager_views`;
+
+CREATE TABLE `exp_member_manager_views` (
+  `view_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `role_id` int(6) unsigned NOT NULL,
+  `member_id` int(10) unsigned NOT NULL,
+  `name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `columns` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`view_id`),
+  KEY `role_id_member_id` (`role_id`,`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
 # Dump of table exp_member_news_views
 # ------------------------------------------------------------
 
@@ -1804,7 +1866,7 @@ DROP TABLE IF EXISTS `exp_member_news_views`;
 
 CREATE TABLE `exp_member_news_views` (
   `news_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `version` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `version` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `member_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`news_id`),
   KEY `member_id` (`member_id`)
@@ -1821,6 +1883,31 @@ VALUES
 UNLOCK TABLES;
 
 
+# Dump of table exp_member_relationships
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_member_relationships`;
+
+CREATE TABLE `exp_member_relationships` (
+  `relationship_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
+  `parent_id` int(10) unsigned DEFAULT '0',
+  `child_id` int(10) unsigned DEFAULT '0',
+  `field_id` int(10) unsigned DEFAULT '0',
+  `fluid_field_data_id` int(10) unsigned DEFAULT '0',
+  `grid_field_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `grid_col_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `grid_row_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `order` int(10) unsigned DEFAULT '0',
+  PRIMARY KEY (`relationship_id`),
+  KEY `parent_id` (`parent_id`),
+  KEY `child_id` (`child_id`),
+  KEY `field_id` (`field_id`),
+  KEY `fluid_field_data_id` (`fluid_field_data_id`),
+  KEY `grid_row_id` (`grid_row_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
 # Dump of table exp_member_search
 # ------------------------------------------------------------
 
@@ -1829,7 +1916,7 @@ DROP TABLE IF EXISTS `exp_member_search`;
 CREATE TABLE `exp_member_search` (
   `search_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `site_id` int(4) unsigned NOT NULL DEFAULT '1',
-  `search_date` int(10) unsigned NOT NULL,
+  `search_date` bigint(10) unsigned NOT NULL,
   `keywords` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `fields` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `member_id` int(10) unsigned NOT NULL,
@@ -1858,7 +1945,7 @@ CREATE TABLE `exp_members` (
   `unique_id` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
   `crypt_key` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `authcode` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(254) COLLATE utf8mb4_unicode_ci NOT NULL,
   `signature` text COLLATE utf8mb4_unicode_ci,
   `avatar_filename` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `avatar_width` int(4) unsigned DEFAULT NULL,
@@ -1873,19 +1960,19 @@ CREATE TABLE `exp_members` (
   `private_messages` int(4) unsigned NOT NULL DEFAULT '0',
   `accept_messages` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   `last_view_bulletins` int(10) NOT NULL DEFAULT '0',
-  `last_bulletin_date` int(10) NOT NULL DEFAULT '0',
+  `last_bulletin_date` bigint(10) NOT NULL DEFAULT '0',
   `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
-  `join_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `join_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `last_visit` int(10) unsigned NOT NULL DEFAULT '0',
   `last_activity` int(10) unsigned NOT NULL DEFAULT '0',
   `total_entries` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `total_comments` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `total_forum_topics` mediumint(8) NOT NULL DEFAULT '0',
   `total_forum_posts` mediumint(8) NOT NULL DEFAULT '0',
-  `last_entry_date` int(10) unsigned NOT NULL DEFAULT '0',
-  `last_comment_date` int(10) unsigned NOT NULL DEFAULT '0',
-  `last_forum_post_date` int(10) unsigned NOT NULL DEFAULT '0',
-  `last_email_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `last_entry_date` bigint(10) unsigned NOT NULL DEFAULT '0',
+  `last_comment_date` bigint(10) unsigned NOT NULL DEFAULT '0',
+  `last_forum_post_date` bigint(10) unsigned NOT NULL DEFAULT '0',
+  `last_email_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `in_authorlist` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `accept_admin_email` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   `accept_user_email` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
@@ -1930,7 +2017,7 @@ LOCK TABLES `exp_members` WRITE;
 
 INSERT INTO `exp_members` (`member_id`, `role_id`, `username`, `screen_name`, `password`, `salt`, `unique_id`, `crypt_key`, `authcode`, `email`, `signature`, `avatar_filename`, `avatar_width`, `avatar_height`, `photo_filename`, `photo_width`, `photo_height`, `sig_img_filename`, `sig_img_width`, `sig_img_height`, `ignore_list`, `private_messages`, `accept_messages`, `last_view_bulletins`, `last_bulletin_date`, `ip_address`, `join_date`, `last_visit`, `last_activity`, `total_entries`, `total_comments`, `total_forum_topics`, `total_forum_posts`, `last_entry_date`, `last_comment_date`, `last_forum_post_date`, `last_email_date`, `in_authorlist`, `accept_admin_email`, `accept_user_email`, `notify_by_default`, `notify_of_pm`, `display_signatures`, `parse_smileys`, `smart_notifications`, `language`, `timezone`, `time_format`, `date_format`, `week_start`, `include_seconds`, `profile_theme`, `forum_theme`, `tracker`, `template_size`, `notepad`, `notepad_size`, `bookmarklets`, `quick_links`, `quick_tabs`, `show_sidebar`, `pmember_id`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `dismissed_pro_banner`, `enable_mfa`, `backup_mfa_code`, `pending_role_id`, `dismissed_banner`)
 VALUES
-	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1697834538,1698245013,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,NULL,NULL,NULL,'y','n',NULL,0,'n');
+	(1,1,'admin','admin','$2y$10$fkT7XkprjQuaY8m4RHkBP.WoGzJkwoi92hli4Jek8E96hche6wuZu','','6736fc35dc74d7f8f5c1d55e56f81db25a780e4c','ab14c17d26cceb2fd03af10ea5fb3ecef924f245',NULL,'stevendemanett@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'y',0,0,'::1',1607033726,1702411601,1754066458,0,0,0,0,0,0,0,0,'n','y','y','y','y','y','y','y','english','America/New_York',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'28',NULL,'18',NULL,'',NULL,'n',0,NULL,NULL,NULL,'y','n',NULL,0,'n');
 
 /*!40000 ALTER TABLE `exp_members` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2035,7 +2122,7 @@ CREATE TABLE `exp_message_attachments` (
   `attachment_hash` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `attachment_extension` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `attachment_location` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `attachment_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `attachment_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `attachment_size` int(10) unsigned NOT NULL DEFAULT '0',
   `is_temp` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   PRIMARY KEY (`attachment_id`)
@@ -2077,7 +2164,7 @@ DROP TABLE IF EXISTS `exp_message_data`;
 CREATE TABLE `exp_message_data` (
   `message_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sender_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `message_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `message_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `message_subject` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `message_body` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `message_tracking` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
@@ -2185,13 +2272,13 @@ VALUES
 	(3,'Consent','1.0.0','n','n'),
 	(4,'Member','2.2.1','n','n'),
 	(5,'Stats','2.2.0','n','n'),
-	(6,'Rte','2.1.0','y','n'),
+	(6,'Rte','2.2.0','y','n'),
 	(7,'File','1.1.0','n','n'),
 	(8,'Filepicker','1.0','y','n'),
 	(9,'Relationship','1.0.0','n','n'),
 	(10,'Search','2.3.0','n','n'),
 	(11,'Structure','6.0.0','y','y'),
-	(12,'Wygwam','5.4.6','y','n'),
+	(12,'Wygwam','6.0.2','y','n'),
 	(13,'Pro','2.0.0','n','n');
 
 /*!40000 ALTER TABLE `exp_modules` ENABLE KEYS */;
@@ -2226,7 +2313,7 @@ DROP TABLE IF EXISTS `exp_password_lockout`;
 
 CREATE TABLE `exp_password_lockout` (
   `lockout_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `login_date` int(10) unsigned NOT NULL,
+  `login_date` bigint(10) unsigned NOT NULL,
   `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `user_agent` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2363,7 +2450,8 @@ VALUES
 	(95,5,1,'can_attach_in_private_messages'),
 	(96,1,1,'can_access_dock'),
 	(97,1,1,'can_access_dock'),
-	(98,1,1,'can_access_dock');
+	(98,1,1,'can_access_dock'),
+	(99,1,1,'can_edit_member_fields');
 
 /*!40000 ALTER TABLE `exp_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2459,6 +2547,7 @@ LOCK TABLES `exp_remember_me` WRITE;
 INSERT INTO `exp_remember_me` (`remember_me_id`, `member_id`, `ip_address`, `user_agent`, `admin_sess`, `site_id`, `expiration`, `last_refresh`)
 VALUES
 	('31c49d60f95d6c4c187c6d78b23a58f0f8f61154',1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.84 Safari/537.36',0,1,1647901848,1646692248),
+	('b1bae08c9fc11e69e2441439fffa0a07a78180f3',1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',0,1,1703600196,1702390596),
 	('dd76c6c325407901f30c9b7c5ffb50e5076ed4e9',1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.23 Safari/537.36',0,1,1637722246,1636512646);
 
 /*!40000 ALTER TABLE `exp_remember_me` ENABLE KEYS */;
@@ -2490,7 +2579,7 @@ CREATE TABLE `exp_revision_tracker` (
   `item_id` int(10) unsigned NOT NULL,
   `item_table` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `item_field` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `item_date` int(10) NOT NULL,
+  `item_date` bigint(10) NOT NULL,
   `item_author_id` int(10) unsigned NOT NULL,
   `item_data` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`tracker_id`),
@@ -2543,6 +2632,7 @@ CREATE TABLE `exp_role_settings` (
   `can_edit_templates` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `can_delete_templates` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `require_mfa` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
+  `show_field_names` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'y',
   PRIMARY KEY (`id`),
   KEY `role_id` (`role_id`,`site_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2550,13 +2640,13 @@ CREATE TABLE `exp_role_settings` (
 LOCK TABLES `exp_role_settings` WRITE;
 /*!40000 ALTER TABLE `exp_role_settings` DISABLE KEYS */;
 
-INSERT INTO `exp_role_settings` (`id`, `role_id`, `site_id`, `menu_set_id`, `is_locked`, `can_edit_other_entries`, `can_assign_post_authors`, `can_delete_self_entries`, `can_delete_all_entries`, `mbr_delete_notify_emails`, `exclude_from_moderation`, `search_flood_control`, `prv_msg_send_limit`, `prv_msg_storage_limit`, `include_in_authorlist`, `include_in_memberlist`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `can_create_entries`, `can_edit_self_entries`, `can_create_new_templates`, `can_edit_templates`, `can_delete_templates`, `require_mfa`)
+INSERT INTO `exp_role_settings` (`id`, `role_id`, `site_id`, `menu_set_id`, `is_locked`, `can_edit_other_entries`, `can_assign_post_authors`, `can_delete_self_entries`, `can_delete_all_entries`, `mbr_delete_notify_emails`, `exclude_from_moderation`, `search_flood_control`, `prv_msg_send_limit`, `prv_msg_storage_limit`, `include_in_authorlist`, `include_in_memberlist`, `cp_homepage`, `cp_homepage_channel`, `cp_homepage_custom`, `can_create_entries`, `can_edit_self_entries`, `can_create_new_templates`, `can_edit_templates`, `can_delete_templates`, `require_mfa`, `show_field_names`)
 VALUES
-	(1,1,1,1,'y','y','y','y','y',NULL,'y',0,20,60,'y','y',NULL,0,NULL,'y','y','y','y','y','n'),
-	(2,2,1,0,'n','n','n','n','n',NULL,'n',60,20,60,'n','n',NULL,0,NULL,'n','n','n','n','n','n'),
-	(3,3,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n'),
-	(4,4,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n'),
-	(5,5,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n');
+	(1,1,1,1,'y','y','y','y','y',NULL,'y',0,20,60,'y','y',NULL,0,NULL,'y','y','y','y','y','n','y'),
+	(2,2,1,0,'n','n','n','n','n',NULL,'n',60,20,60,'n','n',NULL,0,NULL,'n','n','n','n','n','n','y'),
+	(3,3,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n','y'),
+	(4,4,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n','y'),
+	(5,5,1,0,'n','n','n','n','n',NULL,'n',10,20,60,'n','y',NULL,0,NULL,'n','n','n','n','n','n','y');
 
 /*!40000 ALTER TABLE `exp_role_settings` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2574,19 +2664,20 @@ CREATE TABLE `exp_roles` (
   `description` text COLLATE utf8mb4_unicode_ci,
   `is_locked` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `total_members` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `highlight` varchar(6) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 LOCK TABLES `exp_roles` WRITE;
 /*!40000 ALTER TABLE `exp_roles` DISABLE KEYS */;
 
-INSERT INTO `exp_roles` (`role_id`, `name`, `short_name`, `description`, `is_locked`, `total_members`)
+INSERT INTO `exp_roles` (`role_id`, `name`, `short_name`, `description`, `is_locked`, `total_members`, `highlight`)
 VALUES
-	(1,'Super Admin','super_admin','','y',1),
-	(2,'Banned','banned','','n',0),
-	(3,'Guests','guests','','n',0),
-	(4,'Pending','pending','','n',0),
-	(5,'Members','members','','n',0);
+	(1,'Super Admin','super_admin','','y',1,''),
+	(2,'Banned','banned','','n',0,''),
+	(3,'Guests','guests','','n',0,''),
+	(4,'Pending','pending','','n',0,''),
+	(5,'Members','members','','n',0,'');
 
 /*!40000 ALTER TABLE `exp_roles` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2627,7 +2718,9 @@ VALUES
 	(1,'Basic','YTozOntzOjc6InRvb2xiYXIiO2E6Njp7aTowO3M6NDoiYm9sZCI7aToxO3M6NjoiaXRhbGljIjtpOjI7czo5OiJ1bmRlcmxpbmUiO2k6MztzOjEyOiJudW1iZXJlZExpc3QiO2k6NDtzOjEyOiJidWxsZXRlZExpc3QiO2k6NTtzOjQ6ImxpbmsiO31zOjY6ImhlaWdodCI7czozOiIyMDAiO3M6MTA6InVwbG9hZF9kaXIiO3M6MzoiYWxsIjt9','ckeditor'),
 	(2,'Full','YTozOntzOjc6InRvb2xiYXIiO2E6Mjk6e2k6MDtzOjQ6ImJvbGQiO2k6MTtzOjY6Iml0YWxpYyI7aToyO3M6MTM6InN0cmlrZXRocm91Z2giO2k6MztzOjk6InVuZGVybGluZSI7aTo0O3M6OToic3Vic2NyaXB0IjtpOjU7czoxMToic3VwZXJzY3JpcHQiO2k6NjtzOjEwOiJibG9ja3F1b3RlIjtpOjc7czo0OiJjb2RlIjtpOjg7czo3OiJoZWFkaW5nIjtpOjk7czoxMjoicmVtb3ZlRm9ybWF0IjtpOjEwO3M6NDoidW5kbyI7aToxMTtzOjQ6InJlZG8iO2k6MTI7czoxMjoibnVtYmVyZWRMaXN0IjtpOjEzO3M6MTI6ImJ1bGxldGVkTGlzdCI7aToxNDtzOjc6Im91dGRlbnQiO2k6MTU7czo2OiJpbmRlbnQiO2k6MTY7czo0OiJsaW5rIjtpOjE3O3M6MTE6ImZpbGVtYW5hZ2VyIjtpOjE4O3M6MTE6Imluc2VydFRhYmxlIjtpOjE5O3M6MTA6Im1lZGlhRW1iZWQiO2k6MjA7czoxNDoiYWxpZ25tZW50OmxlZnQiO2k6MjE7czoxNToiYWxpZ25tZW50OnJpZ2h0IjtpOjIyO3M6MTY6ImFsaWdubWVudDpjZW50ZXIiO2k6MjM7czoxNzoiYWxpZ25tZW50Omp1c3RpZnkiO2k6MjQ7czoxNDoiaG9yaXpvbnRhbExpbmUiO2k6MjU7czoxNzoic3BlY2lhbENoYXJhY3RlcnMiO2k6MjY7czo4OiJyZWFkTW9yZSI7aToyNztzOjk6ImZvbnRDb2xvciI7aToyODtzOjE5OiJmb250QmFja2dyb3VuZENvbG9yIjt9czo2OiJoZWlnaHQiO3M6MzoiMjAwIjtzOjEwOiJ1cGxvYWRfZGlyIjtzOjM6ImFsbCI7fQ==','ckeditor'),
 	(3,'Redactor Basic','YTo0OntzOjQ6InR5cGUiO3M6ODoicmVkYWN0b3IiO3M6NzoidG9vbGJhciI7YToyOntzOjc6ImJ1dHRvbnMiO2E6Njp7aTowO3M6NDoiYm9sZCI7aToxO3M6NjoiaXRhbGljIjtpOjI7czo5OiJ1bmRlcmxpbmUiO2k6MztzOjI6Im9sIjtpOjQ7czoyOiJ1bCI7aTo1O3M6NDoibGluayI7fXM6NzoicGx1Z2lucyI7YTowOnt9fXM6NjoiaGVpZ2h0IjtzOjM6IjIwMCI7czoxMDoidXBsb2FkX2RpciI7czozOiJhbGwiO30=','redactor'),
-	(4,'Redactor Full','YTo0OntzOjQ6InR5cGUiO3M6ODoicmVkYWN0b3IiO3M6NzoidG9vbGJhciI7YToyOntzOjc6ImJ1dHRvbnMiO2E6MTY6e2k6MDtzOjQ6Imh0bWwiO2k6MTtzOjY6ImZvcm1hdCI7aToyO3M6NDoiYm9sZCI7aTozO3M6NjoiaXRhbGljIjtpOjQ7czo3OiJkZWxldGVkIjtpOjU7czo5OiJ1bmRlcmxpbmUiO2k6NjtzOjQ6InJlZG8iO2k6NztzOjQ6InVuZG8iO2k6ODtzOjI6Im9sIjtpOjk7czoyOiJ1bCI7aToxMDtzOjY6ImluZGVudCI7aToxMTtzOjc6Im91dGRlbnQiO2k6MTI7czozOiJzdXAiO2k6MTM7czozOiJzdWIiO2k6MTQ7czo0OiJsaW5rIjtpOjE1O3M6NDoibGluZSI7fXM6NzoicGx1Z2lucyI7YToxNTp7aTowO3M6OToiYWxpZ25tZW50IjtpOjE7czoxNjoicnRlX2RlZmluZWRsaW5rcyI7aToyO3M6MTE6ImZpbGVicm93c2VyIjtpOjM7czo1OiJwYWdlcyI7aTo0O3M6MTE6ImlubGluZXN0eWxlIjtpOjU7czo5OiJmb250Y29sb3IiO2k6NjtzOjc6ImxpbWl0ZXIiO2k6NztzOjc6ImNvdW50ZXIiO2k6ODtzOjEwOiJwcm9wZXJ0aWVzIjtpOjk7czoxMjoic3BlY2lhbGNoYXJzIjtpOjEwO3M6NToidGFibGUiO2k6MTE7czo1OiJ2aWRlbyI7aToxMjtzOjY6IndpZGdldCI7aToxMztzOjg6InJlYWRtb3JlIjtpOjE0O3M6MTA6ImZ1bGxzY3JlZW4iO319czo2OiJoZWlnaHQiO3M6MzoiMjAwIjtzOjEwOiJ1cGxvYWRfZGlyIjtzOjM6ImFsbCI7fQ==','redactor');
+	(4,'Redactor Full','YTo0OntzOjQ6InR5cGUiO3M6ODoicmVkYWN0b3IiO3M6NzoidG9vbGJhciI7YToyOntzOjc6ImJ1dHRvbnMiO2E6MTY6e2k6MDtzOjQ6Imh0bWwiO2k6MTtzOjY6ImZvcm1hdCI7aToyO3M6NDoiYm9sZCI7aTozO3M6NjoiaXRhbGljIjtpOjQ7czo3OiJkZWxldGVkIjtpOjU7czo5OiJ1bmRlcmxpbmUiO2k6NjtzOjQ6InJlZG8iO2k6NztzOjQ6InVuZG8iO2k6ODtzOjI6Im9sIjtpOjk7czoyOiJ1bCI7aToxMDtzOjY6ImluZGVudCI7aToxMTtzOjc6Im91dGRlbnQiO2k6MTI7czozOiJzdXAiO2k6MTM7czozOiJzdWIiO2k6MTQ7czo0OiJsaW5rIjtpOjE1O3M6NDoibGluZSI7fXM6NzoicGx1Z2lucyI7YToxNTp7aTowO3M6OToiYWxpZ25tZW50IjtpOjE7czoxNjoicnRlX2RlZmluZWRsaW5rcyI7aToyO3M6MTE6ImZpbGVicm93c2VyIjtpOjM7czo1OiJwYWdlcyI7aTo0O3M6MTE6ImlubGluZXN0eWxlIjtpOjU7czo5OiJmb250Y29sb3IiO2k6NjtzOjc6ImxpbWl0ZXIiO2k6NztzOjc6ImNvdW50ZXIiO2k6ODtzOjEwOiJwcm9wZXJ0aWVzIjtpOjk7czoxMjoic3BlY2lhbGNoYXJzIjtpOjEwO3M6NToidGFibGUiO2k6MTE7czo1OiJ2aWRlbyI7aToxMjtzOjY6IndpZGdldCI7aToxMztzOjg6InJlYWRtb3JlIjtpOjE0O3M6MTA6ImZ1bGxzY3JlZW4iO319czo2OiJoZWlnaHQiO3M6MzoiMjAwIjtzOjEwOiJ1cGxvYWRfZGlyIjtzOjM6ImFsbCI7fQ==','redactor'),
+	(5,'RedactorX Basic','YTo0OntzOjQ6InR5cGUiO3M6OToicmVkYWN0b3JYIjtzOjc6InRvb2xiYXIiO2E6MTI6e3M6MTI6InRvb2xiYXJfaGlkZSI7czoxOiJ5IjtzOjE0OiJ0b29sYmFyX3RvcGJhciI7czoxOiJuIjtzOjE0OiJ0b29sYmFyX2FkZGJhciI7czoxOiJuIjtzOjE1OiJ0b29sYmFyX2NvbnRleHQiO3M6MToibiI7czoxNToidG9vbGJhcl9jb250cm9sIjtzOjE6Im4iO3M6NDoiaGlkZSI7YTowOnt9czo2OiJ0b3BiYXIiO2E6Mzp7aTowO3M6ODoic2hvcnRjdXQiO2k6MTtzOjQ6InVuZG8iO2k6MjtzOjQ6InJlZG8iO31zOjY6ImFkZGJhciI7YTo2OntpOjA7czo5OiJwYXJhZ3JhcGgiO2k6MTtzOjU6ImVtYmVkIjtpOjI7czo1OiJ0YWJsZSI7aTozO3M6NToicXVvdGUiO2k6NDtzOjM6InByZSI7aTo1O3M6NDoibGluZSI7fXM6NzoiY29udGV4dCI7YTo5OntpOjA7czo0OiJib2xkIjtpOjE7czo2OiJpdGFsaWMiO2k6MjtzOjc6ImRlbGV0ZWQiO2k6MztzOjQ6ImNvZGUiO2k6NDtzOjQ6ImxpbmsiO2k6NTtzOjQ6Im1hcmsiO2k6NjtzOjM6InN1YiI7aTo3O3M6Mzoic3VwIjtpOjg7czozOiJrYmQiO31zOjY6ImVkaXRvciI7YTo0OntpOjA7czo2OiJmb3JtYXQiO2k6MTtzOjQ6ImJvbGQiO2k6MjtzOjY6Iml0YWxpYyI7aTozO3M6NDoibGluayI7fXM6NjoiZm9ybWF0IjthOjM6e2k6MDtzOjE6InAiO2k6MTtzOjI6InVsIjtpOjI7czoyOiJvbCI7fXM6NzoicGx1Z2lucyI7YTo0OntpOjA7czo5OiJ1bmRlcmxpbmUiO2k6MTtzOjExOiJmaWxlYnJvd3NlciI7aToyO3M6MTY6InJ0ZV9kZWZpbmVkbGlua3MiO2k6MztzOjU6InBhZ2VzIjt9fXM6NjoiaGVpZ2h0IjtzOjM6IjIwMCI7czoxMDoidXBsb2FkX2RpciI7czozOiJhbGwiO30=','redactorX'),
+	(6,'RedactorX Full','YTo0OntzOjQ6InR5cGUiO3M6OToicmVkYWN0b3JYIjtzOjc6InRvb2xiYXIiO2E6MTI6e3M6MTI6InRvb2xiYXJfaGlkZSI7czoxOiJ5IjtzOjE0OiJ0b29sYmFyX3RvcGJhciI7czoxOiJ5IjtzOjE0OiJ0b29sYmFyX2FkZGJhciI7czoxOiJ5IjtzOjE1OiJ0b29sYmFyX2NvbnRleHQiO3M6MToieSI7czoxNToidG9vbGJhcl9jb250cm9sIjtzOjE6InkiO3M6NDoiaGlkZSI7YTowOnt9czo2OiJ0b3BiYXIiO2E6Mzp7aTowO3M6NDoidW5kbyI7aToxO3M6NDoicmVkbyI7aToyO3M6ODoic2hvcnRjdXQiO31zOjY6ImFkZGJhciI7YTo2OntpOjA7czo5OiJwYXJhZ3JhcGgiO2k6MTtzOjU6ImVtYmVkIjtpOjI7czo1OiJ0YWJsZSI7aTozO3M6NToicXVvdGUiO2k6NDtzOjM6InByZSI7aTo1O3M6NDoibGluZSI7fXM6NzoiY29udGV4dCI7YTo5OntpOjA7czo0OiJib2xkIjtpOjE7czo2OiJpdGFsaWMiO2k6MjtzOjc6ImRlbGV0ZWQiO2k6MztzOjQ6ImNvZGUiO2k6NDtzOjQ6ImxpbmsiO2k6NTtzOjQ6Im1hcmsiO2k6NjtzOjM6InN1YiI7aTo3O3M6Mzoic3VwIjtpOjg7czozOiJrYmQiO31zOjY6ImVkaXRvciI7YTo3OntpOjA7czozOiJhZGQiO2k6MTtzOjQ6Imh0bWwiO2k6MjtzOjY6ImZvcm1hdCI7aTozO3M6NDoiYm9sZCI7aTo0O3M6NjoiaXRhbGljIjtpOjU7czo3OiJkZWxldGVkIjtpOjY7czo0OiJsaW5rIjt9czo2OiJmb3JtYXQiO2E6OTp7aTowO3M6MToicCI7aToxO3M6MjoiaDEiO2k6MjtzOjI6ImgyIjtpOjM7czoyOiJoMyI7aTo0O3M6MjoiaDQiO2k6NTtzOjI6Img1IjtpOjY7czoyOiJoNiI7aTo3O3M6MjoidWwiO2k6ODtzOjI6Im9sIjt9czo3OiJwbHVnaW5zIjthOjE1OntpOjA7czo5OiJ1bmRlcmxpbmUiO2k6MTtzOjk6ImFsaWdubWVudCI7aToyO3M6OToiYmxvY2tjb2RlIjtpOjM7czoxNjoicnRlX2RlZmluZWRsaW5rcyI7aTo0O3M6NToicGFnZXMiO2k6NTtzOjExOiJmaWxlYnJvd3NlciI7aTo2O3M6MTM6ImltYWdlcG9zaXRpb24iO2k6NztzOjExOiJpbWFnZXJlc2l6ZSI7aTo4O3M6MTI6ImlubGluZWZvcm1hdCI7aTo5O3M6MTI6InJlbW92ZWZvcm1hdCI7aToxMDtzOjc6ImNvdW50ZXIiO2k6MTE7czo4OiJzZWxlY3RvciI7aToxMjtzOjEyOiJzcGVjaWFsY2hhcnMiO2k6MTM7czoxMzoidGV4dGRpcmVjdGlvbiI7aToxNDtzOjg6InJlYWRtb3JlIjt9fXM6NjoiaGVpZ2h0IjtzOjM6IjIwMCI7czoxMDoidXBsb2FkX2RpciI7czozOiJhbGwiO30=','redactorX');
 
 /*!40000 ALTER TABLE `exp_rte_toolsets` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2641,7 +2734,7 @@ DROP TABLE IF EXISTS `exp_search`;
 CREATE TABLE `exp_search` (
   `search_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `site_id` int(4) NOT NULL DEFAULT '1',
-  `search_date` int(10) NOT NULL,
+  `search_date` bigint(10) unsigned NOT NULL,
   `keywords` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
   `member_id` int(10) unsigned NOT NULL,
   `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2668,7 +2761,7 @@ CREATE TABLE `exp_search_log` (
   `member_id` int(10) unsigned NOT NULL,
   `screen_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
-  `search_date` int(10) NOT NULL,
+  `search_date` bigint(10) unsigned NOT NULL,
   `search_type` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `search_terms` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
@@ -2696,9 +2789,7 @@ LOCK TABLES `exp_security_hashes` WRITE;
 
 INSERT INTO `exp_security_hashes` (`hash_id`, `date`, `session_id`, `hash`)
 VALUES
-	(34,1677557027,'8ecdb26463784b860c2f6a70056d8bf5e14e7ca6','d1619c5753de969f71ec20c7013fb08114d4da1d'),
-	(35,1697831831,'2420ab3b421a34280e51dc833e3b6c9056dba46f','452395558aa849d38d8dd7bc31117a915d9cadb7'),
-	(36,1698245013,'4bfeb272939a298ad6da462b8478f26dbac091ac','e913604620a34d7ddd871d20df39fe53d5692db3');
+	(43,1754065393,'e582095df2c33be422a2d2a31bdb11f0b974f3eb','1498ec488b69b6298a25dc8b86f4161ea20d1684');
 
 /*!40000 ALTER TABLE `exp_security_hashes` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2733,9 +2824,7 @@ LOCK TABLES `exp_sessions` WRITE;
 
 INSERT INTO `exp_sessions` (`session_id`, `member_id`, `admin_sess`, `ip_address`, `user_agent`, `login_state`, `fingerprint`, `sess_start`, `auth_timeout`, `last_activity`, `can_debug`, `mfa_flag`, `pro_banner_seen`)
 VALUES
-	('2420ab3b421a34280e51dc833e3b6c9056dba46f',1,0,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',NULL,'1fa97444302921bfaec90202ea360a6a',1697831830,0,1697834538,'0','skip','n'),
-	('4bfeb272939a298ad6da462b8478f26dbac091ac',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',NULL,'1fa97444302921bfaec90202ea360a6a',1698245012,0,1698245249,'0','skip','n'),
-	('8ecdb26463784b860c2f6a70056d8bf5e14e7ca6',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.33 Safari/537.36',NULL,'f32c4dcbba99d0704e14bfd01cc5e70d',1677557026,0,1677559603,'0','skip','n');
+	('e582095df2c33be422a2d2a31bdb11f0b974f3eb',1,1,'::1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',NULL,'1f7eee0955e6d012187d486b4effbda7',1754065393,0,1754066466,'0','skip','n');
 
 /*!40000 ALTER TABLE `exp_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2779,7 +2868,7 @@ CREATE TABLE `exp_snippets` (
   `site_id` int(4) NOT NULL,
   `snippet_name` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
   `snippet_contents` text COLLATE utf8mb4_unicode_ci,
-  `edit_date` int(10) NOT NULL DEFAULT '0',
+  `edit_date` bigint(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`snippet_id`),
   KEY `site_id` (`site_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2801,7 +2890,7 @@ CREATE TABLE `exp_specialty_templates` (
   `template_subtype` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `template_data` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `template_notes` text COLLATE utf8mb4_unicode_ci,
-  `edit_date` int(10) NOT NULL DEFAULT '0',
+  `edit_date` bigint(10) NOT NULL DEFAULT '0',
   `last_author_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`template_id`),
   KEY `template_name` (`template_name`),
@@ -2813,17 +2902,17 @@ LOCK TABLES `exp_specialty_templates` WRITE;
 
 INSERT INTO `exp_specialty_templates` (`template_id`, `site_id`, `enable_template`, `template_name`, `data_title`, `template_type`, `template_subtype`, `template_data`, `template_notes`, `edit_date`, `last_author_id`)
 VALUES
-	(1,1,'y','offline_template','','system',NULL,'<html>\n<head>\n\n<title>System Offline</title>\n\n<style type=\"text/css\">\n\nbody {\nbackground-color:	#ffffff;\nmargin:				50px;\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-size:			11px;\ncolor:				#000;\nbackground-color:	#fff;\n}\n\na {\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-weight:		bold;\nletter-spacing:		.09em;\ntext-decoration:	none;\ncolor:			  #330099;\nbackground-color:	transparent;\n}\n\na:visited {\ncolor:				#330099;\nbackground-color:	transparent;\n}\n\na:hover {\ncolor:				#000;\ntext-decoration:	underline;\nbackground-color:	transparent;\n}\n\n#content  {\nborder:				#999999 1px solid;\npadding:			22px 25px 14px 25px;\n}\n\nh1 {\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-weight:		bold;\nfont-size:			14px;\ncolor:				#000;\nmargin-top: 		0;\nmargin-bottom:		14px;\n}\n\np {\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-size: 			12px;\nfont-weight: 		normal;\nmargin-top: 		12px;\nmargin-bottom: 		14px;\ncolor: 				#000;\n}\n</style>\n\n</head>\n\n<body>\n\n<div id=\"content\">\n\n<h1>System Offline</h1>\n\n<p>This site is currently offline</p>\n\n</div>\n\n</body>\n\n</html>',NULL,1607033726,0),
-	(2,1,'y','message_template','','system',NULL,'<html>\n<head>\n\n<title>{title}</title>\n\n<meta http-equiv=\'content-type\' content=\'text/html; charset={charset}\' />\n\n{meta_refresh}\n\n<style type=\"text/css\">\n\nbody {\nbackground-color:	#ffffff;\nmargin:				50px;\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-size:			11px;\ncolor:				#000;\nbackground-color:	#fff;\n}\n\na {\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nletter-spacing:		.09em;\ntext-decoration:	none;\ncolor:			  #330099;\nbackground-color:	transparent;\n}\n\na:visited {\ncolor:				#330099;\nbackground-color:	transparent;\n}\n\na:active {\ncolor:				#ccc;\nbackground-color:	transparent;\n}\n\na:hover {\ncolor:				#000;\ntext-decoration:	underline;\nbackground-color:	transparent;\n}\n\n#content  {\nborder:				#000 1px solid;\nbackground-color: 	#DEDFE3;\npadding:			22px 25px 14px 25px;\n}\n\nh1 {\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-weight:		bold;\nfont-size:			14px;\ncolor:				#000;\nmargin-top: 		0;\nmargin-bottom:		14px;\n}\n\np {\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-size: 			12px;\nfont-weight: 		normal;\nmargin-top: 		12px;\nmargin-bottom: 		14px;\ncolor: 				#000;\n}\n\nul {\nmargin-bottom: 		16px;\n}\n\nli {\nlist-style:			square;\nfont-family:		Verdana, Arial, Tahoma, Trebuchet MS, Sans-serif;\nfont-size: 			12px;\nfont-weight: 		normal;\nmargin-top: 		8px;\nmargin-bottom: 		8px;\ncolor: 				#000;\n}\n\n</style>\n\n</head>\n\n<body>\n\n<div id=\"content\">\n\n<h1>{heading}</h1>\n\n{content}\n\n<p>{link}</p>\n\n</div>\n\n</body>\n\n</html>',NULL,1607033726,0),
+	(1,1,'y','offline_template','','system',NULL,'<!doctype html>\n<html dir=\"ltr\">\n    <head>\n        <title>System Offline</title>\n        <meta content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\"  name=\"viewport\">\n\n        <style type=\"text/css\">\n:root, body {\n    --ee-panel-bg: #fff;\n    --ee-panel-border: #dfe0ef;\n    --ee-text-normal: #0d0d19;\n    --ee-main-bg: #f7f7fb;\n    --ee-link: #5D63F1;\n    --ee-link-hover: #171feb;\n}\n\n*, :after, :before {\n    box-sizing: inherit;\n}\n\nhtml {\n    box-sizing: border-box;\n    font-size: 15px;\n    height: 100%;\n    line-height: 1.15;\n}\n\nbody {\n    font-family: -apple-system, BlinkMacSystemFont, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;\n    height: 100%;\n    font-size: 1rem;\n    line-height: 1.6;\n    color: var(--ee-text-normal);\n    background: var(--ee-main-bg);\n    -webkit-font-smoothing: antialiased;\n    margin: 0;\n}\n\n.panel {\n    margin-bottom: 20px;\n    background-color: var(--ee-panel-bg);\n    border: 1px solid var(--ee-panel-border);\n    border-radius: 6px;\n}\n.redirect {\n	max-width: 700px;\n	min-width: 350px;\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%,-50%);\n}\n\n.panel-heading {\n    padding: 20px 25px;\n    position: relative;\n}\n\n.panel-body {\n    padding: 20px 25px;\n}\n\n.panel-body:after, .panel-body:before {\n    content: \" \";\n    display: table;\n}\n\n.redirect p {\n    margin-bottom: 20px;\n}\np {\n    line-height: 1.6;\n}\na, blockquote, code, h1, h2, h3, h4, h5, h6, ol, p, pre, ul {\n    color: inherit;\n    margin: 0;\n    padding: 0;\n    font-weight: inherit;\n}\n\na {\n    color: var(--ee-link);\n    text-decoration: none;\n    -webkit-transition: color .15s ease-in-out;\n    -moz-transition: color .15s ease-in-out;\n    -o-transition: color .15s ease-in-out;\n}\n\na:hover {\n    color: var(--ee-link-hover);\n}\n\nh3 {\n    font-size: 1.35em;\n    font-weight: 500;\n}\n\nol, ul {\n    padding-left: 0;\n}\n\nol li, ul li {\n    list-style-position: inside;\n}\n\n.panel-footer {\n    padding: 20px 25px;\n    position: relative;\n}\n\n\n        </style>\n    </head>\n    <body>\n        <section class=\"flex-wrap\">\n            <section class=\"wrap\">\n                <div class=\"panel redirect\">\n                    <div class=\"panel-heading\">\n                        <h3>System Offline</h3>\n                    </div>\n					<div class=\"panel-body\">\n					This site is currently offline\n                    </div>\n                </div>\n            </section>\n        </section>\n    </body>\n</html>',NULL,1607033726,0),
+	(2,1,'y','message_template','','system',NULL,'<!doctype html>\n<html dir=\"ltr\">\n    <head>\n        <title>{title}</title>\n        <meta http-equiv=\"content-type\" content=\"text/html; charset={charset}\">\n        <meta content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\"  name=\"viewport\">\n        <meta name=\"referrer\" content=\"no-referrer\">\n        {meta_refresh}\n        <style type=\"text/css\">\n:root, body {\n    --ee-panel-bg: #fff;\n    --ee-panel-border: #dfe0ef;\n    --ee-text-normal: #0d0d19;\n    --ee-main-bg: #f7f7fb;\n    --ee-link: #5D63F1;\n    --ee-link-hover: #171feb;\n}\n\n*, :after, :before {\n    box-sizing: inherit;\n}\n\nhtml {\n    box-sizing: border-box;\n    font-size: 15px;\n    height: 100%;\n    line-height: 1.15;\n}\n\nbody {\n    font-family: -apple-system, BlinkMacSystemFont, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;\n    height: 100%;\n    font-size: 1rem;\n    line-height: 1.6;\n    color: var(--ee-text-normal);\n    background: var(--ee-main-bg);\n    -webkit-font-smoothing: antialiased;\n    margin: 0;\n}\n\n.panel {\n    margin-bottom: 20px;\n    background-color: var(--ee-panel-bg);\n    border: 1px solid var(--ee-panel-border);\n    border-radius: 6px;\n}\n.redirect {\n	max-width: 700px;\n	min-width: 350px;\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%,-50%);\n}\n\n.panel-heading {\n    padding: 20px 25px;\n    position: relative;\n}\n\n.panel-body {\n    padding: 20px 25px;\n}\n\n.panel-body:after, .panel-body:before {\n    content: \" \";\n    display: table;\n}\n\n.redirect p {\n    margin-bottom: 20px;\n}\np {\n    line-height: 1.6;\n}\na, blockquote, code, h1, h2, h3, h4, h5, h6, ol, p, pre, ul {\n    color: inherit;\n    margin: 0;\n    padding: 0;\n    font-weight: inherit;\n}\n\na {\n    color: var(--ee-link);\n    text-decoration: none;\n    -webkit-transition: color .15s ease-in-out;\n    -moz-transition: color .15s ease-in-out;\n    -o-transition: color .15s ease-in-out;\n}\n\na:hover {\n    color: var(--ee-link-hover);\n}\n\nh3 {\n    font-size: 1.35em;\n    font-weight: 500;\n}\n\nol, ul {\n    padding-left: 0;\n}\n\nol li, ul li {\n    list-style-position: inside;\n}\n\n.panel-footer {\n    padding: 20px 25px;\n    position: relative;\n}\n\n\n        </style>\n    </head>\n    <body>\n        <section class=\"flex-wrap\">\n            <section class=\"wrap\">\n                <div class=\"panel redirect\">\n                    <div class=\"panel-heading\">\n                        <h3>{heading}</h3>\n                    </div>\n                    <div class=\"panel-body\">\n                        {content}\n\n\n                    </div>\n                    <div class=\"panel-footer\">\n                        {link}\n                    </div>\n                </div>\n            </section>\n        </section>\n    </body>\n</html>',NULL,1607033726,0),
 	(3,1,'y','admin_notify_reg','Notification of new member registration','email','members','New member registration site: {site_name}\n\nScreen name: {name}\nUser name: {username}\nEmail: {email}\n\nYour control panel URL: {control_panel_url}',NULL,1607033726,0),
 	(4,1,'y','admin_notify_entry','A new channel entry has been posted','email','content','A new entry has been posted in the following channel:\n{channel_name}\n\nThe title of the entry is:\n{entry_title}\n\nPosted by: {name}\nEmail: {email}\n\nTo read the entry please visit:\n{entry_url}\n',NULL,1607033726,0),
 	(5,1,'y','admin_notify_comment','You have just received a comment','email','comments','You have just received a comment for the following channel:\n{channel_name}\n\nThe title of the entry is:\n{entry_title}\n\nLocated at:\n{comment_url}\n\nPosted by: {name}\nEmail: {email}\nURL: {url}\nLocation: {location}\n\n{comment}',NULL,1607033726,0),
 	(6,1,'y','mbr_activation_instructions','Enclosed is your activation code','email','members','Thank you for your new member registration.\n\nTo activate your new account, please visit the following URL:\n\n{unwrap}{activation_url}{/unwrap}\n\nThank You!\n\n{site_name}\n\n{site_url}',NULL,1607033726,0),
-	(7,1,'y','forgot_password_instructions','Login information','email','members','{name},\n\nTo reset your password, please go to the following page:\n\n{reset_url}\n\nThen log in with your username: {username}\n\nIf you do not wish to reset your password, ignore this message. It will expire in 24 hours.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
+	(7,1,'y','forgot_password_instructions','Login information','email','members','To reset your password, please go to the following page:\n\n{reset_url}\n\nThen log in with your username: {username}\n\nIf you do not wish to reset your password, ignore this message. It will expire in 24 hours.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
 	(8,1,'y','password_changed_notification','Password changed','email','members','{name},\n\nYour password was just changed.\n\nIf you didn\'t make this change yourself, please contact an administrator right away.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
 	(9,1,'y','email_changed_notification','Email address changed','email','members','{name},\n\nYour email address has been changed, and this email address is no longer associated with your account.\n\nIf you didn\'t make this change yourself, please contact an administrator right away.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
-	(10,1,'y','validated_member_notify','Your membership account has been activated','email','members','{name},\n\nYour membership account has been activated and is ready for use.\n\nThank You!\n\n{site_name}\n{site_url}',NULL,1607033726,0),
-	(11,1,'y','decline_member_validation','Your membership account has been declined','email','members','{name},\n\nWe\'re sorry but our staff has decided not to validate your membership.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
+	(10,1,'y','validated_member_notify','Your membership account has been activated','email','members','Your membership account has been activated and is ready for use.\n\nThank You!\n\n{site_name}\n{site_url}',NULL,1607033726,0),
+	(11,1,'y','decline_member_validation','Your membership account has been declined','email','members','We\'re sorry but our staff has decided not to validate your membership.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
 	(12,1,'y','comment_notification','Someone just responded to your comment','email','comments','{name_of_commenter} just responded to the entry you subscribed to at:\n{channel_name}\n\nThe title of the entry is:\n{entry_title}\n\nYou can see the comment at the following URL:\n{comment_url}\n\n{comment}\n\nTo stop receiving notifications for this comment, click here:\n{notification_removal_url}',NULL,1607033726,0),
 	(13,1,'y','comments_opened_notification','New comments have been added','email','comments','Responses have been added to the entry you subscribed to at:\n{channel_name}\n\nThe title of the entry is:\n{entry_title}\n\nYou can see the comments at the following URL:\n{comment_url}\n\n{comments}\n{comment}\n{/comments}\n\nTo stop receiving notifications for this entry, click here:\n{notification_removal_url}',NULL,1607033726,0),
 	(14,1,'y','private_message_notification','Someone has sent you a Private Message','email','private_messages','\n{recipient_name},\n\n{sender_name} has just sent you a Private Message titled ‘{message_subject}’.\n\nYou can see the Private Message by logging in and viewing your inbox at:\n{site_url}\n\nContent:\n\n{message_content}\n\nTo stop receiving notifications of Private Messages, turn the option off in your Email Settings.\n\n{site_name}\n{site_url}',NULL,1607033726,0),
@@ -2853,12 +2942,12 @@ CREATE TABLE `exp_stats` (
   `total_forum_topics` mediumint(8) NOT NULL DEFAULT '0',
   `total_forum_posts` mediumint(8) NOT NULL DEFAULT '0',
   `total_comments` mediumint(8) NOT NULL DEFAULT '0',
-  `last_entry_date` int(10) unsigned NOT NULL DEFAULT '0',
-  `last_forum_post_date` int(10) unsigned NOT NULL DEFAULT '0',
-  `last_comment_date` int(10) unsigned NOT NULL DEFAULT '0',
-  `last_visitor_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `last_entry_date` bigint(10) unsigned NOT NULL DEFAULT '0',
+  `last_forum_post_date` bigint(10) unsigned NOT NULL DEFAULT '0',
+  `last_comment_date` bigint(10) unsigned NOT NULL DEFAULT '0',
+  `last_visitor_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `most_visitors` mediumint(7) NOT NULL DEFAULT '0',
-  `most_visitor_date` int(10) unsigned NOT NULL DEFAULT '0',
+  `most_visitor_date` bigint(10) unsigned NOT NULL DEFAULT '0',
   `last_cache_clear` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`stat_id`),
   KEY `site_id` (`site_id`)
@@ -2869,7 +2958,7 @@ LOCK TABLES `exp_stats` WRITE;
 
 INSERT INTO `exp_stats` (`stat_id`, `site_id`, `total_members`, `recent_member_id`, `recent_member`, `total_entries`, `total_forum_topics`, `total_forum_posts`, `total_comments`, `last_entry_date`, `last_forum_post_date`, `last_comment_date`, `last_visitor_date`, `most_visitors`, `most_visitor_date`, `last_cache_clear`)
 VALUES
-	(1,1,1,1,'admin',0,0,0,0,1607033726,0,0,0,0,0,1674862042);
+	(1,1,1,1,'admin',0,0,0,0,1607033726,0,0,0,0,0,1754670159);
 
 /*!40000 ALTER TABLE `exp_stats` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3141,7 +3230,7 @@ CREATE TABLE `exp_templates` (
   `template_engine` varchar(24) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `template_data` mediumtext COLLATE utf8mb4_unicode_ci,
   `template_notes` text COLLATE utf8mb4_unicode_ci,
-  `edit_date` int(10) NOT NULL DEFAULT '0',
+  `edit_date` bigint(10) NOT NULL DEFAULT '0',
   `last_author_id` int(10) unsigned NOT NULL DEFAULT '0',
   `cache` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
   `refresh` int(6) unsigned NOT NULL DEFAULT '0',
@@ -3442,7 +3531,37 @@ VALUES
 	(190,1698245246,'Running database update step: runUpdateFile[ud_7_03_12.php]',NULL,NULL,NULL),
 	(191,1698245246,'Running database update step: runUpdateFile[ud_7_03_13.php]',NULL,NULL,NULL),
 	(192,1698245247,'Running database update step: runUpdateFile[ud_7_03_14.php]',NULL,NULL,NULL),
-	(193,1698245247,'Update complete. Now running version 7.3.14',NULL,NULL,NULL);
+	(193,1698245247,'Update complete. Now running version 7.3.14',NULL,NULL,NULL),
+	(194,1754065580,'Running database update step: runUpdateFile[ud_7_03_15.php]',NULL,NULL,NULL),
+	(195,1754065580,'Running database update step: runUpdateFile[ud_7_04_00.php]',NULL,NULL,NULL),
+	(196,1754065581,'Running database update step: runUpdateFile[ud_7_04_01.php]',NULL,NULL,NULL),
+	(197,1754065581,'Running database update step: runUpdateFile[ud_7_04_02.php]',NULL,NULL,NULL),
+	(198,1754065581,'Running database update step: runUpdateFile[ud_7_04_03.php]',NULL,NULL,NULL),
+	(199,1754065581,'Running database update step: runUpdateFile[ud_7_04_04.php]',NULL,NULL,NULL),
+	(200,1754065582,'Running database update step: runUpdateFile[ud_7_04_05.php]',NULL,NULL,NULL),
+	(201,1754065582,'Running database update step: runUpdateFile[ud_7_04_06.php]',NULL,NULL,NULL),
+	(202,1754065582,'Running database update step: runUpdateFile[ud_7_04_07.php]',NULL,NULL,NULL),
+	(203,1754065582,'Running database update step: runUpdateFile[ud_7_04_08.php]',NULL,NULL,NULL),
+	(204,1754065582,'Running database update step: runUpdateFile[ud_7_04_09.php]',NULL,NULL,NULL),
+	(205,1754065582,'Running database update step: runUpdateFile[ud_7_04_10.php]',NULL,NULL,NULL),
+	(206,1754065583,'Running database update step: runUpdateFile[ud_7_04_11.php]',NULL,NULL,NULL),
+	(207,1754065583,'Running database update step: runUpdateFile[ud_7_05_00.php]',NULL,NULL,NULL),
+	(208,1754065585,'Running database update step: runUpdateFile[ud_7_05_01.php]',NULL,NULL,NULL),
+	(209,1754065585,'Running database update step: runUpdateFile[ud_7_05_02.php]',NULL,NULL,NULL),
+	(210,1754065585,'Running database update step: runUpdateFile[ud_7_05_03.php]',NULL,NULL,NULL),
+	(211,1754065585,'Running database update step: runUpdateFile[ud_7_05_04.php]',NULL,NULL,NULL),
+	(212,1754065586,'Running database update step: runUpdateFile[ud_7_05_05.php]',NULL,NULL,NULL),
+	(213,1754065586,'Running database update step: runUpdateFile[ud_7_05_06.php]',NULL,NULL,NULL),
+	(214,1754065586,'Running database update step: runUpdateFile[ud_7_05_07.php]',NULL,NULL,NULL),
+	(215,1754065586,'Running database update step: runUpdateFile[ud_7_05_08.php]',NULL,NULL,NULL),
+	(216,1754065586,'Running database update step: runUpdateFile[ud_7_05_09.php]',NULL,NULL,NULL),
+	(217,1754065586,'Running database update step: runUpdateFile[ud_7_05_10.php]',NULL,NULL,NULL),
+	(218,1754065587,'Running database update step: runUpdateFile[ud_7_05_11.php]',NULL,NULL,NULL),
+	(219,1754065587,'Could not drop key \'condition_set_id\' from table \'exp_field_condition_sets_channel_fields\'. Key does not exist.','Smartforge::drop_key',58,'/Users/SDemanett/Sites/localhost/expressionengine-skeleton/system/ee/installer/updates/ud_7_05_11.php'),
+	(220,1754065587,'Could not drop key \'field_id\' from table \'exp_field_condition_sets_channel_fields\'. Key does not exist.','Smartforge::drop_key',59,'/Users/SDemanett/Sites/localhost/expressionengine-skeleton/system/ee/installer/updates/ud_7_05_11.php'),
+	(221,1754065587,'Running database update step: runUpdateFile[ud_7_05_12.php]',NULL,NULL,NULL),
+	(222,1754065587,'Running database update step: runUpdateFile[ud_7_05_13.php]',NULL,NULL,NULL),
+	(223,1754065587,'Update complete. Now running version 7.5.13',NULL,NULL,NULL);
 
 /*!40000 ALTER TABLE `exp_update_log` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3508,6 +3627,20 @@ VALUES
 
 /*!40000 ALTER TABLE `exp_upload_prefs` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+# Dump of table exp_upload_prefs_category_groups
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `exp_upload_prefs_category_groups`;
+
+CREATE TABLE `exp_upload_prefs_category_groups` (
+  `upload_location_id` int(4) unsigned NOT NULL,
+  `group_id` int(6) unsigned NOT NULL,
+  PRIMARY KEY (`upload_location_id`,`group_id`),
+  KEY `group_id` (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
 # Dump of table exp_upload_prefs_roles
