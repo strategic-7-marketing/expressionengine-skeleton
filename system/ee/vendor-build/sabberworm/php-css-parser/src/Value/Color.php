@@ -6,6 +6,10 @@ use ExpressionEngine\Dependency\Sabberworm\CSS\OutputFormat;
 use ExpressionEngine\Dependency\Sabberworm\CSS\Parsing\ParserState;
 use ExpressionEngine\Dependency\Sabberworm\CSS\Parsing\UnexpectedEOFException;
 use ExpressionEngine\Dependency\Sabberworm\CSS\Parsing\UnexpectedTokenException;
+/**
+ * `Color's can be input in the form #rrggbb, #rgb or schema(val1, val2, …) but are always stored as an array of
+ * ('s' => val1, 'c' => val2, 'h' => val3, …) and output in the second form.
+ */
 class Color extends CSSFunction
 {
     /**
@@ -14,15 +18,20 @@ class Color extends CSSFunction
      */
     public function __construct(array $aColor, $iLineNo = 0)
     {
-        parent::__construct(\implode('', \array_keys($aColor)), $aColor, ',', $iLineNo);
+        parent::__construct(implode('', array_keys($aColor)), $aColor, ',', $iLineNo);
     }
     /**
+     * @param ParserState $oParserState
+     * @param bool $bIgnoreCase
+     *
      * @return Color|CSSFunction
      *
      * @throws UnexpectedEOFException
      * @throws UnexpectedTokenException
+     *
+     * @internal since V8.8.0
      */
-    public static function parse(ParserState $oParserState)
+    public static function parse(ParserState $oParserState, $bIgnoreCase = \false)
     {
         $aColor = [];
         if ($oParserState->comes('#')) {
@@ -34,9 +43,11 @@ class Color extends CSSFunction
                 $sValue = $sValue[0] . $sValue[0] . $sValue[1] . $sValue[1] . $sValue[2] . $sValue[2] . $sValue[3] . $sValue[3];
             }
             if ($oParserState->strlen($sValue) === 8) {
-                $aColor = ['r' => new Size(\intval($sValue[0] . $sValue[1], 16), null, \true, $oParserState->currentLine()), 'g' => new Size(\intval($sValue[2] . $sValue[3], 16), null, \true, $oParserState->currentLine()), 'b' => new Size(\intval($sValue[4] . $sValue[5], 16), null, \true, $oParserState->currentLine()), 'a' => new Size(\round(self::mapRange(\intval($sValue[6] . $sValue[7], 16), 0, 255, 0, 1), 2), null, \true, $oParserState->currentLine())];
+                $aColor = ['r' => new Size(intval($sValue[0] . $sValue[1], 16), null, \true, $oParserState->currentLine()), 'g' => new Size(intval($sValue[2] . $sValue[3], 16), null, \true, $oParserState->currentLine()), 'b' => new Size(intval($sValue[4] . $sValue[5], 16), null, \true, $oParserState->currentLine()), 'a' => new Size(round(self::mapRange(intval($sValue[6] . $sValue[7], 16), 0, 255, 0, 1), 2), null, \true, $oParserState->currentLine())];
+            } elseif ($oParserState->strlen($sValue) === 6) {
+                $aColor = ['r' => new Size(intval($sValue[0] . $sValue[1], 16), null, \true, $oParserState->currentLine()), 'g' => new Size(intval($sValue[2] . $sValue[3], 16), null, \true, $oParserState->currentLine()), 'b' => new Size(intval($sValue[4] . $sValue[5], 16), null, \true, $oParserState->currentLine())];
             } else {
-                $aColor = ['r' => new Size(\intval($sValue[0] . $sValue[1], 16), null, \true, $oParserState->currentLine()), 'g' => new Size(\intval($sValue[2] . $sValue[3], 16), null, \true, $oParserState->currentLine()), 'b' => new Size(\intval($sValue[4] . $sValue[5], 16), null, \true, $oParserState->currentLine())];
+                throw new UnexpectedTokenException('Invalid hex color value', $sValue, 'custom', $oParserState->currentLine());
             }
         } else {
             $sColorMode = $oParserState->parseIdentifier(\true);
@@ -63,7 +74,7 @@ class Color extends CSSFunction
             }
             $oParserState->consume(')');
             if ($bContainsVar) {
-                return new CSSFunction($sColorMode, \array_values($aColor), ',', $oParserState->currentLine());
+                return new CSSFunction($sColorMode, array_values($aColor), ',', $oParserState->currentLine());
             }
         }
         return new Color($aColor, $oParserState->currentLine());
@@ -100,7 +111,7 @@ class Color extends CSSFunction
      */
     public function setColor(array $aColor)
     {
-        $this->setName(\implode('', \array_keys($aColor)));
+        $this->setName(implode('', array_keys($aColor)));
         $this->aComponents = $aColor;
     }
     /**
@@ -112,19 +123,23 @@ class Color extends CSSFunction
     }
     /**
      * @return string
+     *
+     * @deprecated in V8.8.0, will be removed in V9.0.0. Use `render` instead.
      */
     public function __toString()
     {
         return $this->render(new OutputFormat());
     }
     /**
+     * @param OutputFormat|null $oOutputFormat
+     *
      * @return string
      */
-    public function render(OutputFormat $oOutputFormat)
+    public function render($oOutputFormat)
     {
         // Shorthand RGB color values
-        if ($oOutputFormat->getRGBHashNotation() && \implode('', \array_keys($this->aComponents)) === 'rgb') {
-            $sResult = \sprintf('%02x%02x%02x', $this->aComponents['r']->getSize(), $this->aComponents['g']->getSize(), $this->aComponents['b']->getSize());
+        if ($oOutputFormat->getRGBHashNotation() && implode('', array_keys($this->aComponents)) === 'rgb') {
+            $sResult = sprintf('%02x%02x%02x', $this->aComponents['r']->getSize(), $this->aComponents['g']->getSize(), $this->aComponents['b']->getSize());
             return '#' . ($sResult[0] == $sResult[1] && $sResult[2] == $sResult[3] && $sResult[4] == $sResult[5] ? "{$sResult[0]}{$sResult[2]}{$sResult[4]}" : $sResult);
         }
         return parent::render($oOutputFormat);
