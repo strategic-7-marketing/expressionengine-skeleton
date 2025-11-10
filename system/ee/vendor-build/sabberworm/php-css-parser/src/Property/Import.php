@@ -20,10 +20,14 @@ class Import implements AtRule
     private $sMediaQuery;
     /**
      * @var int
+     *
+     * @internal since 8.8.0
      */
     protected $iLineNo;
     /**
      * @var array<array-key, Comment>
+     *
+     * @internal since 8.8.0
      */
     protected $aComments;
     /**
@@ -63,17 +67,21 @@ class Import implements AtRule
     }
     /**
      * @return string
+     *
+     * @deprecated in V8.8.0, will be removed in V9.0.0. Use `render` instead.
      */
     public function __toString()
     {
         return $this->render(new OutputFormat());
     }
     /**
+     * @param OutputFormat|null $oOutputFormat
+     *
      * @return string
      */
-    public function render(OutputFormat $oOutputFormat)
+    public function render($oOutputFormat)
     {
-        return "@import " . $this->oLocation->render($oOutputFormat) . ($this->sMediaQuery === null ? '' : ' ' . $this->sMediaQuery) . ';';
+        return $oOutputFormat->comments($this) . "@import " . $this->oLocation->render($oOutputFormat) . ($this->sMediaQuery === null ? '' : ' ' . $this->sMediaQuery) . ';';
     }
     /**
      * @return string
@@ -89,7 +97,7 @@ class Import implements AtRule
     {
         $aResult = [$this->oLocation];
         if ($this->sMediaQuery) {
-            \array_push($aResult, $this->sMediaQuery);
+            array_push($aResult, $this->sMediaQuery);
         }
         return $aResult;
     }
@@ -100,7 +108,7 @@ class Import implements AtRule
      */
     public function addComments(array $aComments)
     {
-        $this->aComments = \array_merge($this->aComments, $aComments);
+        $this->aComments = array_merge($this->aComments, $aComments);
     }
     /**
      * @return array<array-key, Comment>
@@ -117,5 +125,12 @@ class Import implements AtRule
     public function setComments(array $aComments)
     {
         $this->aComments = $aComments;
+    }
+    /**
+     * @return string
+     */
+    public function getMediaQuery()
+    {
+        return $this->sMediaQuery;
     }
 }

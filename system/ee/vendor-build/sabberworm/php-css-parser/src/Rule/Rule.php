@@ -12,8 +12,9 @@ use ExpressionEngine\Dependency\Sabberworm\CSS\Renderable;
 use ExpressionEngine\Dependency\Sabberworm\CSS\Value\RuleValueList;
 use ExpressionEngine\Dependency\Sabberworm\CSS\Value\Value;
 /**
- * RuleSets contains Rule objects which always have a key and a value.
- * In CSS, Rules are expressed as follows: “key: value[0][0] value[0][1], value[1][0] value[1][1];”
+ * `Rule`s just have a string key (the rule) and a 'Value'.
+ *
+ * In CSS, `Rule`s are expressed as follows: “key: value[0][0] value[0][1], value[1][0] value[1][1];”
  */
 class Rule implements Renderable, Commentable
 {
@@ -22,7 +23,7 @@ class Rule implements Renderable, Commentable
      */
     private $sRule;
     /**
-     * @var RuleValueList|null
+     * @var RuleValueList|string|null
      */
     private $mValue;
     /**
@@ -39,10 +40,14 @@ class Rule implements Renderable, Commentable
     protected $iLineNo;
     /**
      * @var int
+     *
+     * @internal since 8.8.0
      */
     protected $iColNo;
     /**
      * @var array<array-key, Comment>
+     *
+     * @internal since 8.8.0
      */
     protected $aComments;
     /**
@@ -61,14 +66,18 @@ class Rule implements Renderable, Commentable
         $this->aComments = [];
     }
     /**
+     * @param array<int, Comment> $commentsBeforeRule
+     *
      * @return Rule
      *
      * @throws UnexpectedEOFException
      * @throws UnexpectedTokenException
+     *
+     * @internal since V8.8.0
      */
-    public static function parse(ParserState $oParserState)
+    public static function parse(ParserState $oParserState, $commentsBeforeRule = [])
     {
-        $aComments = $oParserState->consumeWhiteSpace();
+        $aComments = \array_merge($commentsBeforeRule, $oParserState->consumeWhiteSpace());
         $oRule = new Rule($oParserState->parseIdentifier(!$oParserState->comes("--")), $oParserState->currentLine(), $oParserState->currentColumn());
         $oRule->setComments($aComments);
         $oRule->addComments($oParserState->consumeWhiteSpace());
@@ -93,20 +102,28 @@ class Rule implements Renderable, Commentable
         while ($oParserState->comes(';')) {
             $oParserState->consume(';');
         }
-        $oParserState->consumeWhiteSpace();
         return $oRule;
     }
     /**
+     * Returns a list of delimiters (or separators).
+     * The first item is the innermost separator (or, put another way, the highest-precedence operator).
+     * The sequence continues to the outermost separator (or lowest-precedence operator).
+     *
      * @param string $sRule
      *
-     * @return array<int, string>
+     * @return list<non-empty-string>
      */
     private static function listDelimiterForRule($sRule)
     {
-        if (\preg_match('/^font($|-)/', $sRule)) {
+        if (preg_match('/^font($|-)/', $sRule)) {
             return [',', '/', ' '];
         }
-        return [',', ' ', '/'];
+        switch ($sRule) {
+            case 'src':
+                return [' ', ','];
+            default:
+                return [',', ' ', '/'];
+        }
     }
     /**
      * @return int
@@ -150,14 +167,14 @@ class Rule implements Renderable, Commentable
         return $this->sRule;
     }
     /**
-     * @return RuleValueList|null
+     * @return RuleValueList|string|null
      */
     public function getValue()
     {
         return $this->mValue;
     }
     /**
-     * @param RuleValueList|null $mValue
+     * @param RuleValueList|string|null $mValue
      *
      * @return void
      */
@@ -177,12 +194,12 @@ class Rule implements Renderable, Commentable
     public function setValues(array $aSpaceSeparatedValues)
     {
         $oSpaceSeparatedList = null;
-        if (\count($aSpaceSeparatedValues) > 1) {
+        if (count($aSpaceSeparatedValues) > 1) {
             $oSpaceSeparatedList = new RuleValueList(' ', $this->iLineNo);
         }
         foreach ($aSpaceSeparatedValues as $aCommaSeparatedValues) {
             $oCommaSeparatedList = null;
-            if (\count($aCommaSeparatedValues) > 1) {
+            if (count($aCommaSeparatedValues) > 1) {
                 $oCommaSeparatedList = new RuleValueList(',', $this->iLineNo);
             }
             foreach ($aCommaSeparatedValues as $mValue) {
@@ -227,11 +244,11 @@ class Rule implements Renderable, Commentable
                 $aResult[] = [$mValue];
                 continue;
             }
-            if ($this->mValue->getListSeparator() === ' ' || \count($aResult) === 0) {
+            if ($this->mValue->getListSeparator() === ' ' || count($aResult) === 0) {
                 $aResult[] = [];
             }
             foreach ($mValue->getListComponents() as $mValue) {
-                $aResult[\count($aResult) - 1][] = $mValue;
+                $aResult[count($aResult) - 1][] = $mValue;
             }
         }
         return $aResult;
@@ -247,7 +264,7 @@ class Rule implements Renderable, Commentable
      */
     public function addValue($mValue, $sType = ' ')
     {
-        if (!\is_array($mValue)) {
+        if (!is_array($mValue)) {
             $mValue = [$mValue];
         }
         if (!$this->mValue instanceof RuleValueList || $this->mValue->getListSeparator() !== $sType) {
@@ -265,6 +282,8 @@ class Rule implements Renderable, Commentable
      * @param int $iModifier
      *
      * @return void
+     *
+     * @deprecated since V8.8.0, will be removed in V9.0
      */
     public function addIeHack($iModifier)
     {
@@ -274,6 +293,8 @@ class Rule implements Renderable, Commentable
      * @param array<int, int> $aModifiers
      *
      * @return void
+     *
+     * @deprecated since V8.8.0, will be removed in V9.0
      */
     public function setIeHack(array $aModifiers)
     {
@@ -281,6 +302,8 @@ class Rule implements Renderable, Commentable
     }
     /**
      * @return array<int, int>
+     *
+     * @deprecated since V8.8.0, will be removed in V9.0
      */
     public function getIeHack()
     {
@@ -304,25 +327,29 @@ class Rule implements Renderable, Commentable
     }
     /**
      * @return string
+     *
+     * @deprecated in V8.8.0, will be removed in V9.0.0. Use `render` instead.
      */
     public function __toString()
     {
         return $this->render(new OutputFormat());
     }
     /**
+     * @param OutputFormat|null $oOutputFormat
+     *
      * @return string
      */
-    public function render(OutputFormat $oOutputFormat)
+    public function render($oOutputFormat)
     {
-        $sResult = "{$this->sRule}:{$oOutputFormat->spaceAfterRuleName()}";
+        $sResult = "{$oOutputFormat->comments($this)}{$this->sRule}:{$oOutputFormat->spaceAfterRuleName()}";
         if ($this->mValue instanceof Value) {
-            //Can also be a ValueList
+            // Can also be a ValueList
             $sResult .= $this->mValue->render($oOutputFormat);
         } else {
             $sResult .= $this->mValue;
         }
         if (!empty($this->aIeHack)) {
-            $sResult .= ' \\' . \implode('\\', $this->aIeHack);
+            $sResult .= ' \\' . implode('\\', $this->aIeHack);
         }
         if ($this->bIsImportant) {
             $sResult .= ' !important';
@@ -337,7 +364,7 @@ class Rule implements Renderable, Commentable
      */
     public function addComments(array $aComments)
     {
-        $this->aComments = \array_merge($this->aComments, $aComments);
+        $this->aComments = array_merge($this->aComments, $aComments);
     }
     /**
      * @return array<array-key, Comment>
