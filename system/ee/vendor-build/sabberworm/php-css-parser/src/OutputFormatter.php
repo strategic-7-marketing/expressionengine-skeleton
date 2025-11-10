@@ -2,7 +2,11 @@
 
 namespace ExpressionEngine\Dependency\Sabberworm\CSS;
 
+use ExpressionEngine\Dependency\Sabberworm\CSS\Comment\Commentable;
 use ExpressionEngine\Dependency\Sabberworm\CSS\Parsing\OutputException;
+/**
+ * @internal since 8.8.0
+ */
 class OutputFormatter
 {
     /**
@@ -24,11 +28,11 @@ class OutputFormatter
         $sSpaceString = $this->oFormat->get("Space{$sName}");
         // If $sSpaceString is an array, we have multiple values configured
         // depending on the type of object the space applies to
-        if (\is_array($sSpaceString)) {
+        if (is_array($sSpaceString)) {
             if ($sType !== null && isset($sSpaceString[$sType])) {
                 $sSpaceString = $sSpaceString[$sType];
             } else {
-                $sSpaceString = \reset($sSpaceString);
+                $sSpaceString = reset($sSpaceString);
             }
         }
         return $this->prepareSpace($sSpaceString);
@@ -103,6 +107,10 @@ class OutputFormatter
      */
     public function spaceBeforeListArgumentSeparator($sSeparator)
     {
+        $spaceForSeparator = $this->oFormat->getSpaceBeforeListArgumentSeparators();
+        if (isset($spaceForSeparator[$sSeparator])) {
+            return $spaceForSeparator[$sSeparator];
+        }
         return $this->space('BeforeListArgumentSeparator', $sSeparator);
     }
     /**
@@ -112,6 +120,10 @@ class OutputFormatter
      */
     public function spaceAfterListArgumentSeparator($sSeparator)
     {
+        $spaceForSeparator = $this->oFormat->getSpaceAfterListArgumentSeparators();
+        if (isset($spaceForSeparator[$sSeparator])) {
+            return $spaceForSeparator[$sSeparator];
+        }
         return $this->space('AfterListArgumentSeparator', $sSeparator);
     }
     /**
@@ -184,14 +196,34 @@ class OutputFormatter
         if ($this->oFormat->get('SemicolonAfterLastRule')) {
             return $sString;
         }
-        $sString = \explode(';', $sString);
-        if (\count($sString) < 2) {
+        $sString = explode(';', $sString);
+        if (count($sString) < 2) {
             return $sString[0];
         }
-        $sLast = \array_pop($sString);
-        $sNextToLast = \array_pop($sString);
-        \array_push($sString, $sNextToLast . $sLast);
-        return \implode(';', $sString);
+        $sLast = array_pop($sString);
+        $sNextToLast = array_pop($sString);
+        array_push($sString, $sNextToLast . $sLast);
+        return implode(';', $sString);
+    }
+    /**
+     *
+     * @param array<Commentable> $aComments
+     *
+     * @return string
+     */
+    public function comments(Commentable $oCommentable)
+    {
+        if (!$this->oFormat->bRenderComments) {
+            return '';
+        }
+        $sResult = '';
+        $aComments = $oCommentable->getComments();
+        $iLastCommentIndex = count($aComments) - 1;
+        foreach ($aComments as $i => $oComment) {
+            $sResult .= $oComment->render($this->oFormat);
+            $sResult .= $i === $iLastCommentIndex ? $this->spaceAfterBlocks() : $this->spaceBetweenBlocks();
+        }
+        return $sResult;
     }
     /**
      * @param string $sSpaceString
@@ -200,13 +232,13 @@ class OutputFormatter
      */
     private function prepareSpace($sSpaceString)
     {
-        return \str_replace("\n", "\n" . $this->indent(), $sSpaceString);
+        return str_replace("\n", "\n" . $this->indent(), $sSpaceString);
     }
     /**
      * @return string
      */
     private function indent()
     {
-        return \str_repeat($this->oFormat->sIndentation, $this->oFormat->level());
+        return str_repeat($this->oFormat->sIndentation, $this->oFormat->getIndentationLevel());
     }
 }
