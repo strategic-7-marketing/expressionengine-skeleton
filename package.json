@@ -6,9 +6,12 @@
   "dependencies": {
     "foundation-sites": "^6.7.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "sass": "^1.104.1"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "sass css/styles.scss css/styles.min.css --style=compressed",
+    "watch": "sass css/styles.scss css/styles.min.css --style=compressed --watch"
   },
   "repository": {
     "type": "git",
