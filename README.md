@@ -1,4 +1,4 @@
-# ExpressionEngine Skeleton
+# ExpressionEngine Skeleton With Bootstrap
 
 **Default DB Credentials:**\
 DB Name: ee-skeleton\
@@ -81,5 +81,22 @@ The `main` branch has no front-end framework. Start a new project from one of th
 - `foundation` branch includes an NPM package for Foundation and preconfiguration for using the Foundation front-end.
 
 - `tailwind` branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
+
+## Using Bootstrap
+Bootstrap (v5) is installed as an NPM package and compiled from Sass. The source lives in `css/`:
+
+- `css/_variables.scss` - override Bootstrap variables here, before Bootstrap is imported. See `node_modules/bootstrap/scss/_variables.scss` for everything that can be overridden.
+- `css/styles.scss` - the entry point. It imports each Bootstrap component individually; comment out the `@import` lines for components the site does not use to reduce the CSS size.
+- `css/_global.scss` - site-specific custom styles, imported after Bootstrap.
+
+The compiled output is `css/styles.min.css`, which the templates load from `_base-layout.html`.
+
+First install the dependencies: `npm install`
+
+To begin watching for changes run: `npx sass css/styles.scss css/styles.min.css --style=compressed --watch`
+
+For a one-off minified production build run: `npx sass css/styles.scss css/styles.min.css --style=compressed`
+
+Bootstrap's JavaScript is not included in the templates by default. If interactive components (dropdowns, modals, offcanvas, etc.) are needed, add `node_modules/bootstrap/dist/js/bootstrap.bundle.min.js` to the site or copy it into a public directory.
 
 ## **Don't Forget To License The Add-Ons For Production**
