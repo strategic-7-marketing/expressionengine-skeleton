@@ -1,4 +1,4 @@
-# ExpressionEngine Skeleton With Tailwind
+# ExpressionEngine Skeleton
 
 **Default DB Credentials:**\
 DB Name: ee-skeleton\
@@ -20,7 +20,14 @@ config/config.master.php may also need modified depending on need.
 config/config.local.php is included as a template for local development but should not be tracked or comitted.
 config/config.local.php is commented out in .gitignore please uncomment when creating a new repo from this template.
 
-Included in an .htaccess_LIVE file that if used should be configured for the production domain. "APEXDOMAIN" in .htaccess_LIVE should be replaced with the actual apex or naked domain name. This file is intended to be used with GitHub Actions to streamline deployment to the production server. For example using the following Deploy Via FTP action which will deploy the site when the main branch is comitted to the configured FTP server secrets (FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD) furthermore it will delete any .htaccess file on the server and rename .htaccess_LIVE to .htaccess to take its place.
+Included is an .htaccess_LIVE file intended for production. It is domain-agnostic, so no domain names need to be edited into it. It handles:
+
+- **Canonical host:** Option A (default) redirects www to the apex (naked) domain, e.g. `www.example.com` -> `https://example.com`. If the client requires www as the primary domain, comment out Option A and uncomment Option B in the file, which does the reverse. Both options ignore environment subdomains (`staging.`, `stage.`, `dev.`, `test.`, `uat.`) so a staging site is never redirected to the production host.
+- **HTTPS:** redirects HTTP to HTTPS for whatever host was requested, including behind a proxy or CDN that sets `X-Forwarded-Proto`. Staging subdomains must therefore have a valid TLS certificate.
+- **Staging noindex:** sends an `X-Robots-Tag: noindex, nofollow` header on the environment subdomains above so search engines do not index them.
+- **Clean URLs:** removes index.php from ExpressionEngine URLs.
+
+This file is intended to be used with GitHub Actions to streamline deployment to the production server. For example using the following Deploy Via FTP action which will deploy the site when the main branch is comitted to the configured FTP server secrets (FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD) furthermore it will delete any .htaccess file on the server and rename .htaccess_LIVE to .htaccess to take its place.
 
 ```
 name: Deploy Via FTP
@@ -33,11 +40,11 @@ jobs:
     name: FTP-Deploy-Action
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 2
     - name: FTP-Deploy-Action
-      uses: SamKirkland/FTP-Deploy-Action@4.3.3
+      uses: SamKirkland/FTP-Deploy-Action@v4.4.0
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
@@ -65,17 +72,14 @@ jobs:
 
 - Added default additional menu items for Structure and Template Manager in the EE backend dashboard.
 
-## Front-end Framework Branches.
+## Front-end Framework Branches
 
-- Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for using Bootstrap Front-end.
+The `main` branch has no front-end framework. Start a new project from one of the framework branches below; each branch adds its framework's NPM package, a preconfigured `css/` source setup, and a "Using ..." section at the end of its README with build instructions.
 
-- Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
+- `bootstrap` branch includes an NPM package for Bootstrap and preconfiguration for using the Bootstrap front-end.
 
-- Tailwind branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
+- `foundation` branch includes an NPM package for Foundation and preconfiguration for using the Foundation front-end.
 
-## Using Tailwind
-Tailwind is preconfigured to watch the `/system/user/templates/` directory to build the CSS. Modify the `tailwind.config.js` if other locations are required.
-
-To begin watching for changes run: `npx tailwindcss -i ./css/styles.css -o ./css/styles.min.css --watch`
+- `tailwind` branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
 
 ## **Don't Forget To License The Add-Ons For Production**
