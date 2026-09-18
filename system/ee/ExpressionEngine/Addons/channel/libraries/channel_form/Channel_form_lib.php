@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 require_once PATH_ADDONS . 'channel/libraries/channel_form/Channel_form_exception.php';
@@ -305,14 +305,7 @@ class Channel_form_lib
                     );
                 }
 
-                foreach ($custom_field_variables_row as $key => $value) {
-                    if (is_array($value)) {
-                        $temp = $this->swap_var_pair($key, $value, $temp);
-                    } elseif (! is_int($value)) {
-                        // don't use our conditionals as vars
-                        $temp = ee()->TMPL->swap_var_single($key, $value, $temp);
-                    }
-                }
+                $temp = $this->_swap_custom_field_variables($custom_field_variables_row, $temp);
 
                 if ($custom_field_variables_row['field_type'] === 'catchall') {
                     $temp = $this->replace_tag($field_name, $this->entry($field_name), array(), $temp);
@@ -1109,6 +1102,31 @@ GRID_FALLBACK;
         }
 
         return $custom_field_variables;
+    }
+
+    /**
+     * Swap variables inside a single {custom_fields} row.
+     *
+     * @param   array   $custom_field_variables_row
+     * @param   string  $tagdata
+     * @return  string
+     */
+    private function _swap_custom_field_variables($custom_field_variables_row, $tagdata)
+    {
+        $integer_variables = array('field_id', 'field_data', 'rows', 'maxlength');
+
+        foreach ($custom_field_variables_row as $key => $value) {
+            if (is_array($value)) {
+                $tagdata = $this->swap_var_pair($key, $value, $tagdata);
+            } elseif (in_array($key, $integer_variables, true)) {
+                $tagdata = ee()->TMPL->swap_var_single($key, (string) $value, $tagdata);
+            } elseif (! is_int($value)) {
+                // don't use our conditionals as vars
+                $tagdata = ee()->TMPL->swap_var_single($key, $value, $tagdata);
+            }
+        }
+
+        return $tagdata;
     }
 
     /**
@@ -2126,8 +2144,12 @@ GRID_FALLBACK;
             // and now into safecracker legacy format. Good grief, why does it
             // group them by column name?
             foreach ($rows as $row) {
-                $site_id = $row['site_id'];
-                $channel_id = $row['channel_id'];
+                $site_id = $row['site_id'] ?? null;
+                $channel_id = $row['channel_id'] ?? null;
+
+                if ($site_id === null || $channel_id === null) {
+                    continue;
+                }
 
                 unset(
                     $row['site_id'],
@@ -2999,7 +3021,11 @@ GRID_FALLBACK;
             $data = base64_decode((string) $data);
         }
 
-        $data = @unserialize($data);
+        if ($data === null || $data === '') {
+            return array();
+        }
+
+        $data = @unserialize((string) $data);
 
         return (is_array($data)) ? $data : array();
     }
@@ -3153,8 +3179,11 @@ SCRIPT;
      */
     private function switch_site($site_id)
     {
+        // cache the current site_prefs and cache and set the site_pages from the new site_prefs
+        ee()->config->get_cached_site_prefs(ee()->config->item('site_id'));
+        $config = ee()->config->get_cached_site_prefs($site_id);
         ee()->config->set_item('site_id', $site_id);
-        ee()->config->get_cached_site_prefs($site_id);
+        ee()->config->set_item('site_pages', $config['site_pages'] ?? []);
     }
 }
 

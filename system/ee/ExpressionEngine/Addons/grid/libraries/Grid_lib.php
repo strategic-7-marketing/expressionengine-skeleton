@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -81,7 +81,7 @@ class Grid_lib
                 'required' => ($column['col_required'] == 'y')
             );
 
-            if (ee()->session->userdata('member_id') !== 0 && ee()->session->getMember()->PrimaryRole->RoleSettings->filter('site_id', ee()->config->item('site_id'))->first()->show_field_names == 'y' && !empty($this->field_short_name)) {
+            if (REQ == 'CP' && ee()->session->getMember()->PrimaryRole->RoleSettings->filter('site_id', ee()->config->item('site_id'))->first()->show_field_names == 'y' && !empty($this->field_short_name)) {
                 $column_headings[$i]['badge'] = ee('View')->make('publish/partials/name_badge_copy')->render(['name' => (empty($this->fluid_field_data_id) ? $this->field_short_name : 'content') . ':' . $column['col_name']]);
             }
 

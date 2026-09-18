@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -60,7 +60,7 @@ class Tools_model extends CI_Model
         foreach ($query->result() as $row) {
             $prefix = ($display_site) ? $row->site_label . ' - ' : '';
 
-            $fields["field_id_{$row->field_id}"] = $prefix . $row->field_label . ' {' . $row->field_name . '}';
+            $fields["field_id_{$row->field_id}"] = $prefix . $row->field_label . ' {' . $row->field_name . '}' . ' #' . $row->field_id;
         }
 
         $options['channel_fields'] = array('name' => $this->lang->line('channel_fields'), 'choices' => $fields);

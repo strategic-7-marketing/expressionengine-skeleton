@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -211,7 +211,7 @@ class Pro_search_words
      */
     public function plural($word)
     {
-        return $this->_inflect($word, 'plural');
+        return $this->inflect($word, 'plural');
     }
 
     /**
@@ -219,7 +219,7 @@ class Pro_search_words
      */
     public function singular($word)
     {
-        return $this->_inflect($word, 'singular');
+        return $this->inflect($word, 'singular');
     }
 
     /**
@@ -330,7 +330,9 @@ class Pro_search_words
             $words = array_map('preg_quote', $words);
         }
 
-        $str = preg_replace('/<br\s?\/?>/iu', ' ', (string) $str);
+        $str = (string) $str;
+        $str = str_replace('<', ' <', $str); //inject some whitespace between tags to prevent concatenation
+        $str = preg_replace('/<br\s?\/?>/iu', ' ', $str);
         $str = strip_tags($str);
         $str = html_entity_decode($str, ENT_QUOTES, 'UTF-8');
         $str = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $str);

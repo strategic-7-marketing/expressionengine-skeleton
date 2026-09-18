@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -685,14 +685,17 @@ class Addons extends CP_Controller
     }
 
     /**
-     * Uninstalls an add-on
+     * Uninstall one or more add-ons.
      *
-     * @param   str|array   $addons The name(s) of add-ons to uninstall
-     * @return  void
+     * @param string|array $addons The name(s) of add-ons to uninstall.
+     * @return void
      */
     public function remove($addons)
     {
-        if (! ee('Permission')->can('admin_addons')) {
+        if (
+            ! ee('Permission')->can('admin_addons') or
+            ee('Request')->method() !== 'POST'
+        ) {
             show_error(lang('unauthorized_access'), 403);
         }
 

@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -595,6 +595,11 @@ class Template extends AbstractDesignController
 
         if (isset($_POST['template_engine']) && $_POST['template_engine'] === '') {
             $_POST['template_engine'] = null;
+        }
+
+        if (! ee('Permission')->isSuperAdmin()) {
+            $_POST['allow_php'] = $template->isNew() ? 'n' : $template->allow_php;
+            $_POST['php_parse_location'] = $template->isNew() ? 'o' : $template->php_parse_location;
         }
 
         $template->set($_POST);

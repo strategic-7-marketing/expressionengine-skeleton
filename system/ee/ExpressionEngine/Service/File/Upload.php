@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -39,7 +39,7 @@ class Upload
                 'file_type' => lang('type_' . $file->file_type)
             ];
             if ($file->isImage()) {
-                $metadata['dimensions'] = (count($dimensions) > 1) ? $dimensions[0] . 'x' . $dimensions[1] . ' px' : '';
+                $metadata['dimensions'] = (count($dimensions) > 1) ? $dimensions[1] . 'x' . $dimensions[0] . ' px' : '';
             }
             $metadata = array_merge($metadata, [
                 'uploaded_by' => ($file->uploaded_by_member_id && $file->UploadAuthor) ? $file->UploadAuthor->getMemberName() : '',
@@ -434,6 +434,16 @@ class Upload
                 return $result;
             }
 
+            if (! $this->hasValidRenameFilename($new_name)) {
+                ee('CP/Alert')->makeInline('shared-form')
+                    ->asIssue()
+                    ->withTitle(lang('file_conflict'))
+                    ->addToBody(lang('invalid_filename'))
+                    ->now();
+
+                return $result;
+            }
+
             $original_extension = substr($original_name, strrpos($original_name, '.'));
             $new_extension = substr($new_name, strrpos($new_name, '.'));
 
@@ -531,7 +541,9 @@ class Upload
                     }
                 }
 
+                // Update original file metadata with new file properties
                 $original->file_hw_original = $file->file_hw_original;
+                $original->file_size = $file->file_size;
 
                 $file->delete();
 
@@ -792,6 +804,30 @@ class Upload
                 'message_type' => 'success'
             ));
         }
+    }
+
+    /**
+     * Ensure conflict-resolution rename input resolves to a real filename.
+     */
+    private function hasValidRenameFilename($filename)
+    {
+        $filename = preg_replace('#\\p{C}+#u', '', (string) $filename);
+        if ($filename === null) {
+            return false;
+        }
+
+        if (strpbrk($filename, '/\\') !== false) {
+            return false;
+        }
+
+        $filename = rtrim($filename, " \t\n\r\0\x0B");
+        if ($filename === '') {
+            return false;
+        }
+
+        $basename = trim(basename($filename), " \t\n\r\0\x0B");
+
+        return $basename !== '' && $basename !== '.' && $basename !== '..' && strncmp($basename, '.', 1) !== 0;
     }
 }
 

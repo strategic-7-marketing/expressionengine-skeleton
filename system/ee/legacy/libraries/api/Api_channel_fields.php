@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -441,7 +441,7 @@ class Api_channel_fields extends Api
             $parameters = $this->custom_field_data_hook($ft, $method, $parameters);
         }
 
-        $res = call_user_func_array(array(&$ft, $method), $parameters);
+        $res = call_user_func_array(array(&$ft, $method), array_values($parameters));
 
         ee()->load->remove_package_path($_ft_path);
 
