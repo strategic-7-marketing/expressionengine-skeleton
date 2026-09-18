@@ -1,3 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+
+/* Directories Tailwind scans for class names (relative to this file). */
+@source "../system/user/templates";
+
+/* Customize the design tokens here (colors, fonts, breakpoints, etc.). */
+@theme {
+}

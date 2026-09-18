@@ -81,8 +81,12 @@ jobs:
 - Tailwind branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
 
 ## Using Tailwind
-Tailwind is preconfigured to watch the `/system/user/templates/` directory to build the CSS. Modify the `tailwind.config.js` if other locations are required.
+Tailwind (v4) is preconfigured to scan the `/system/user/templates/` directory to build the CSS. Configuration lives in `css/styles.css` rather than a `tailwind.config.js` file: add or change `@source` directives if other locations need scanning, and customize design tokens (colors, fonts, breakpoints, etc.) inside the `@theme` block.
 
-To begin watching for changes run: `npx tailwindcss -i ./css/styles.css -o ./css/styles.min.css --watch`
+First install the dependencies: `npm install`
+
+To begin watching for changes run: `npx @tailwindcss/cli -i ./css/styles.css -o ./css/styles.min.css --watch`
+
+For a one-off minified production build run: `npx @tailwindcss/cli -i ./css/styles.css -o ./css/styles.min.css --minify`
 
 ## **Don't Forget To License The Add-Ons For Production**
