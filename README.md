@@ -1,4 +1,4 @@
-# ExpressionEngine Skeleton
+# ExpressionEngine Skeleton With Foundation
 
 **Default DB Credentials:**\
 DB Name: ee-skeleton\
@@ -81,5 +81,22 @@ The `main` branch has no front-end framework. Start a new project from one of th
 - `foundation` branch includes an NPM package for Foundation and preconfiguration for using the Foundation front-end.
 
 - `tailwind` branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
+
+## Using Foundation
+Foundation for Sites (v6) is installed as an NPM package and compiled from Sass. The source lives in `css/`:
+
+- `css/_settings.scss` - Foundation's settings file. Change global variables (colors, breakpoints, typography, component settings, etc.) here.
+- `css/styles.scss` - the entry point. It uses Foundation's component mixins individually; comment out the `@include` lines for components the site does not use to reduce the CSS size. Only one grid system should be enabled (the XY grid is on by default).
+- `css/_custom.scss` - site-specific custom styles, imported after Foundation.
+
+The compiled output is `css/styles.min.css`, which the templates load from `_base-layout.html`.
+
+First install the dependencies: `npm install`
+
+To begin watching for changes run: `npx sass css/styles.scss css/styles.min.css --style=compressed --watch`
+
+For a one-off minified production build run: `npx sass css/styles.scss css/styles.min.css --style=compressed`
+
+Foundation's JavaScript is not included in the templates by default. If interactive components (reveal, off-canvas, dropdown menus, etc.) are needed, add `node_modules/foundation-sites/dist/js/foundation.min.js` (plus jQuery) to the site or copy it into a public directory and call `$(document).foundation();`.
 
 ## **Don't Forget To License The Add-Ons For Production**
