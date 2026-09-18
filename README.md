@@ -91,11 +91,13 @@ Bootstrap (v5) is installed as an NPM package and compiled from Sass. The source
 
 The compiled output is `css/styles.min.css`, which the templates load from `_base-layout.html`.
 
-First install the dependencies: `npm install`
+First install the dependencies (Bootstrap and the Sass compiler): `npm install`
 
-To begin watching for changes run: `npx sass css/styles.scss css/styles.min.css --style=compressed --watch`
+To begin watching for changes run: `npm run watch`
 
-For a one-off minified production build run: `npx sass css/styles.scss css/styles.min.css --style=compressed`
+For a one-off minified production build run: `npm run build`
+
+Both scripts are defined in `package.json` and compile `css/styles.scss` to `css/styles.min.css`.
 
 Bootstrap's JavaScript is not included in the templates by default. If interactive components (dropdowns, modals, offcanvas, etc.) are needed, add `node_modules/bootstrap/dist/js/bootstrap.bundle.min.js` to the site or copy it into a public directory.
 
