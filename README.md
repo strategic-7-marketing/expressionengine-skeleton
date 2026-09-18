@@ -1,4 +1,4 @@
-# ExpressionEngine Skeleton With Tailwind
+# ExpressionEngine Skeleton
 
 **Default DB Credentials:**\
 DB Name: ee-skeleton\
@@ -72,17 +72,14 @@ jobs:
 
 - Added default additional menu items for Structure and Template Manager in the EE backend dashboard.
 
-## Front-end Framework Branches.
+## Front-end Framework Branches
 
-- Bootstrap branch includes an NPM package for Bootstrap and preconfiguration for using Bootstrap Front-end.
+The `main` branch has no front-end framework. Start a new project from one of the framework branches below; each branch adds its framework's NPM package, a preconfigured `css/` source setup, and a "Using ..." section at the end of its README with build instructions.
 
-- Foundation branch includes an NPM package for Foundation and preconfiguration for using Foundation Front-end.
+- `bootstrap` branch includes an NPM package for Bootstrap and preconfiguration for using the Bootstrap front-end.
 
-- Tailwind branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
+- `foundation` branch includes an NPM package for Foundation and preconfiguration for using the Foundation front-end.
 
-## Using Tailwind
-Tailwind is preconfigured to watch the `/system/user/templates/` directory to build the CSS. Modify the `tailwind.config.js` if other locations are required.
-
-To begin watching for changes run: `npx tailwindcss -i ./css/styles.css -o ./css/styles.min.css --watch`
+- `tailwind` branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
 
 ## **Don't Forget To License The Add-Ons For Production**
