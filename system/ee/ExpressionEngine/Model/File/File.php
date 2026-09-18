@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -21,18 +21,61 @@ namespace ExpressionEngine\Model\File;
  */
 class File extends FileSystemEntity
 {
+    /**
+     * Get the stored original image width.
+     *
+     * @return string|null Original image width as a numeric string, or null when unavailable.
+     */
     public function get__width()
     {
-        $dimensions = explode(" ", $this->getProperty('file_hw_original'));
+        $dimensions = $this->getOriginalDimensions();
 
-        return $dimensions[1];
+        return $dimensions === null ? null : $dimensions['width'];
     }
 
+    /**
+     * Get the stored original image height.
+     *
+     * @return string|null Original image height as a numeric string, or null when unavailable.
+     */
     public function get__height()
     {
-        $dimensions = explode(" ", $this->getProperty('file_hw_original'));
+        $dimensions = $this->getOriginalDimensions();
 
-        return $dimensions[0];
+        return $dimensions === null ? null : $dimensions['height'];
+    }
+
+    /**
+     * Parse the stored original image dimensions as an atomic pair.
+     *
+     * @return array|null Height and width as positive numeric strings, or null when invalid.
+     */
+    private function getOriginalDimensions()
+    {
+        $value = $this->getProperty('file_hw_original');
+
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $dimensions = explode(' ', $value);
+
+        if (count($dimensions) !== 2) {
+            return null;
+        }
+
+        list($height, $width) = $dimensions;
+
+        if (
+            ! ctype_digit($height)
+            || ! ctype_digit($width)
+            || (int) $height <= 0
+            || (int) $width <= 0
+        ) {
+            return null;
+        }
+
+        return compact('height', 'width');
     }
 
     public function get__title()
@@ -44,9 +87,13 @@ class File extends FileSystemEntity
     {
         if (empty($this->file_hw_original) && !empty($this->file_name)) {
             ee()->load->library('filemanager');
-            $image_dimensions = $this->actLocally(function($path) {
-                return ee()->filemanager->get_image_dimensions($path);
-            });
+            try {
+                $image_dimensions = $this->actLocally(function ($path) {
+                    return ee()->filemanager->get_image_dimensions($path);
+                });
+            } catch (\LogicException $e) {
+                return $this->file_hw_original;
+            }
             if ($image_dimensions !== false) {
                 $this->setRawProperty('file_hw_original', $image_dimensions['height'] . ' ' . $image_dimensions['width']);
             }

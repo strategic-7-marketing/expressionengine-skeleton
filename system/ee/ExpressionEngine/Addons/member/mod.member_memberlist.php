@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -907,11 +907,18 @@ class Member_memberlist extends Member
         return $return;
     }
 
-    /** ------------------------------------------
-    /**  Perform a Search
-    /** ------------------------------------------*/
+    /**
+     * Perform a member search submission.
+     *
+     * @return mixed
+     */
     public function do_member_search()
     {
+        // ACTION searches must come from secure forms before return URLs are honored.
+        if (REQ === 'ACTION' && strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            return ee()->output->show_form_error(['general' => lang('not_authorized')]);
+        }
+
         // Handle our protected data if any. This contains our extra params.
         $protected = ee()->functions->handle_protected();
 

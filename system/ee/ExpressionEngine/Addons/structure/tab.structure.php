@@ -7,13 +7,14 @@ require_once PATH_ADDONS . 'structure/helper.php';
 
 use ExpressionEngine\Structure\Conduit\StaticCache;
 use ExpressionEngine\Structure\Conduit\PersistentCache;
+use ExpressionEngine\Model\Channel\ChannelEntry;
 
 /**
  * This source file is part of the open source project
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 class Structure_tab
@@ -74,6 +75,13 @@ class Structure_tab
         return $this->publish_tabs($channel_id, $entry_id);
     }
 
+    /**
+     * Build the Structure publish tab settings for the current channel.
+     *
+     * @param int|string $channel_id
+     * @param int|string $entry_id
+     * @return array
+     */
     public function publish_tabs($channel_id, $entry_id = '')
     {
         $settings = array();
@@ -105,8 +113,9 @@ class Structure_tab
             if (empty($entry_id)) {
                 ee()->cp->add_js_script('plugin', 'ee_url_title');
 
-                if (ee()->input->get('parent_id')) {
-                    ee()->javascript->output('$("section.wrap div.tab-wrap > form").prepend(\'<input type="hidden" name="structure__parent_id" value="' . ee()->input->get('parent_id') . '" />\');');
+                $parent_id = (int) ee()->input->get('parent_id');
+                if ($parent_id > 0) {
+                    ee()->javascript->output('$("section.wrap div.tab-wrap > form").prepend(\'<input type="hidden" name="structure__parent_id" value="' . $parent_id . '" />\');');
                 }
 
                 ee()->javascript->output('
@@ -803,6 +812,39 @@ class Structure_tab
     public function create_uri($str)
     {
         return ee('Format')->make('Text', $str)->urlSlug()->compile();
+    }
+
+    /**
+     * Clones the page data for cloned entry
+     *
+     * @param ExpressionEngine\Model\Channel\ChannelEntry $entry
+     * @param array $values An associative array of field => value
+     * @return array $values modified array of values
+     */
+    public function cloneData(ChannelEntry $entry, $values)
+    {
+        if ($values['uri'] == '') {
+            return $values;
+        }
+        //check if submitted URI exists
+        $site_pages = $this->sql->get_site_pages(true, true);
+        $uris = $site_pages['uris'];
+
+        //exclude current page from check
+        $entry_id = $entry->entry_id ?? null;
+        if ($entry_id !== null && isset($uris[$entry_id])) {
+            unset($uris[$entry_id]);
+        }
+        //ensure leading slash is present
+        $value = '/' . trim($values['uri'], '/');
+
+        $word_separator = ee()->config->item('word_separator') != "dash" ? '_' : '-';
+        while (in_array($value, $uris)) {
+            $value = 'copy' . $word_separator . ltrim($value, '/');
+        }
+        $_POST['structure__uri'] = $values['uri'] = $value;
+
+        return $values;
     }
 }
 /* END Class */

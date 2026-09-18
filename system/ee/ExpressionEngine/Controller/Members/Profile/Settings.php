@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -138,7 +138,7 @@ class Settings extends Profile
         foreach ($this->member->getDisplay()->getFields() as $field) {
             $vars['sections']['custom_fields'][] = array(
                 'title' => $field->getLabel(),
-                'desc' => '',
+                'desc' => ee('Format')->make('Text', (string) $field->getInstructions())->convertToEntities()->compile(),
                 'fields' => array(
                     $field->getName() => array(
                         'type' => 'html',
