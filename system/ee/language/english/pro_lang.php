@@ -46,7 +46,7 @@ $lang = array(
 
     // Pro Cookies
     'cookie_frontedit' => 'Front-end editing',
-    'cookie_frontedit_desc' => 'Determines whether ExpressioEngine front-end editing features should be enabled.',
+    'cookie_frontedit_desc' => 'Determines whether ExpressionEngine front-end editing features should be enabled.',
 
     'export_consent_log' => 'Export Consent Audit Logs',
     'exported_consent_log' => 'Exported Consent Audit Logs',
@@ -107,7 +107,7 @@ $lang = array(
     'pro_license_error_invalid' => 'The ExpressionEngine Pro license is not valid for this site.',
     'pro_license_error_expired' => 'The ExpressionEngine Pro license has expired.',
 
-    'pro_license_check_instructions' => 'Since this site has multiple members, it will also require a purchased license. %s.<br><br>Please verify your <a href="%s">Site License Key</a> and visit <a href="https://expressionengine.com/store/licenses" target="_blank">Licenses</a> section at ExpressionEngine.com',
+    'pro_license_check_instructions' => 'Since this site has multiple members, it will also require a purchased license. %s<br><br>Please verify your <a href="%s">Site License Key</a> and visit <a href="https://expressionengine.com/store/licenses" target="_blank">Licenses</a> section at ExpressionEngine.com',
 
     'pro_license_check_trial_instructions' => '%s<br><br>Please verify your <a href="%s">Site License Key</a> and visit <a href="https://expressionengine.com/store/licenses" target="_blank">Licenses</a> section at ExpressionEngine.com',
 

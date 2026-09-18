@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -435,7 +435,9 @@ class Member_auth extends Member
     }
 
     /**
-     * Member Logout
+     * Log out the current member or redirect if already logged out.
+     *
+     * @return mixed
      */
     public function member_logout()
     {
@@ -445,11 +447,6 @@ class Member_auth extends Member
         // Determine where we need to return to in case of success or error.
         $return_link = ee()->functions->determine_return(true);
         $return_error_link = ee()->functions->determine_error_return();
-
-        // If they are already logged out then send them away.
-        if (ee()->session->userdata('member_id') === 0) {
-            return ee()->functions->redirect($return_link);
-        }
 
         // If this is a GET request, they're using the `path="logout"` tag so check the CSRF Token.
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -465,6 +462,12 @@ class Member_auth extends Member
                 return ee()->output->show_form_error(['general' => lang('not_authorized')]);
             }
         }
+
+        // If they are already logged out then send them away.
+        if (ee()->session->userdata('member_id') === 0) {
+            return ee()->functions->redirect($return_link);
+        }
+
         // Kill the session and cookies
         ee()->db->where('site_id', ee()->config->item('site_id'));
         ee()->db->where('ip_address', ee()->input->ip_address());
@@ -1115,8 +1118,9 @@ class Member_auth extends Member
      */
     private function getTokenExpiration()
     {
-        return ee()->localize->now - (60 * 60); // One hour
+        return ee()->localize->now - (24 * 60 * 60); // 24 hours as per email instructions
     }
+
 }
 // END CLASS
 

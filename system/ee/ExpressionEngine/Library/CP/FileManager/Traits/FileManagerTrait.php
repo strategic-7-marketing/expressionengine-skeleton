@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -343,8 +343,13 @@ trait FileManagerTrait
             }
         }
 
-        $files = $files->order($sort_field, $table->sort_dir)
-            ->limit($perpage)
+        $files = $files->order($sort_field, $table->sort_dir);
+
+        if ($sort_col == 'date_added') {
+            $files = $files->order('file_id', $table->sort_dir);
+        }
+
+        $files = $files->limit($perpage)
             ->offset($offset)
             ->all();
 

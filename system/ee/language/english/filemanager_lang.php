@@ -88,7 +88,7 @@ $lang = array(
 
     'invalid_mime' => 'Invalid mime type, file could not be processed',
 
-    'invalid_short_name' => 'The image manipulation short name may only contain alpha-numeric characters, dashes and underscores, and cannot be named "thumbs".',
+    'invalid_short_name' => 'The image manipulation short name may only contain alpha-numeric characters, dashes and underscores, and cannot use a built-in manipulation name: "thumbs", "resize", "crop", "rotate", "webp", or "avif".',
 
     'link' => 'Link',
 
@@ -515,7 +515,7 @@ $lang = array(
 
     'upload_remove_modal_upload_directory' => 'Upload directory',
 
-    'upload_url' => 'Upload directory',
+    'upload_url' => 'Upload directory URL',
 
     'upload_url_desc' => '<abbr title="Uniform Resource Location">URL</abbr> location of this directory. We recommend using <code>{base_url}your_upload_directory</code>',
 
@@ -998,7 +998,7 @@ $lang = array(
 
     'move_file' => 'Move File',
 
-    'select_new_destinatin_for' => 'Select new destination for:',
+    'select_new_destination_for' => 'Select new destination for:',
 
     'destination' => 'Destination',
 

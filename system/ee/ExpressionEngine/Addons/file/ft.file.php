@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -90,9 +90,21 @@ class File_ft extends EE_Fieldtype implements ColumnInterface
                         $fluid_field_data_id
                     );
 
-                    // If this filed was we need to check permissions.
-                    if (! isset($this->settings['grid_row_id']) || $rows[$this->content_id][$this->settings['grid_row_id']] != $data) {
+                    // If this field changed we need to check permissions.
+                    if (! isset($this->settings['grid_row_id'])) {
                         $check_permissions = true;
+                    } else {
+                        $row = isset($rows[$this->content_id][$this->settings['grid_row_id']])
+                            ? $rows[$this->content_id][$this->settings['grid_row_id']]
+                            : array();
+                        $col_id = isset($this->settings['col_id']) ? 'col_id_' . $this->settings['col_id'] : null;
+                        $existing = (is_array($row) && $col_id && array_key_exists($col_id, $row))
+                            ? $row[$col_id]
+                            : null;
+
+                        if ($existing != $data) {
+                            $check_permissions = true;
+                        }
                     }
                 } else {
                     $entry = ee('Model')->get('ChannelEntry', $this->content_id)->first();
@@ -141,9 +153,10 @@ class File_ft extends EE_Fieldtype implements ColumnInterface
     }
 
     /**
-     * Show the publish field
+     * Render the publish field for the current request.
      *
-     * @access  public
+     * @param mixed $data Stored file field data
+     * @return string Rendered file field
      */
     public function display_field($data)
     {
@@ -176,7 +189,8 @@ class File_ft extends EE_Fieldtype implements ColumnInterface
             $allowed_file_dirs,
             $content_type,
             $filebrowser,
-            ($show_existing == 'y') ? $existing_limit : null
+            ($show_existing == 'y') ? $existing_limit : null,
+            ($this->content_type() === 'channel') ? $this->field_name : null
         );
     }
 
@@ -586,6 +600,13 @@ JSC;
             }
             $new = $data['filesystem']->createTempFile();
 
+            // If no per-tag quality is provided, use the configured default
+            // while preserving the historical 75 fallback.
+            $imageQuality = 75;
+            if (is_int(ee()->config->item('image_manipulation_quality')) && 0 < ee()->config->item('image_manipulation_quality') && ee()->config->item('image_manipulation_quality') <= 100) {
+                $imageQuality = ee()->config->item('image_manipulation_quality');
+            }
+
             $imageLibConfig = array(
                 'image_library' => ee()->config->item('image_resize_protocol'),
                 'library_path' => ee()->config->item('image_library_path'),
@@ -594,7 +615,7 @@ JSC;
                 'maintain_ratio' => isset($params['maintain_ratio']) ? get_bool_from_string($params['maintain_ratio']) : true,
                 'master_dim' => (isset($params['master_dim']) && in_array($params['master_dim'], ['auto', 'width', 'height'])) ? $params['master_dim'] : 'auto',
 
-                'quality' => isset($params['quality']) ? (int) $params['quality'] : 75,
+                'quality' => isset($params['quality']) ? (int) $params['quality'] : $imageQuality,
                 'x_axis' => isset($params['x']) ? (int) $params['x'] : 0,
                 'y_axis' => isset($params['y']) ? (int) $params['y'] : 0,
                 'rotation_angle' => (isset($params['angle']) && in_array($params['angle'], ['90', '180', '270', 'vrt', 'hor'])) ? $params['angle'] : null,
