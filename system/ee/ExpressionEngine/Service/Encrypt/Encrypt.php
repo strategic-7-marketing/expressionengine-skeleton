@@ -4,7 +4,7 @@
  * ExpressionEngine (https://expressionengine.com)
  *
  * @link      https://expressionengine.com/
- * @copyright Copyright (c) 2003-2023, Packet Tide, LLC (https://www.packettide.com)
+ * @copyright Copyright (c) 2003-2026, Packet Tide, LLC (https://www.packettide.com)
  * @license   https://expressionengine.com/license Licensed under Apache License, Version 2.0
  */
 
@@ -265,11 +265,11 @@ class Encrypt
     /**
      * Generates a random key to be used for anything, probably encryption
      *
-     * @return string 32-character key
+     * @return string 40-character key
      */
     public function generateKey()
     {
-        return sha1(uniqid(random_int(-PHP_INT_MAX, PHP_INT_MAX), true));
+        return bin2hex(random_bytes(20));
     }
 }
 
