@@ -1,4 +1,4 @@
-# ExpressionEngine Skeleton
+# ExpressionEngine Skeleton With Tailwind
 
 **Default DB Credentials:**\
 DB Name: ee-skeleton\
@@ -81,5 +81,19 @@ The `main` branch has no front-end framework. Start a new project from one of th
 - `foundation` branch includes an NPM package for Foundation and preconfiguration for using the Foundation front-end.
 
 - `tailwind` branch includes an NPM package for Tailwind and preconfiguration for using Tailwind.
+
+## Using Tailwind
+Tailwind (v4) is installed as an NPM package and preconfigured to scan the `/system/user/templates/` directory to build the CSS. Configuration lives in `css/styles.css` rather than a `tailwind.config.js` file:
+
+- `@source` directives - add or change these if other locations need scanning for class names.
+- `@theme` block - customize design tokens (colors, fonts, breakpoints, etc.) here.
+
+The compiled output is `css/styles.min.css`, which the templates load from `_base-layout.html`.
+
+First install the dependencies: `npm install`
+
+To begin watching for changes run: `npx @tailwindcss/cli -i ./css/styles.css -o ./css/styles.min.css --watch`
+
+For a one-off minified production build run: `npx @tailwindcss/cli -i ./css/styles.css -o ./css/styles.min.css --minify`
 
 ## **Don't Forget To License The Add-Ons For Production**
